@@ -1,20 +1,19 @@
 {
-  "name": "durable-isr-poc",
+  "name": "@platform/durable-isr-poc",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format": "biome format --write"
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
+    "@biomejs/biome": "2.2.0",
     "turbo": "^2.5.6",
     "typescript": "5.9.2"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@10.12.4",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

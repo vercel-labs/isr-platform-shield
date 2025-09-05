@@ -1,0 +1,19 @@
+{
+  "name": "cache-layer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "PORT=3000 next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@platform/config": "workspace:*",
+    "next": "15.5.2"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19"
+  }
+}
