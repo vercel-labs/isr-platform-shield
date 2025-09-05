@@ -1,5 +1,5 @@
 {
-  "name": "cache-layer",
+  "name": "@platform/cache-layer",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@platform/config": "workspace:*",
     "next": "15.5.2"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { rootDomain } from "@/lib/utils";
+import { rootDomain, protocol } from "@/lib/utils";
 
 function extractSubdomain(request: NextRequest): string | null {
   const url = request.url;
@@ -47,13 +47,12 @@ export async function middleware(request: NextRequest) {
   if (subdomain) {
     // Block access to admin page from subdomains
     if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", `${protocol}://${rootDomain}`));
     }
 
-    // For the root path on a subdomain, rewrite to the subdomain page
-    if (pathname === "/") {
-      return NextResponse.rewrite(new URL(`/s/${subdomain}`, request.url));
-    }
+    return NextResponse.rewrite(
+      new URL(`/s/${subdomain}${pathname}`, `${protocol}://${rootDomain}`),
+    );
   }
 
   // On the root domain, allow normal access
@@ -62,12 +61,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all paths except for:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. all root files inside /public (e.g. /favicon.ico)
-     */
-    "/((?!api|_next|[\\w-]+\\.\\w+).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 };

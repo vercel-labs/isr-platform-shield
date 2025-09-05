@@ -15,7 +15,8 @@ import {
   type Author,
 } from "@/lib/data-utils";
 
-const DELAY = 1000;
+// Delay for latency, not looking to illustrate anything specific
+const DELAY = process.env.NODE_ENV === "production" ? 2000 : 0;
 
 // Define the schema for valid resources
 const ResourceSchema = z.enum(["posts", "authors"]);
