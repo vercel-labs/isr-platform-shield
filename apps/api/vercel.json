@@ -1,4 +1,3 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "turbo build --filter @platform/api..."
+  "$schema": "https://openapi.vercel.sh/vercel.json"
 }
