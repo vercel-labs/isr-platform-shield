@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { SubdomainForm } from './subdomain-form';
-import { rootDomain } from '@/lib/utils';
 
 export default async function HomePage() {
   return (
@@ -17,15 +16,15 @@ export default async function HomePage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight">
-            {rootDomain}
+            Multi-Tenant Platform with Durable ISR Cache
           </h1>
-          <p className="mt-3 text-lg">
-            Create your own subdomain with a custom emoji
+          <p className="mt-3 text-md text-muted-foreground">
+            Reference architecture by the <br/><span className="font-bold text-foreground">Vercel Developer Success Team</span>
           </p>
         </div>
 
         <div className="mt-8 shadow-md rounded-lg p-6">
-          <SubdomainForm />
+          <SubdomainForm host={process.env.CACHE_LAYER_HOST} />
         </div>
       </div>
     </div>

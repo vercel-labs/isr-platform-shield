@@ -21,7 +21,6 @@ import {
   EmojiPickerFooter
 } from '@/components/ui/emoji-picker';
 import { createSubdomainAction } from '@/app/actions';
-import { rootDomain } from '@/lib/utils';
 
 type CreateState = {
   error?: string;
@@ -30,7 +29,7 @@ type CreateState = {
   icon?: string;
 };
 
-function SubdomainInput({ defaultValue }: { defaultValue?: string }) {
+function SubdomainInput({ defaultValue, host }: { defaultValue?: string, host?: string }) {
   return (
     <div className="space-y-2">
       <Label htmlFor="subdomain">Subdomain</Label>
@@ -46,7 +45,7 @@ function SubdomainInput({ defaultValue }: { defaultValue?: string }) {
           />
         </div>
         <span className="px-3 border border-l-0 border-input rounded-r-md text-muted-foreground min-h-[36px] flex items-center">
-          .{rootDomain}
+          .{host}
         </span>
       </div>
     </div>
@@ -124,7 +123,7 @@ function IconPicker({
   );
 }
 
-export function SubdomainForm() {
+export function SubdomainForm({ host }: { host?: string }) {
   const [icon, setIcon] = useState('');
 
   const [state, action, isPending] = useActionState<CreateState, FormData>(
@@ -134,7 +133,7 @@ export function SubdomainForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <SubdomainInput defaultValue={state?.subdomain} />
+      <SubdomainInput defaultValue={state?.subdomain} host={host} />
 
       <IconPicker icon={icon} setIcon={setIcon} defaultValue={state?.icon} />
 
