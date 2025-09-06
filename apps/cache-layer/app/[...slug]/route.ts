@@ -1,13 +1,8 @@
 import { NextRequest } from "next/server";
-import { protocol } from "@/lib/utils";
+import { getCoreUrl } from "@platform/config";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
-
-const getCoreUrl = () => {
-  const coreHost = process.env.CORE_HOST || "localhost:3001";
-  return `${protocol}://${coreHost}`;
-};
 
 export async function GET(
   _request: NextRequest,

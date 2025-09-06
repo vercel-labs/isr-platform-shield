@@ -8,6 +8,9 @@ export const config = {
   cacheLayer: {
     url: isProd ? 'https://pzona.lol' : 'http://localhost:3000',
   },
+  core: {
+    url: isProd ? 'https://core.pzvtest314.vercel.app' : 'http://localhost:3001',
+  },
   redis: {
     url: process.env.REDIS_URL || '',
     restApiUrl: process.env.KV_REST_API_URL || '',
@@ -20,5 +23,6 @@ export const config = {
 // Simple getters
 export const getApiUrl = () => config.api.url;
 export const getCacheLayerUrl = () => config.cacheLayer.url;
+export const getCoreUrl = () => config.core.url;
 export const getProtocol = () => config.protocol;
 export const getRootDomain = () => config.rootDomain;

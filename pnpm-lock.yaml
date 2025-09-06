@@ -45,6 +45,9 @@ importers:
 
   apps/cache-layer:
     dependencies:
+      '@platform/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       next:
         specifier: 15.5.2
         version: 15.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

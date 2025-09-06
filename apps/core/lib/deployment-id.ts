@@ -24,7 +24,7 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
 }
 
 
-async function stringToColorGoldenCrypto(
+export async function stringToColor(
   text: string,
   saturation: number = 0.7,
   lightness: number = 0.6
