@@ -50,17 +50,29 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", `${protocol}://${rootDomain}`));
     }
 
+    // Pass /_next static assets to the core app
+    if (pathname.startsWith("/_next")) {
+      const coreHost = process.env.CORE_HOST
+      return NextResponse.rewrite(new URL(pathname, `${protocol}://${coreHost}`));
+    }
+
     return NextResponse.rewrite(
       new URL(`/s/${subdomain}${pathname}`, `${protocol}://${rootDomain}`),
     );
   }
 
-  // On the root domain, allow normal access
+  // On the root domain, handle static assets
+  if (pathname.startsWith("/_next")) {
+    const coreHost = process.env.CORE_HOST
+    return NextResponse.rewrite(new URL(pathname, `${protocol}://${coreHost}`));
+  }
+
+  // Allow normal access for other root domain requests
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
-  ],
-};
+// export const config = {
+//   matcher: [
+//     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+//   ],
+// };

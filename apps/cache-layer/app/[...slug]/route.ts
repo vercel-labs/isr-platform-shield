@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { protocol } from "@/lib/utils";
 
 export const dynamic = "force-static";
@@ -14,7 +14,6 @@ export async function GET(
   { params }: { params: Promise<{ slug: string[] }> },
 ) {
   const { slug } = await params;
-  console.log(slug);
   const coreUrl = getCoreUrl();
   const pageResponse = await fetch(`${coreUrl}/${slug.join("/")}`, {
     cache: "force-cache",
