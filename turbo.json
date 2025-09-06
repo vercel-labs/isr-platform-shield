@@ -1,6 +1,9 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "TURBO_PLATFORM_ENV_DISABLED"
+  ],
   "tasks": {
     "build": {
       "dependsOn": [

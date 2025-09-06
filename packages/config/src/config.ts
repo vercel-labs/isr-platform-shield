@@ -1,4 +1,4 @@
-const isProd = process.env.VERCEL_ENV === 'production' || process.env.VERCEL_ENV === 'preview';
+const isProd = !!process.env.VERCEL;
 const protocol = isProd ? 'https' : 'http';
 
 export const config = {
