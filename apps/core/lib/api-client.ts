@@ -1,5 +1,5 @@
 // API client for the new data structure
-import { protocol } from "./utils";
+import { getApiUrl } from "@platform/config";
 export interface Author {
   id: number;
   name: string;
@@ -119,10 +119,5 @@ export class ApiClient {
   }
 }
 
-// Default instance - uses environment variables for API host
-const getApiUrl = () => {
-  const apiHost = process.env.API_HOST || "localhost:3002";
-  return `${protocol}://${apiHost}`;
-};
-
+// Default instance - uses config package for API URL
 export const apiClient = new ApiClient(getApiUrl());

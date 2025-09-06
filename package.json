@@ -5,12 +5,16 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "deploy:api": "vercel deploy --prod apps/api",
+    "deploy:cache-layer": "vercel deploy --prod apps/cache-layer",
+    "deploy:core": "vercel deploy --prod apps/core"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
     "turbo": "^2.5.6",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vercel": "^47.0.5"
   },
   "packageManager": "pnpm@10.12.4",
   "engines": {

@@ -11,8 +11,9 @@
     "next": "15.5.2"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
-    "@types/react": "^19"
+    "@types/react": "^19",
+    "typescript": "^5",
+    "vercel": "^47.0.5"
   }
 }

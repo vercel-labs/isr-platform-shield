@@ -12,34 +12,21 @@
       ],
       "outputs": [
         ".next/**",
-        "!.next/cache/**"
+        "!.next/cache/**",
+        "dist/**"
       ]
-    },
-    "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
-    },
-    "check-types": {
-      "dependsOn": [
-        "^check-types"
-      ]
-    },
-    "type-check": {
-      "dependsOn": [
-        "^type-check"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "tsconfig.json"
-      ]
-    },
-    "clean": {
-      "cache": false
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "start": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "format": {
+      "cache": false
     }
   }
 }

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "PORT=3002 next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "deploy": "vercel deploy --prod"
   },
   "dependencies": {
     "next": "15.5.2",
