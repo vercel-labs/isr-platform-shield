@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SubdomainForm } from './subdomain-form';
+import { getRootDomain } from '@platform/config';
 
 export default async function HomePage() {
   return (
@@ -24,7 +25,7 @@ export default async function HomePage() {
         </div>
 
         <div className="mt-8 shadow-md rounded-lg p-6">
-          <SubdomainForm host={process.env.CACHE_LAYER_HOST} />
+          <SubdomainForm host={getRootDomain()} />
         </div>
       </div>
     </div>
