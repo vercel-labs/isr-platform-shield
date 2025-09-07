@@ -2,7 +2,11 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "globalEnv": [
-    "TURBO_PLATFORM_ENV_DISABLED"
+    "TURBO_PLATFORM_ENV_DISABLED",
+    "VERCEL",
+    "REDIS_URL",
+    "KV_REST_API_URL",
+    "KV_REST_API_TOKEN"
   ],
   "tasks": {
     "build": {
@@ -30,6 +34,15 @@
     },
     "format": {
       "cache": false
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ]
     }
   }
 }

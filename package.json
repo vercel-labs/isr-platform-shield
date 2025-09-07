@@ -2,7 +2,7 @@
   "name": "@platform/durable-isr-poc",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --env-mode=loose",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "biome format --write",
