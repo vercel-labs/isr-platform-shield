@@ -66,39 +66,40 @@ export default async function SubdomainPage({
           {recentPosts.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {recentPosts.map((post) => (
-                <Link
-                  key={post.id}
-                  href={`/${post.id}`}
-                  className="block rounded-lg p-6 bg-card text-card-foreground hover:bg-accent transition-colors border"
-                >
-                  <h3 className="text-xl font-semibold mb-2 line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                    {post.content}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>By {post.author}</span>
-                    <time dateTime={post.publishedAt}>
-                      {new Date(post.publishedAt).toLocaleDateString()}
-                    </time>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {post.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 text-muted-foreground rounded text-xs"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                    {post.tags.length > 3 && (
-                      <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
-                        +{post.tags.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                // <Link
+                //   key={post.id}
+                //   href={`/${post.id}`}
+                //   className="block rounded-lg p-6 bg-card text-card-foreground hover:bg-accent transition-colors border"
+                // >
+                //   <h3 className="text-xl font-semibold mb-2 line-clamp-2">
+                //     {post.title}
+                //   </h3>
+                //   <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                //     {post.content}
+                //   </p>
+                //   <div className="flex items-center justify-between text-sm text-muted-foreground">
+                //     <span>By {post.author}</span>
+                //     <time dateTime={post.publishedAt}>
+                //       {new Date(post.publishedAt).toLocaleDateString()}
+                //     </time>
+                //   </div>
+                //   <div className="flex flex-wrap gap-2 mt-3">
+                //     {post.tags.slice(0, 3).map((tag) => (
+                //       <span
+                //         key={tag}
+                //         className="px-2 py-1 text-muted-foreground rounded text-xs"
+                //       >
+                //         #{tag}
+                //       </span>
+                //     ))}
+                //     {post.tags.length > 3 && (
+                //       <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
+                //         +{post.tags.length - 3} more
+                //       </span>
+                //     )}
+                //   </div>
+                // </Link>
+                <pre key={post.id}>{`/${post.id}`}</pre>
               ))}
             </div>
           ) : (
