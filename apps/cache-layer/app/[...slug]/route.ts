@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server";
-import { getCoreUrl } from "@platform/config";
+import { NextRequest, NextResponse } from "next/server";
+import { getCoreUrl, getCacheLayerUrl } from "@platform/config";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -9,6 +9,14 @@ export async function GET(
   { params }: { params: Promise<{ slug: string[] }> },
 ) {
   const { slug } = await params;
+  console.log("slug", slug);
+  console.log("slug[0]", slug[0]);
+
+  if (slug[0] === "_next") {
+    console.log("rewriting _next", slug.join("/"), getCacheLayerUrl());
+    return NextResponse.rewrite(new URL(slug.join("/"), getCacheLayerUrl()));
+  }
+
   const coreUrl = getCoreUrl();
   const pageResponse = await fetch(`${coreUrl}/${slug.join("/")}`, {
     cache: "force-cache",

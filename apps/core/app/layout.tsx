@@ -25,7 +25,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} antialiased`}>
-        <div className="text-sm text-muted-foreground" style={{ backgroundColor: color }}>
+        <div className="px-3 py-1 text-sm text-background font-bold" style={{ backgroundColor: color }}>
           {deploymentId}
         </div>
         {children}

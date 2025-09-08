@@ -19,17 +19,17 @@ const nextConfig: NextConfig = {
           ],
         },
       ],
-      afterFiles: [
-        // Don't proxy static assets - let them be handled by middleware
-        {
-          source: "/_next/static/:path*",
-          destination: "/_next/static/:path*",
-        },
-        {
-          source: "/_next/image/:path*",
-          destination: "/_next/image/:path*",
-        },
-      ],
+      // afterFiles: [
+      //   // Don't proxy static assets - let them be handled by middleware
+      //   {
+      //     source: "/_next/static/:path*",
+      //     destination: "/_next/static/:path*",
+      //   },
+      //   {
+      //     source: "/_next/image/:path*",
+      //     destination: "/_next/image/:path*",
+      //   },
+      // ],
     };
   },
 };
