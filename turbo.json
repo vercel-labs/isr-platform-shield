@@ -4,6 +4,7 @@
   "globalEnv": [
     "TURBO_PLATFORM_ENV_DISABLED",
     "VERCEL",
+    "VERCEL_DEPLOYMENT_ID",
     "REDIS_URL",
     "KV_REST_API_URL",
     "KV_REST_API_TOKEN"

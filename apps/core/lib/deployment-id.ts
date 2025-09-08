@@ -50,6 +50,3 @@ export async function stringToColor(
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
-
-// Usage:
-// const color = await stringToColorGoldenCrypto("hello");

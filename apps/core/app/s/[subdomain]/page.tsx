@@ -42,7 +42,7 @@ export default async function SubdomainPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-12 text-center">
           <div className="text-9xl mb-6">{subdomainData.emoji}</div>
@@ -64,44 +64,41 @@ export default async function SubdomainPage({
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Recent Posts</h2>
           {recentPosts.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <ul className="space-y-3">
               {recentPosts.map((post) => (
-                // <Link
-                //   key={post.id}
-                //   href={`/${post.id}`}
-                //   className="block rounded-lg p-6 bg-card text-card-foreground hover:bg-accent transition-colors border"
-                // >
-                //   <h3 className="text-xl font-semibold mb-2 line-clamp-2">
-                //     {post.title}
-                //   </h3>
-                //   <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                //     {post.content}
-                //   </p>
-                //   <div className="flex items-center justify-between text-sm text-muted-foreground">
-                //     <span>By {post.author}</span>
-                //     <time dateTime={post.publishedAt}>
-                //       {new Date(post.publishedAt).toLocaleDateString()}
-                //     </time>
-                //   </div>
-                //   <div className="flex flex-wrap gap-2 mt-3">
-                //     {post.tags.slice(0, 3).map((tag) => (
-                //       <span
-                //         key={tag}
-                //         className="px-2 py-1 text-muted-foreground rounded text-xs"
-                //       >
-                //         #{tag}
-                //       </span>
-                //     ))}
-                //     {post.tags.length > 3 && (
-                //       <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
-                //         +{post.tags.length - 3} more
-                //       </span>
-                //     )}
-                //   </div>
-                // </Link>
-                <pre key={post.id}>{`/${post.id}`}</pre>
+                <li key={post.id} className="border-t border-border">
+                  <Link
+                    href={`/${post.id}`}
+                    className="block py-3 hover:text-primary transition-colors"
+                  >
+                    <h3 className="text-lg font-semibold mb-1 line-clamp-1">
+                      {post.title}
+                    </h3>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>By {post.author}</span>
+                      <time dateTime={post.publishedAt}>
+                        {new Date(post.publishedAt).toLocaleDateString()}
+                      </time>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {post.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-muted-foreground text-xs"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                      {post.tags.length > 3 && (
+                        <span className="text-muted-foreground text-xs">
+                          +{post.tags.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">No posts available yet.</p>
