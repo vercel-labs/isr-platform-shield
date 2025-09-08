@@ -50,12 +50,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", `${protocol}://${rootDomain}`));
     }
 
-    // Pass /_next static assets to the core app
+    // Pass /_next static assets directly to the core app (don't add /s/ prefix)
     if (pathname.startsWith("/_next")) {
       const coreHost = process.env.CORE_HOST
       return NextResponse.rewrite(new URL(pathname, `${protocol}://${coreHost}`));
     }
 
+    // For all other subdomain requests, rewrite to /s/subdomain path
     return NextResponse.rewrite(
       new URL(`/s/${subdomain}${pathname}`, `${protocol}://${rootDomain}`),
     );
