@@ -7,7 +7,14 @@
     "VERCEL_DEPLOYMENT_ID",
     "REDIS_URL",
     "KV_REST_API_URL",
-    "KV_REST_API_TOKEN"
+    "KV_REST_API_TOKEN",
+    "CORE_HOST",
+    "CACHE_LAYER_HOST",
+    "API_HOST",
+    "PROTOCOL",
+    "NEXT_PUBLIC_ROOT_DOMAIN",
+    "KV_REST_API_READ_ONLY_TOKEN",
+    "KV_URL"
   ],
   "tasks": {
     "build": {
