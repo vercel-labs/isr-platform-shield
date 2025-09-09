@@ -52,9 +52,9 @@ export async function middleware(request: NextRequest) {
     }
   });
 
-  await trace.getTracer('cache-layer').startActiveSpan('subdomain_routing', async (span) => {
-    try {
-      if (subdomain) {
+  if (subdomain) {
+    return await trace.getTracer('cache-layer').startActiveSpan('subdomain_routing', async (span) => {
+      try {
         // Block access to admin page from subdomains
         if (pathname.startsWith("/admin")) {
           return NextResponse.redirect(new URL("/", `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`));
@@ -68,11 +68,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.rewrite(
           new URL(`/s/${subdomain}${pathname}`, `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`),
         );
+
+      } finally {
+        span.end();
       }
-    } finally {
-      span.end();
-    }
-  });
+    });
+  }
 
 
 
