@@ -25,7 +25,7 @@ export class ApiClient {
   constructor(
     private baseUrl: string,
     private fetchClient: typeof fetch = fetch,
-  ) {}
+  ) { }
 
   private async request<T>(endpoint: string): Promise<T> {
     try {
@@ -119,4 +119,4 @@ export class ApiClient {
 }
 
 // Default instance - uses environment variables for API URL
-export const apiClient = new ApiClient(`${process.env.PROTOCOL}://${process.env.API_HOST}`);
+export const apiClient = new ApiClient(`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.API_HOST}`);

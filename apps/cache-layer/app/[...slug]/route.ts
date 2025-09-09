@@ -8,10 +8,10 @@ export async function GET(
   { params }: { params: Promise<{ slug: string[] }> },
 ) {
   const { slug } = await params;
-  
+
   // Handle root domain requests (no slug means root page)
   if (slug.length === 0) {
-    const pageResponse = await fetch(`${process.env.PROTOCOL}://${process.env.CORE_HOST}/`, {
+    const pageResponse = await fetch(`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/`, {
       cache: "force-cache",
     });
     pageResponse.headers.delete("transfer-encoding");
@@ -29,7 +29,7 @@ export async function GET(
   }
 
   // Handle other requests
-  const pageResponse = await fetch(`${process.env.PROTOCOL}://${process.env.CORE_HOST}/${slug.join("/")}`, {
+  const pageResponse = await fetch(`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/${slug.join("/")}`, {
     cache: "force-cache",
   });
   pageResponse.headers.delete("transfer-encoding");

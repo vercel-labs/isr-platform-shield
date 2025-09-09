@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
       if (subdomain) {
         // Block access to admin page from subdomains
         if (pathname.startsWith("/admin")) {
-          return NextResponse.redirect(new URL("/", `${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`));
+          return NextResponse.redirect(new URL("/", `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`));
         }
 
         // Pass /_next static assets to the core app
@@ -66,7 +66,7 @@ export async function middleware(request: NextRequest) {
         }
 
         return NextResponse.rewrite(
-          new URL(`/s/${subdomain}${pathname}`, `${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`),
+          new URL(`/s/${subdomain}${pathname}`, `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`),
         );
       }
     } finally {

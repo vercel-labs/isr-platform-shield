@@ -27,7 +27,7 @@ function DashboardHeader({ host }: { host: string }) {
       <h1 className="text-3xl font-bold">Subdomain Management</h1>
       <div className="flex items-center gap-4">
         <Link
-          href={`${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
+          href={`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
           className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
         >
           {process.env.NEXT_PUBLIC_ROOT_DOMAIN}
@@ -94,7 +94,7 @@ function TenantGrid({
             </div>
             <div className="mt-4">
               <a
-                href={`${process.env.PROTOCOL}://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
+                href={`${process.env.NEXT_PUBLIC_PROTOCOL}://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-sm"

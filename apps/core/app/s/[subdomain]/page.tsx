@@ -53,7 +53,7 @@ export default async function SubdomainPage({
             Your custom subdomain with the latest blog posts
           </p>
           <Link
-            href={`${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`}
+            href={`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Back to {process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}

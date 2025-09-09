@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: "/:path*",
-          destination: `${process.env.PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+          destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
           missing: [
             {
               type: "header",

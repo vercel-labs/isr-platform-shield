@@ -55,7 +55,7 @@ export async function createSubdomainAction(
     createdAt: Date.now(),
   });
 
-  redirect(`${process.env.PROTOCOL}://${sanitizedSubdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
+  redirect(`${process.env.NEXT_PUBLIC_PROTOCOL}://${sanitizedSubdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
 }
 
 export async function deleteSubdomainAction(
