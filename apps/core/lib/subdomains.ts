@@ -1,4 +1,5 @@
 import { redis } from '@/lib/redis';
+import { trace } from '@opentelemetry/api';
 
 export function isValidIcon(str: string) {
   if (str.length > 10) {
@@ -32,30 +33,43 @@ type SubdomainData = {
 };
 
 export async function getSubdomainData(subdomain: string) {
-  const sanitizedSubdomain = subdomain.toLowerCase().replace(/[^a-z0-9-]/g, '');
-  const data = await redis.get<SubdomainData>(
-    `subdomain:${sanitizedSubdomain}`
-  );
-  return data;
+  return await trace.getTracer('core').startActiveSpan('getSubdomainData', async (span) => {
+    try {
+      const sanitizedSubdomain = subdomain.toLowerCase().replace(/[^a-z0-9-]/g, '');
+      const data = await redis.get<SubdomainData>(
+        `subdomain:${sanitizedSubdomain}`
+      );
+      return data
+    } finally {
+      span.end();
+    }
+  });
+
 }
 
 export async function getAllSubdomains() {
-  const keys = await redis.keys('subdomain:*');
+  return await trace.getTracer('core').startActiveSpan('getAllSubdomains', async (span) => {
+    try {
+      const keys = await redis.keys('subdomain:*');
 
-  if (!keys.length) {
-    return [];
-  }
+      if (!keys.length) {
+        return [];
+      }
+      const values = await redis.mget<SubdomainData[]>(...keys);
+      return keys.map((key, index) => {
+        const subdomain = key.replace('subdomain:', '');
+        const data = values[index];
 
-  const values = await redis.mget<SubdomainData[]>(...keys);
-
-  return keys.map((key, index) => {
-    const subdomain = key.replace('subdomain:', '');
-    const data = values[index];
-
-    return {
-      subdomain,
-      emoji: data?.emoji || '❓',
-      createdAt: data?.createdAt || Date.now()
-    };
+        return {
+          subdomain,
+          emoji: data?.emoji || '❓',
+          createdAt: data?.createdAt || Date.now()
+        };
+      });
+    } finally {
+      span.end();
+    }
   });
+
+
 }

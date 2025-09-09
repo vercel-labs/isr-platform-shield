@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { stringToColor } from "@/lib/deployment-id";
+import { VercelToolbar } from "@vercel/toolbar/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default async function RootLayout({
         </div>
         {children}
         <SpeedInsights />
+        <VercelToolbar />
       </body>
     </html>
   );

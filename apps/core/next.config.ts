@@ -1,24 +1,10 @@
 import type { NextConfig } from "next";
+import createWithVercelToolbar from '@vercel/toolbar/plugins/next';
+
+const withToolbar = createWithVercelToolbar();
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    // Enable experimental features if needed
-  },
-  // Ensure proper handling of Vercel Analytics and Speed Insights
-  // headers: async () => {
-  //   return [
-  //     {
-  //       source: '/_vercel/speed-insights/script.js',
-  //       headers: [
-  //         {
-  //           key: 'Cache-Control',
-  //           value: 'public, max-age=31536000, immutable',
-  //         },
-  //       ],
-  //     },
-  //   ];
-  // },
 };
 
-export default nextConfig;
+export default withToolbar(nextConfig);

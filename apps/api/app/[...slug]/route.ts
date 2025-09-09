@@ -14,6 +14,7 @@ import {
   type Post,
   type Author,
 } from "@/lib/data-utils";
+import { trace } from "@opentelemetry/api";
 
 // Delay for latency, not looking to illustrate anything specific
 const DELAY = process.env.NODE_ENV === "production" ? 2000 : 0;
@@ -144,19 +145,27 @@ export async function GET(
         return NextResponse.json({ data: posts });
       }
 
+
       // Get recent posts
       if (query.recent) {
-        const limit = Number.parseInt(query.recent, 10);
-        const posts = getRecentPosts(limit);
-        if (query.withAuthors === "true") {
-          const postsWithAuthors = getPostsWithAuthors();
-          const filteredPosts = postsWithAuthors.filter(
-            (p: Post & { authorInfo: Author }) =>
-              posts.some((recentPost: Post) => recentPost.id === p.id),
-          );
-          return NextResponse.json({ data: filteredPosts });
-        }
-        return NextResponse.json({ data: posts });
+        await trace.getTracer('api').startActiveSpan('getRecentPosts', async (span) => {
+          try {
+            const limit = Number.parseInt(query.recent || "0", 10);
+            const posts = getRecentPosts(limit);
+            if (query.withAuthors === "true") {
+              const postsWithAuthors = getPostsWithAuthors();
+              const filteredPosts = postsWithAuthors.filter(
+                (p: Post & { authorInfo: Author }) =>
+                  posts.some((recentPost: Post) => recentPost.id === p.id),
+              );
+              return NextResponse.json({ data: filteredPosts });
+            }
+            return NextResponse.json({ data: posts });
+          } finally {
+            span.end();
+          }
+        });
+
       }
 
       // Get all posts

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { deleteSubdomainAction } from '@/app/actions';
-import { getCacheLayerUrl, getRootDomain } from '@platform/config';
+// Using environment variables directly
 
 type Tenant = {
   subdomain: string;
@@ -27,10 +27,10 @@ function DashboardHeader({ host }: { host: string }) {
       <h1 className="text-3xl font-bold">Subdomain Management</h1>
       <div className="flex items-center gap-4">
         <Link
-          href={`${getCacheLayerUrl()}`}
+          href={`${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
           className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
         >
-          {getRootDomain()}
+          {process.env.NEXT_PUBLIC_ROOT_DOMAIN}
         </Link>
       </div>
     </div>
@@ -94,7 +94,7 @@ function TenantGrid({
             </div>
             <div className="mt-4">
               <a
-                href={`${getRootDomain().startsWith('localhost') ? 'http' : 'https'}://${tenant.subdomain}.${getRootDomain()}`}
+                href={`${process.env.PROTOCOL}://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-sm"
@@ -117,7 +117,7 @@ export function AdminDashboard({ tenants }: { tenants: Tenant[] }) {
 
   return (
     <div className="space-y-6 relative p-4 md:p-8">
-      <DashboardHeader host={getRootDomain()} />
+      <DashboardHeader host={process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"} />
       <TenantGrid tenants={tenants} action={action} isPending={isPending} />
 
       {state.error && (

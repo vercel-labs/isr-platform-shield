@@ -1,3 +1,4 @@
+import { trace } from "@opentelemetry/api";
 import { type PostWithAuthor, type Post, type ApiClient } from "./api-client";
 
 export interface BlogPost {
@@ -20,7 +21,7 @@ export interface BlogPostService {
 }
 
 export class ApiBlogPostService implements BlogPostService {
-  constructor(private apiClient: ApiClient) {}
+  constructor(private apiClient: ApiClient) { }
 
   private convertPostWithAuthor(post: PostWithAuthor): BlogPost {
     return {
@@ -35,18 +36,20 @@ export class ApiBlogPostService implements BlogPostService {
   }
 
   async getPost(id: string): Promise<BlogPost | null> {
-    try {
-      const postId = Number.parseInt(id, 10);
-      if (Number.isNaN(postId)) {
+    return await trace.getTracer('core').startActiveSpan('getPost', async (span) => {
+      try {
+        const postId = Number.parseInt(id, 10);
+        if (Number.isNaN(postId)) {
+          return null;
+        }
+
+        const post = await this.apiClient.getPostWithAuthor(postId);
+        return post ? this.convertPostWithAuthor(post) : null;
+      } catch (error) {
+        console.error("Error fetching blog post:", error);
         return null;
       }
-
-      const post = await this.apiClient.getPostWithAuthor(postId);
-      return post ? this.convertPostWithAuthor(post) : null;
-    } catch (error) {
-      console.error("Error fetching blog post:", error);
-      return null;
-    }
+    });
   }
 
   async getAllPosts(): Promise<BlogPost[]> {
@@ -103,20 +106,24 @@ export class ApiBlogPostService implements BlogPostService {
   }
 
   async getRecentPosts(limit?: number): Promise<BlogPost[]> {
-    try {
-      const posts = await this.apiClient.getRecentPosts(limit);
-      // For recent posts, we need to get author info separately
-      const postsWithAuthors = await this.apiClient.getPostsWithAuthors();
-      const recentResults = postsWithAuthors.filter((post: PostWithAuthor) =>
-        posts.some((recentPost: Post) => recentPost.id === post.id),
-      );
-      return recentResults.map((post: PostWithAuthor) =>
-        this.convertPostWithAuthor(post),
-      );
-    } catch (error) {
-      console.error("Error fetching recent posts:", error);
-      return [];
-    }
+    return await trace.getTracer('core').startActiveSpan('getRecentPosts', async (span) => {
+      try {
+        const posts = await this.apiClient.getRecentPosts(limit);
+        // For recent posts, we need to get author info separately
+        const postsWithAuthors = await this.apiClient.getPostsWithAuthors();
+        const recentResults = postsWithAuthors.filter((post: PostWithAuthor) =>
+          posts.some((recentPost: Post) => recentPost.id === post.id),
+        );
+        return recentResults.map((post: PostWithAuthor) =>
+          this.convertPostWithAuthor(post),
+        );
+      } catch (error) {
+        console.error("Error fetching recent posts:", error);
+        return [];
+      } finally {
+        span.end();
+      }
+    });
   }
 }
 

@@ -4,7 +4,7 @@ import { redis } from "@/lib/redis";
 import { isValidIcon } from "@/lib/subdomains";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getProtocol, getCacheLayerUrl } from "@platform/config";
+// Using environment variables directly
 
 export async function createSubdomainAction(
   prevState: any,
@@ -55,7 +55,7 @@ export async function createSubdomainAction(
     createdAt: Date.now(),
   });
 
-  redirect(`${getCacheLayerUrl()}/${sanitizedSubdomain}`);
+  redirect(`${process.env.PROTOCOL}://${sanitizedSubdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
 }
 
 export async function deleteSubdomainAction(

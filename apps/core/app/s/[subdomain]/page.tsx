@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSubdomainData } from "@/lib/subdomains";
-import { protocol, rootDomain } from "@/lib/utils";
+// Using environment variables directly
 import { blogPostService } from "@/lib/blog-posts";
 
 export async function generateMetadata({
@@ -15,13 +15,13 @@ export async function generateMetadata({
 
   if (!subdomainData) {
     return {
-      title: rootDomain,
+      title: process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000",
     };
   }
 
   return {
-    title: `${subdomain}.${rootDomain}`,
-    description: `Subdomain page for ${subdomain}.${rootDomain}`,
+    title: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`,
+    description: `Subdomain page for ${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`,
   };
 }
 
@@ -47,16 +47,16 @@ export default async function SubdomainPage({
         <div className="mb-12 text-center">
           <div className="text-9xl mb-6">{subdomainData.emoji}</div>
           <h1 className="text-4xl font-bold tracking-tight mb-4">
-            Welcome to {subdomain}.{rootDomain}
+            Welcome to {subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Your custom subdomain with the latest blog posts
           </p>
           <Link
-            href={`${protocol}://${rootDomain}`}
+            href={`${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Back to {rootDomain}
+            ← Back to {process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}
           </Link>
         </div>
 

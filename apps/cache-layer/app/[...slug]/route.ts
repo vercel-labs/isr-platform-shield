@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getCoreUrl, getCacheLayerUrl } from "@platform/config";
+import { NextRequest } from "next/server";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
@@ -9,16 +8,28 @@ export async function GET(
   { params }: { params: Promise<{ slug: string[] }> },
 ) {
   const { slug } = await params;
-  console.log("slug", slug);
-  console.log("slug[0]", slug[0]);
-
-  if (slug[0] === "_next") {
-    console.log("rewriting _next", slug.join("/"), getCacheLayerUrl());
-    return NextResponse.rewrite(new URL(slug.join("/"), getCacheLayerUrl()));
+  
+  // Handle root domain requests (no slug means root page)
+  if (slug.length === 0) {
+    const pageResponse = await fetch(`${process.env.PROTOCOL}://${process.env.CORE_HOST}/`, {
+      cache: "force-cache",
+    });
+    pageResponse.headers.delete("transfer-encoding");
+    pageResponse.headers.delete("content-encoding");
+    pageResponse.headers.delete("content-length");
+    pageResponse.headers.set("vercel-cdn-cache-control", "public, max-age=3600");
+    pageResponse.headers.set("x-proxied", "1");
+    for (const [keyName] of pageResponse.headers.entries()) {
+      const key = keyName.toLowerCase();
+      if (key.startsWith("x-vercel-")) {
+        pageResponse.headers.delete(keyName);
+      }
+    }
+    return pageResponse;
   }
 
-  const coreUrl = getCoreUrl();
-  const pageResponse = await fetch(`${coreUrl}/${slug.join("/")}`, {
+  // Handle other requests
+  const pageResponse = await fetch(`${process.env.PROTOCOL}://${process.env.CORE_HOST}/${slug.join("/")}`, {
     cache: "force-cache",
   });
   pageResponse.headers.delete("transfer-encoding");

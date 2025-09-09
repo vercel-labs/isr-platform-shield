@@ -1,5 +1,4 @@
 // API client for the new data structure
-import { getApiUrl } from "@platform/config";
 export interface Author {
   id: number;
   name: string;
@@ -119,5 +118,5 @@ export class ApiClient {
   }
 }
 
-// Default instance - uses config package for API URL
-export const apiClient = new ApiClient(getApiUrl());
+// Default instance - uses environment variables for API URL
+export const apiClient = new ApiClient(`${process.env.PROTOCOL}://${process.env.API_HOST}`);

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { rootDomain, protocol } from "@/lib/utils";
+import { trace } from '@opentelemetry/api';
+
 
 function extractSubdomain(request: NextRequest): string | null {
   const url = request.url;
@@ -23,7 +24,7 @@ function extractSubdomain(request: NextRequest): string | null {
   }
 
   // Production environment
-  const rootDomainFormatted = rootDomain.split(":")[0];
+  const rootDomainFormatted = process.env.NEXT_PUBLIC_ROOT_DOMAIN?.split(":")[0] || "pzona.lol";
 
   // Handle preview deployment URLs (tenant---branch-name.vercel.app)
   if (hostname.includes("---") && hostname.endsWith(".vercel.app")) {
@@ -42,24 +43,38 @@ function extractSubdomain(request: NextRequest): string | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const subdomain = extractSubdomain(request);
 
-  if (subdomain) {
-    // Block access to admin page from subdomains
-    if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/", `${protocol}://${rootDomain}`));
+  const subdomain = await trace.getTracer('cache-layer').startActiveSpan('extractSubdomain', async (span) => {
+    try {
+      return extractSubdomain(request);
+    } finally {
+      span.end();
     }
+  });
 
-    // Pass /_next static assets to the core app
-    if (pathname.startsWith("/_next")) {
-      const coreHost = process.env.CORE_HOST
-      return NextResponse.rewrite(new URL(pathname, `${protocol}://${coreHost}`));
+  await trace.getTracer('cache-layer').startActiveSpan('subdomain_routing', async (span) => {
+    try {
+      if (subdomain) {
+        // Block access to admin page from subdomains
+        if (pathname.startsWith("/admin")) {
+          return NextResponse.redirect(new URL("/", `${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`));
+        }
+
+        // Pass /_next static assets to the core app
+        if (pathname.startsWith("/_next")) {
+          return NextResponse.next();
+        }
+
+        return NextResponse.rewrite(
+          new URL(`/s/${subdomain}${pathname}`, `${process.env.PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`),
+        );
+      }
+    } finally {
+      span.end();
     }
+  });
 
-    return NextResponse.rewrite(
-      new URL(`/s/${subdomain}${pathname}`, `${protocol}://${rootDomain}`),
-    );
-  }
+
 
   // Allow normal access for other root domain requests
   return NextResponse.next();
