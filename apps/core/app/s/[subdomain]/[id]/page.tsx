@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { blogPostService, BlogPost } from "@/lib/blog-posts";
 import { stringToColor } from "@/lib/deployment-id";
+import { getSubdomainData } from "@/lib/subdomains";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -13,6 +14,7 @@ interface BlogPostPageProps {
 
 export const dynamic = 'force-dynamic';
 
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { subdomain, id } = await params;
 
@@ -23,20 +25,41 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  const color = await stringToColor(process.env.VERCEL_DEPLOYMENT_ID ?? 'local');
+  // Fetch subdomain data for emoji
+  const subdomainData = await getSubdomainData(subdomain);
+
+  const deploymentId = process.env.VERCEL_DEPLOYMENT_ID ?? 'local';
+  const idColor = await stringToColor(deploymentId);
+  const dateColor = await stringToColor(new Date().toLocaleString());
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}
         <header className="mb-8">
-          <Card className="mb-4">
-            <CardHeader >
-              <CardTitle>Deployment <Badge className="ml-1 text-md" style={{ backgroundColor: color }}>{process.env.VERCEL_DEPLOYMENT_ID ?? 'local'}</Badge></CardTitle>
+          <Card className="mb-4 gap-2">
+            <CardHeader className="mb-0">
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-xl">
+                  {subdomainData && (
+                  <span className="mr-2" title={`Subdomain: ${subdomain}`}>
+                    {subdomainData.emoji}
+                  </span>
+                )}
+                  {subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN} </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Generated at: {new Date().toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Revalidates at: {new Date().setMinutes(new Date().getMinutes() + 60).toLocaleString()}</p>
+            <CardContent className="gap-2">
+              <p className="text-sm text-muted-foreground mb-2">Deployment:
+                <Badge className="font-bold ml-1" style={{ backgroundColor: idColor }}>
+                  {deploymentId}
+                </Badge>
+              </p>
+              <p className="text-sm text-muted-foreground">Generated:
+                <Badge className="font-bold ml-1" style={{ backgroundColor: dateColor }}>
+                  {new Date().toLocaleString()}
+                </Badge>
+              </p>
             </CardContent>
           </Card>
           <h1 className="text-4xl font-bold mb-4">
@@ -74,7 +97,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Footer */}
         <footer className="mt-12 pt-8 border-t border-border">
-          <div className="text-center text-muted-foreground">
+          <div className="text-muted-foreground">
             <p>Post ID: {id}</p>
             <p>Subdomain: {subdomain}</p>
           </div>

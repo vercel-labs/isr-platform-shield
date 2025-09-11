@@ -6,7 +6,9 @@ export function register() {
     serviceName: 'api',
     traceExporter: new OTLPHttpJsonTraceExporter({
       url: 'https://http.otel.pzona.biz',
-      headers: {}
+      headers: {
+        'Authorization': `Bearer ${process.env.OTEL_AUTH_TOKEN}`
+      }
     }),
     attributes: {
       'next.version': pkg.dependencies['next']

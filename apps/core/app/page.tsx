@@ -20,7 +20,7 @@ export default async function HomePage() {
             Multi-Tenant Platform with Durable ISR Cache
           </h1>
           <p className="mt-3 text-md text-muted-foreground">
-            Reference architecture by the <br/><span className="font-bold text-foreground">Vercel Developer Success Team</span>
+            Reference by <span className="font-bold text-foreground">Vercel Developer Success</span>
           </p>
         </div>
 

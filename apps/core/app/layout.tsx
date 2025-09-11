@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import { stringToColor } from "@/lib/deployment-id";
 import { VercelToolbar } from "@vercel/toolbar/next";
+import { DeploymentBar } from "@/components/deployment_bar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,15 +20,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const deploymentId = process.env.VERCEL_DEPLOYMENT_ID ?? 'local';
-  const color = await stringToColor(deploymentId);
+
 
   return (
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} antialiased`}>
-        <div className="px-3 py-1 text-sm text-background font-bold" style={{ backgroundColor: color }}>
-          {deploymentId}
-        </div>
+        <DeploymentBar />
         {children}
         <SpeedInsights />
         <VercelToolbar />

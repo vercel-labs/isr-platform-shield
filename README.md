@@ -12,18 +12,15 @@ A three-app Next.js system providing durable ISR caching for multi-tenant platfo
 User Request → Cache Layer → Core App → API
 ```
 
-## Development
+## Color System
 
-```bash
-# Install dependencies
-pnpm install
+The platform uses deterministic color generation for deployment identification. Each deployment ID and timestamp generates a unique color using SHA-256 hashing and HSL color space conversion.
 
-# Start all services
-pnpm dev
+### Purpose
 
-# Build all services
-pnpm build
-```
+- **Observability**: Identify which deployment served a request by color
+- **Testing**: Verify cache behavior across different deployments
+- **Debugging**: Distinguish how/when pages are being rendered and/or served from cache
 
 ## Deployment
 
@@ -59,6 +56,7 @@ pnpm run deploy:all
 ## Environment Variables
 
 ### Required
+
 ```bash
 API_HOST=api.yourdomain.com
 CORE_HOST=core.yourdomain.com
@@ -72,6 +70,7 @@ KV_REST_API_READ_ONLY_TOKEN=xxx
 ```
 
 ### Vercel Authentication
+
 ```bash
 VERCEL_TOKEN=your_vercel_token
 VERCEL_ORG_ID=your_org_id
@@ -80,21 +79,18 @@ VERCEL_ORG_ID=your_org_id
 ## Operational Concerns
 
 ### Cache Durability
+
 - Cache layer survives Core System deployments
 - 1-hour CDN cache, 60-second ISR revalidation
 - Independent scaling of cache and core systems
 
 ### Multi-Tenant Routing
+
 - Subdomain-based: `tenant.example.com` → `/s/tenant`
 - Redis storage for tenant data
 - Shared infrastructure with tenant isolation
 
-### Monitoring
-- Vercel function logs for each service
-- Cache hit/miss rates in Vercel Analytics
-- Redis connection status for Core app
-
 ### Troubleshooting
-- Use `pnpm run deploy:check` to validate environment
+
 - Core System must deploy before Cache Layer can proxy to it
-- Verify service URLs are accessible between apps
+  - After initial deployment, either system can be deployed independently

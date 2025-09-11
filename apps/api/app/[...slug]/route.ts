@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
   getPostWithAuthorById,
-  getRandomPostsWithAuthors,
+  getFirstPostsWithAuthors,
 } from "@/lib/data-utils";
 import { trace } from "@opentelemetry/api";
 
@@ -62,11 +62,11 @@ export async function GET(
         return NextResponse.json({ data: postWithAuthor });
       }
 
-      // Get random 5 posts for subdomain page
+      // Get first 5 posts for subdomain page
       if (query.random === "true") {
-        await trace.getTracer('api').startActiveSpan('getRandomPosts', async (span) => {
+        return await trace.getTracer('api').startActiveSpan('getFirstPosts', async (span) => {
           try {
-            const posts = getRandomPostsWithAuthors(5);
+            const posts = getFirstPostsWithAuthors(5);
             return NextResponse.json({ data: posts });
           } finally {
             span.end();
@@ -74,11 +74,13 @@ export async function GET(
         });
       }
 
-      // Default: return random 5 posts
-      const posts = getRandomPostsWithAuthors(5);
+      // Default: return first 5 posts
+      const posts = getFirstPostsWithAuthors(5);
       return NextResponse.json({ data: posts });
     }
   } catch (error) {
+    console.error("API Error:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -90,7 +92,10 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 },
     );
   }

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { z } from "zod";
 
 // Type definitions
@@ -53,7 +54,8 @@ function loadData(): DataStore {
   }
 
   try {
-    const data = readFileSync("lib/data.json", "utf8");
+    const dataPath = join(process.cwd(), "lib", "data.json");
+    const data = readFileSync(dataPath, "utf8");
     const jsonData = JSON.parse(data);
 
     // Validate the data structure
@@ -241,19 +243,18 @@ export function getRecentPosts(limit?: number): Post[] {
 }
 
 /**
- * Get random posts (for subdomain page)
+ * Get first posts (for subdomain page)
  */
-export function getRandomPosts(count: number = 5): Post[] {
+export function getFirstPosts(count: number = 5): Post[] {
   const posts = getAllPosts();
-  const shuffled = [...posts].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  return posts.slice(0, count);
 }
 
 /**
- * Get random posts with author information
+ * Get first posts with author information
  */
-export function getRandomPostsWithAuthors(count: number = 5): (Post & { authorInfo: Author })[] {
-  const posts = getRandomPosts(count);
+export function getFirstPostsWithAuthors(count: number = 5): (Post & { authorInfo: Author })[] {
+  const posts = getFirstPosts(count);
   const authors = getAllAuthors();
 
   return posts.map((post) => {
