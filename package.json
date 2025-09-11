@@ -6,9 +6,14 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "biome format --write",
-    "deploy:api": "vercel deploy --prod apps/api",
-    "deploy:cache-layer": "vercel deploy --prod apps/cache-layer",
-    "deploy:core": "vercel deploy --prod apps/core"
+    "deploy:api": "turbo run deploy:api --filter=@platform/api",
+    "deploy:core": "turbo run deploy:core --filter=@platform/core",
+    "deploy:core-system": "turbo run deploy:core-system",
+    "deploy:cache-layer": "turbo run deploy:cache-layer --filter=@platform/cache-layer",
+    "deploy:all": "turbo run deploy:all",
+    "deploy:api:manual": "vercel deploy --prod apps/api",
+    "deploy:core:manual": "vercel deploy --prod apps/core",
+    "deploy:cache-layer:manual": "vercel deploy --prod apps/cache-layer"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",

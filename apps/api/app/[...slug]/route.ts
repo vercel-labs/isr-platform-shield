@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
-  getAllAuthors,
-  getAuthorById,
-  getAllPosts,
-  getPostById,
-  getPostsByAuthor,
-  getPostsByTag,
-  getPostsWithAuthors,
-  getPostsWithAuthorsByTag,
-  searchPosts,
-  getRecentPosts,
-  type Post,
-  type Author,
+  getPostWithAuthorById,
+  getRandomPostsWithAuthors,
 } from "@/lib/data-utils";
 import { trace } from "@opentelemetry/api";
 
@@ -20,20 +10,12 @@ import { trace } from "@opentelemetry/api";
 const DELAY = process.env.NODE_ENV === "production" ? 2000 : 0;
 
 // Define the schema for valid resources
-const ResourceSchema = z.enum(["posts", "authors"]);
+const ResourceSchema = z.enum(["posts"]);
 
 // Query parameter schemas
 const PostQuerySchema = z.object({
   id: z.string().optional(),
-  author: z.string().optional(),
-  tag: z.string().optional(),
-  search: z.string().optional(),
-  recent: z.string().optional(),
-  withAuthors: z.string().optional(),
-});
-
-const AuthorQuerySchema = z.object({
-  id: z.string().optional(),
+  random: z.string().optional(),
 });
 
 export async function GET(
@@ -50,9 +32,9 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Invalid resource",
-        message: "Resource must be either 'posts' or 'authors'",
+        message: "Resource must be 'posts'",
         received: slug[0],
-        validOptions: ["posts", "authors"],
+        validOptions: ["posts"],
       },
       { status: 400 },
     );
@@ -64,117 +46,36 @@ export async function GET(
   await new Promise((resolve) => setTimeout(resolve, DELAY));
 
   try {
-    if (resource === "authors") {
-      const query = AuthorQuerySchema.parse(Object.fromEntries(searchParams));
-
-      if (query.id) {
-        const author = getAuthorById(Number.parseInt(query.id, 10));
-        if (!author) {
-          return NextResponse.json(
-            { error: "Author not found" },
-            { status: 404 },
-          );
-        }
-        return NextResponse.json({ data: author });
-      }
-
-      const authors = getAllAuthors();
-      return NextResponse.json({ data: authors });
-    }
-
     if (resource === "posts") {
       const query = PostQuerySchema.parse(Object.fromEntries(searchParams));
 
       // Get post by ID
       if (query.id) {
-        const post = getPostById(Number.parseInt(query.id, 10));
-        if (!post) {
+        const postWithAuthor = getPostWithAuthorById(Number.parseInt(query.id, 10));
+        if (!postWithAuthor) {
           return NextResponse.json(
             { error: "Post not found" },
             { status: 404 },
           );
         }
 
-        if (query.withAuthors === "true") {
-          const postsWithAuthors = getPostsWithAuthors();
-          const postWithAuthor = postsWithAuthors.find(
-            (p: Post & { authorInfo: Author }) =>
-              p.id === Number.parseInt(query.id || "0", 10),
-          );
-          return NextResponse.json({ data: postWithAuthor });
-        }
-
-        return NextResponse.json({ data: post });
+        return NextResponse.json({ data: postWithAuthor });
       }
 
-      // Get posts by author
-      if (query.author) {
-        const posts = getPostsByAuthor(Number.parseInt(query.author, 10));
-        if (query.withAuthors === "true") {
-          const postsWithAuthors = getPostsWithAuthors();
-          const filteredPosts = postsWithAuthors.filter(
-            (p: Post & { authorInfo: Author }) =>
-              p.author === Number.parseInt(query.author || "0", 10),
-          );
-          return NextResponse.json({ data: filteredPosts });
-        }
-        return NextResponse.json({ data: posts });
-      }
-
-      // Get posts by tag
-      if (query.tag) {
-        const posts = getPostsByTag(query.tag);
-        if (query.withAuthors === "true") {
-          const postsWithAuthors = getPostsWithAuthorsByTag(query.tag);
-          return NextResponse.json({ data: postsWithAuthors });
-        }
-        return NextResponse.json({ data: posts });
-      }
-
-      // Search posts
-      if (query.search) {
-        const posts = searchPosts(query.search);
-        if (query.withAuthors === "true") {
-          const postsWithAuthors = getPostsWithAuthors();
-          const filteredPosts = postsWithAuthors.filter(
-            (p: Post & { authorInfo: Author }) =>
-              posts.some((searchPost: Post) => searchPost.id === p.id),
-          );
-          return NextResponse.json({ data: filteredPosts });
-        }
-        return NextResponse.json({ data: posts });
-      }
-
-
-      // Get recent posts
-      if (query.recent) {
-        await trace.getTracer('api').startActiveSpan('getRecentPosts', async (span) => {
+      // Get random 5 posts for subdomain page
+      if (query.random === "true") {
+        await trace.getTracer('api').startActiveSpan('getRandomPosts', async (span) => {
           try {
-            const limit = Number.parseInt(query.recent || "0", 10);
-            const posts = getRecentPosts(limit);
-            if (query.withAuthors === "true") {
-              const postsWithAuthors = getPostsWithAuthors();
-              const filteredPosts = postsWithAuthors.filter(
-                (p: Post & { authorInfo: Author }) =>
-                  posts.some((recentPost: Post) => recentPost.id === p.id),
-              );
-              return NextResponse.json({ data: filteredPosts });
-            }
+            const posts = getRandomPostsWithAuthors(5);
             return NextResponse.json({ data: posts });
           } finally {
             span.end();
           }
         });
-
       }
 
-      // Get all posts
-      if (query.withAuthors === "true") {
-        const postsWithAuthors = getPostsWithAuthors();
-        return NextResponse.json({ data: postsWithAuthors });
-      }
-
-      const posts = getAllPosts();
+      // Default: return random 5 posts
+      const posts = getRandomPostsWithAuthors(5);
       return NextResponse.json({ data: posts });
     }
   } catch (error) {

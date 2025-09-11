@@ -241,6 +241,55 @@ export function getRecentPosts(limit?: number): Post[] {
 }
 
 /**
+ * Get random posts (for subdomain page)
+ */
+export function getRandomPosts(count: number = 5): Post[] {
+  const posts = getAllPosts();
+  const shuffled = [...posts].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+/**
+ * Get random posts with author information
+ */
+export function getRandomPostsWithAuthors(count: number = 5): (Post & { authorInfo: Author })[] {
+  const posts = getRandomPosts(count);
+  const authors = getAllAuthors();
+
+  return posts.map((post) => {
+    const authorInfo = authors.find((author) => author.id === post.author);
+    if (!authorInfo) {
+      throw new Error(`Author with ID ${post.author} not found`);
+    }
+    return {
+      ...post,
+      authorInfo,
+    };
+  });
+}
+
+/**
+ * Get post by ID with author information
+ */
+export function getPostWithAuthorById(id: number): (Post & { authorInfo: Author }) | null {
+  const post = getPostById(id);
+  if (!post) {
+    return null;
+  }
+
+  const authors = getAllAuthors();
+  const authorInfo = authors.find((author) => author.id === post.author);
+  if (!authorInfo) {
+    throw new Error(`Author with ID ${post.author} not found`);
+  }
+
+  return {
+    ...post,
+    authorInfo,
+  };
+}
+
+/**
  * Clear the data cache (useful for testing or when data changes)
  */
 export function clearDataCache(): void {

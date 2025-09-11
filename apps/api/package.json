@@ -6,7 +6,8 @@
     "dev": "PORT=3002 next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "deploy": "vercel deploy --prod"
+    "deploy": "vercel deploy --prod",
+    "deploy:api": "vercel deploy --prod"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

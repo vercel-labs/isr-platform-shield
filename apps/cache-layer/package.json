@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "PORT=3000 next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "deploy:cache-layer": "vercel deploy --prod"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

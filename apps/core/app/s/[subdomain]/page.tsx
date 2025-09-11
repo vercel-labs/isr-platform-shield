@@ -37,8 +37,8 @@ export default async function SubdomainPage({
     notFound();
   }
 
-  // Fetch recent posts for this subdomain
-  const recentPosts = await blogPostService.getRecentPosts(5);
+  // Fetch random posts for this subdomain
+  const recentPosts = await blogPostService.getRandomPosts();
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,9 +60,9 @@ export default async function SubdomainPage({
           </Link>
         </div>
 
-        {/* Recent Posts */}
+        {/* Random Posts */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Recent Posts</h2>
+          <h2 className="text-2xl font-bold mb-6">Featured Posts</h2>
           {recentPosts.length > 0 ? (
             <ul className="space-y-3">
               {recentPosts.map((post) => (
