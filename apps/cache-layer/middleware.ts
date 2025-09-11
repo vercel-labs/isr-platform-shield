@@ -65,10 +65,12 @@ export async function middleware(request: NextRequest) {
           return NextResponse.next();
         }
 
-        return NextResponse.rewrite(
-          new URL(`/s/${subdomain}${pathname}`, `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`),
-        );
+        const rewritePath = pathname === '/' ? `/s/${subdomain}` : `/s/${subdomain}${pathname}`;
+        const rewriteUrl = new URL(rewritePath, `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST || process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
 
+        return NextResponse.rewrite(
+          rewriteUrl
+        );
       } finally {
         span.end();
       }
