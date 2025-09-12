@@ -1,24 +1,11 @@
-// API client for the new data structure
-export interface Author {
-  id: number;
-  name: string;
-}
-
+// Simple API client for the new simplified API
 export interface Post {
   id: number;
   title: string;
   content: string;
-  author: number;
+  author: string; // Now just the author name
   publishedAt: string;
   tags: string[];
-}
-
-export interface PostWithAuthor extends Post {
-  authorInfo: Author;
-}
-
-export interface ApiResponse<T> {
-  data: T;
 }
 
 export class ApiClient {
@@ -28,36 +15,31 @@ export class ApiClient {
   ) { }
 
   private async request<T>(endpoint: string): Promise<T> {
-    try {
-      const response = await this.fetchClient(`${this.baseUrl}${endpoint}`);
+    const response = await this.fetchClient(`${this.baseUrl}${endpoint}`);
 
-      if (!response.ok) {
-        throw new Error(
-          `API request failed: ${response.status} ${response.statusText}`,
-        );
-      }
-
-      const result: ApiResponse<T> = await response.json();
-      return result.data;
-    } catch (error) {
-      console.error(`Error fetching from ${endpoint}:`, error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
     }
+
+    return await response.json();
   }
 
-  // Simplified post methods
-  async getPostById(id: number): Promise<PostWithAuthor | null> {
+  // Get single post by ID
+  async getPostById(id: number): Promise<Post | null> {
     try {
-      return await this.request<PostWithAuthor>(`/posts?id=${id}`);
+      const result = await this.request<{ post: Post }>(`/posts/${id}`);
+      return result.post;
     } catch {
       return null;
     }
   }
 
-  async getRandomPosts(): Promise<PostWithAuthor[]> {
-    return this.request<PostWithAuthor[]>("/posts?random=true");
+  // Get posts (limit 5 by default)
+  async getPosts(): Promise<Post[]> {
+    const result = await this.request<{ posts: Post[] }>("/posts");
+    return result.posts;
   }
 }
 
-// Default instance - uses environment variables for API URL
+// Default instance
 export const apiClient = new ApiClient(`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.API_HOST}`);
