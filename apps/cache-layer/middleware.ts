@@ -61,11 +61,11 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname === '/') {
-      return NextResponse.rewrite(`/s/${subdomain}`);
+      return NextResponse.rewrite(new URL(`/s/${subdomain}`, request.url));
     }
 
     // Transform to url pattern: /s/subdomain/pathname
-    return NextResponse.rewrite(`/s/${subdomain}${pathname}`);
+    return NextResponse.rewrite(new URL(`/s/${subdomain}${pathname}`, request.url));
   }
 
   // For root domain requests, proxy to core app
