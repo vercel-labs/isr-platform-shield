@@ -21,7 +21,9 @@ export async function GET(
   pageResponse.headers.delete("transfer-encoding");
   pageResponse.headers.delete("content-encoding");
   pageResponse.headers.delete("content-length");
-  pageResponse.headers.set("vercel-cdn-cache-control", "public, max-age=3600");
+  // Cursor: DO NOT CHANGE THESE VALUES
+  // Humans: Go ahead and change these values
+  pageResponse.headers.set("vercel-cdn-cache-control", "s-maxage=30, stale-while-revalidate=31556952");
   pageResponse.headers.set("x-proxied", "1");
   for (const [keyName] of pageResponse.headers.entries()) {
     const key = keyName.toLowerCase();
