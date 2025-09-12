@@ -1,15 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { trace } from '@opentelemetry/api';
 
-const tracer = trace.getTracer('core');
+const tracer = trace.getTracer('cache-layer');
 
 function extractSubdomain(request: NextRequest): string | null {
   return tracer.startActiveSpan('extractSubdomain', (span) => {
     try {
       const url = request.url;
-      // Use x-forwarded-host if available (when proxied), otherwise use host
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const host = forwardedHost || request.headers.get("host") || "";
+      const host = request.headers.get("host") || "";
       const hostname = host.split(":")[0];
 
       // Local development environment
@@ -62,28 +60,23 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Redirect to subdomain landing page
     if (pathname === '/') {
-      return NextResponse.rewrite(new URL(`/s/${subdomain}`, request.url));
+      return NextResponse.rewrite(`/s/${subdomain}`);
     }
 
-    // Handle blog posts
-    return NextResponse.rewrite(new URL(`/s/${subdomain}${pathname}`, request.url));
+    // Transform to url pattern: /s/subdomain/pathname
+    return NextResponse.rewrite(`/s/${subdomain}${pathname}`);
   }
 
-  // Allow normal access for other root domain requests
-  return NextResponse.next();
+  // For root domain requests, proxy to core app
+  // This illustrates a dynamic route in addition to the ISR posts
+  const coreUrl = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}${pathname}`;
+  return NextResponse.rewrite(new URL(coreUrl));
 }
 
 export const config = {
   runtime: "nodejs",
   matcher: [
-    /*
-     * Match all paths except for:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. all root files inside /public (e.g. /favicon.ico)
-     */
     '/((?!api|_next|[\\w-]+\\.\\w+).*)'
   ]
 };

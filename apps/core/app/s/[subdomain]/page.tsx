@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSubdomainData } from "@/lib/subdomains";
-// Using environment variables directly
 import { blogPostService } from "@/lib/blog-posts";
 
 export async function generateMetadata({
