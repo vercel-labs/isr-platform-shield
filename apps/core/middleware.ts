@@ -52,20 +52,21 @@ function extractSubdomain(request: NextRequest): string | null {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const subdomain = extractSubdomain(request);
+  const rewriteHost = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}`;
 
   if (subdomain) {
     // Block access to admin page from subdomains
     if (pathname.startsWith("/admin")) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", rewriteHost));
     }
 
     // Redirect to subdomain landing page
     if (pathname === '/') {
-      return NextResponse.rewrite(new URL(`/s/${subdomain}`, request.url));
+      return NextResponse.rewrite(new URL(`/s/${subdomain}`, rewriteHost));
     }
 
     // Handle blog posts
-    return NextResponse.rewrite(new URL(`/s/${subdomain}${pathname}`, request.url));
+    return NextResponse.rewrite(new URL(`/s/${subdomain}${pathname}`, rewriteHost));
   }
 
   // Allow normal access for other root domain requests
