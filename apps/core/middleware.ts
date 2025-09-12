@@ -7,7 +7,9 @@ function extractSubdomain(request: NextRequest): string | null {
   return tracer.startActiveSpan('extractSubdomain', (span) => {
     try {
       const url = request.url;
-      const host = request.headers.get("host") || "";
+      // Use x-forwarded-host if available (when proxied), otherwise use host
+      const forwardedHost = request.headers.get("x-forwarded-host");
+      const host = forwardedHost || request.headers.get("host") || "";
       const hostname = host.split(":")[0];
 
       // Local development environment
