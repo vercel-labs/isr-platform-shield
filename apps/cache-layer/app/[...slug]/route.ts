@@ -12,7 +12,7 @@ export async function GET(
   const subdomain = request.url.split(".")[0]; // assume only one level matters here
   const proto = process.env.NEXT_PUBLIC_PROTOCOL;
   const coreUrl =
-    subdomain ?
+    subdomain && subdomain !== "www" && !request.url.includes('localhost') ?
       `${proto}://${process.env.CORE_HOST}/s/${subdomain}/${slug.join("/")}` :
       `${proto}://${process.env.CORE_HOST}/${slug.join("/")}`;
   const pageResponse = await fetch(coreUrl, {
