@@ -1,170 +1,192 @@
-# Durable ISR Architecture
+# Request Flow Diagrams
 
-A three-app Next.js system that provides durable ISR caching for multi-tenant platforms on Vercel. The cache layer survives Core app deployments, enabling independent scaling and true cache durability.
+This document shows the request flow for different routes through the durable ISR multi-tenant platform, including cache layers and system boundaries.
 
-## Components
-
-### 1. Core (`apps/core`)
-
-- Renders pages, manages subdomains, fetches from API
-- ISR revalidation: 60 seconds
-
-### 2. Cache Layer (`apps/cache-layer`)
-
-- Proxies to Core with `force-cache`
-- ISR revalidation: 1 hour
-- Survives Core deployments
-
-### 3. API (`apps/api`)
-
-- Content API for Core app
-- Used to control failure scenarios; this can be implemented with any existing API
-
-## System Architecture Diagram
-
-```mermaid
-graph TB
-    subgraph "User Requests"
-        U1[User Request<br/>tenant.example.com]
-        U2[Admin Request<br/>example.com/admin]
-    end
-
-    subgraph "Cache Layer (Port 3000)"
-        CL[Cache Layer App<br/>Next.js 15.5.2]
-        CLM[Middleware<br/>Subdomain Detection]
-        CLR[Route Handler<br/>[...slug]/route.ts]
-    end
-
-    subgraph "Core App (Port 3001)"
-        CA[Core App<br/>Next.js 15.3.2]
-        CAM[Middleware<br/>Subdomain Routing]
-        CAR[Page Components<br/>ISR enabled]
-        CARedis[(Redis<br/>Tenant Data)]
-    end
-
-    subgraph "API App (Port 3002)"
-        API[API App<br/>Next.js 15.5.2]
-        APIR[API Routes<br/>/posts, /authors]
-        APIData[(Static Data<br/>JSON files)]
-    end
-
-    subgraph "Vercel Deployment"
-        VCDN[Vercel CDN<br/>Edge Caching]
-        VCore[Core Deployment<br/>core.vercel.app]
-        VCache[Cache Deployment<br/>cache.vercel.app]
-        VAPI[API Deployment<br/>api.vercel.app]
-    end
-
-    U1 --> CL
-    U2 --> CA
-    CL --> CLM
-    CLM --> CLR
-    CLR --> CA
-    CA --> CAM
-    CAM --> CAR
-    CAR --> API
-    API --> APIR
-    APIR --> APIData
-    CAR --> CARedis
-
-    CL -.-> VCDN
-    CA -.-> VCore
-    API -.-> VAPI
-    CL -.-> VCache
-```
-
-## Data Flow Diagram
+## Root Domain (/) - Landing Page
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant CacheLayer
-    participant Core
-    participant API
-    participant Redis
-    participant CDN
+    participant U as User
+    participant VCL as Vercel CDN
+    participant VCL_ISR as Cache Layer ISR
+    participant VCL_RT as Cache Layer Runtime
+    participant VCA as Vercel CDN
+    participant VCA_ISR as Core App ISR
+    participant VCA_RT as Core App Runtime
 
-    User->>CacheLayer: GET tenant.example.com/post/123
-    CacheLayer->>CacheLayer: Extract subdomain (tenant)
-    CacheLayer->>Core: GET /s/tenant/post/123 (force-cache)
-
-    alt Cache Miss
-        Core->>Core: Extract subdomain from URL
-        Core->>Redis: Get tenant data
-        Core->>API: GET /posts/123
-        API-->>Core: Post data
-        Core-->>Core: Render page with ISR
-        Core-->>CacheLayer: HTML response
-    else Cache Hit
-        Core-->>CacheLayer: Cached HTML response
+    U->>VCL: GET example.com/
+    VCL->>VCL: Check CDN Cache (1h TTL)
+    alt Cache Hit
+        VCL-->>U: Return Cached Response
+    else Cache Miss
+        VCL->>VCL_ISR: Check ISR Cache
+        alt ISR Hit
+            VCL_ISR-->>VCL: Return Cached Page
+        else ISR Miss
+            VCL->>VCL_RT: Generate Page
+            VCL_RT->>VCA: Proxy to Core App
+            VCA->>VCA_ISR: Check ISR Cache (60s)
+            alt ISR Hit
+                VCA_ISR-->>VCA: Return Cached Page
+            else ISR Miss
+                VCA->>VCA_RT: Generate Page (Runtime)
+                VCA_RT->>VCA_ISR: Store in ISR Cache
+            end
+            VCA-->>VCL_RT: Return Page
+            VCL_RT->>VCL_ISR: Store in ISR Cache
+        end
+        VCL-->>U: Return Response
     end
-
-    CacheLayer->>CacheLayer: Set CDN cache headers
-    CacheLayer-->>User: HTML response
-
-    Note over CDN: Response cached for 1 hour
-    Note over Core: ISR revalidates every 60 seconds
 ```
 
-## Multi-Tenant Routing
+## Subdomain (/) - Tenant Landing Page
 
-Subdomain-based routing: `tenant.example.com` → `/s/tenant` → tenant-specific content
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant VCL as Vercel CDN
+    participant VCL_ISR as Cache Layer ISR
+    participant VCL_RT as Cache Layer Runtime
+    participant VCA as Vercel CDN
+    participant VCA_ISR as Core App ISR
+    participant VCA_RT as Core App Runtime
+    participant R as Redis
+    participant VAPI as Vercel CDN
+    participant VAPI_RT as API App Runtime
 
-**Environments**:
-
-- Local: `tenant.localhost:3000`
-- Production: `tenant.example.com`
-- Vercel Preview: `tenant---branch-name.vercel.app`
-
-## ISR Strategy
-
-**Core**: 60s revalidation, fetches from API
-**Cache Layer**: 1h revalidation, `force-cache` to Core, CDN headers
-**Durability**: Cache survives Core deployments
-
-## Vercel Deployment
-
-**Environment Variables**:
-
-- Core: `API_HOST`, `CACHE_LAYER_HOST`, Redis credentials
-- Cache Layer: `CORE_HOST`, `API_HOST`
-- API: `CORE_HOST`, `CACHE_LAYER_HOST`
-
-**Deployment**: Independent apps, custom domains, CDN integration
-
-## Benefits
-
-**Durable Cache**: Survives Core deployments, reduces cold starts
-**Multi-Tenant**: Subdomain isolation, shared infrastructure
-**Independent Scaling**: Each service scales separately
-
-## Implementation
-
-**Cache Headers**:
-
-```typescript
-// Cache Layer
-pageResponse.headers.set("vercel-cdn-cache-control", "public, max-age=3600");
-
-// Core App
-export const revalidate = 60;
+    U->>VCL: GET tenant.example.com/
+    VCL->>VCL: Check CDN Cache (1h TTL)
+    alt Cache Hit
+        VCL-->>U: Return Cached Response
+    else Cache Miss
+        VCL->>VCL_ISR: Check ISR Cache
+        alt ISR Hit
+            VCL_ISR-->>VCL: Return Cached Page
+        else ISR Miss
+            VCL->>VCL_RT: Generate Page
+            VCL_RT->>VCA: Proxy to Core App
+            VCA->>VCA_RT: Middleware: Extract Subdomain
+            VCA_RT->>VCA_RT: Rewrite to /s/tenant
+            VCA->>VCA_ISR: Check ISR Cache (60s)
+            alt ISR Hit
+                VCA_ISR-->>VCA: Return Cached Page
+            else ISR Miss
+                VCA->>VCA_RT: Generate Page (Runtime)
+                VCA_RT->>R: Fetch Subdomain Data
+                R-->>VCA_RT: Return Subdomain Data
+                VCA_RT->>VAPI: Fetch Posts
+                VAPI->>VAPI_RT: Generate API Response
+                VAPI_RT-->>VAPI: Return Posts Data
+                VAPI-->>VCA_RT: Return Posts Data
+                VCA_RT->>VCA_ISR: Store in ISR Cache
+            end
+            VCA-->>VCL_RT: Return Page
+            VCL_RT->>VCL_ISR: Store in ISR Cache
+        end
+        VCL-->>U: Return Response
+    end
 ```
 
-**Service Communication**:
+## Admin Panel (/admin)
 
-```typescript
-// Core → API
-const posts = await apiClient.getAllPosts();
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant VCL as Vercel CDN
+    participant VCL_RT as Cache Layer Runtime
+    participant VCA as Vercel CDN
+    participant VCA_RT as Core App Runtime
+    participant R as Redis
 
-// Cache Layer → Core
-const response = await fetch(`${coreUrl}/${slug.join("/")}`, {
-  cache: "force-cache",
-});
+    U->>VCL: GET example.com/admin
+    VCL->>VCL_RT: Forward Request
+    VCL_RT->>VCA: Proxy to Core App
+    VCA->>VCA_RT: Middleware: Check Subdomain
+    alt Is Subdomain
+        VCA_RT-->>U: Redirect to Root Domain
+    else Not Subdomain
+        VCA->>VCA_RT: Generate Admin Page (Runtime)
+        VCA_RT->>R: Fetch All Subdomains
+        R-->>VCA_RT: Return Subdomain List
+        VCA_RT-->>VCA: Return Admin Page
+        VCA-->>VCL_RT: Return Admin Page
+        VCL_RT-->>U: Return Response
+    end
 ```
 
-**Tenancy**:
+## Blog Post Page (/[slug])
 
-```typescript
-// Redis storage
-await redis.set(`subdomain:${subdomain}`, { emoji, createdAt });
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant VCL as Vercel CDN
+    participant VCL_ISR as Cache Layer ISR
+    participant VCL_RT as Cache Layer Runtime
+    participant VCA as Vercel CDN
+    participant VCA_ISR as Core App ISR
+    participant VCA_RT as Core App Runtime
+    participant R as Redis
+    participant VAPI as Vercel CDN
+    participant VAPI_RT as API App Runtime
+
+    U->>VCL: GET tenant.example.com/123
+    VCL->>VCL: Check CDN Cache (1h TTL)
+    alt Cache Hit
+        VCL-->>U: Return Cached Response
+    else Cache Miss
+        VCL->>VCL_ISR: Check ISR Cache
+        alt ISR Hit
+            VCL_ISR-->>VCL: Return Cached Page
+        else ISR Miss
+            VCL->>VCL_RT: Generate Page
+            VCL_RT->>VCA: Proxy to Core App
+            VCA->>VCA_RT: Middleware: Extract Subdomain
+            VCA_RT->>VCA_RT: Rewrite to /s/tenant/123
+            VCA->>VCA_ISR: Check ISR Cache (60s)
+            alt ISR Hit
+                VCA_ISR-->>VCA: Return Cached Page
+            else ISR Miss
+                VCA->>VCA_RT: Generate Page (Runtime)
+                VCA_RT->>R: Fetch Subdomain Data
+                R-->>VCA_RT: Return Subdomain Data
+                VCA_RT->>VAPI: Fetch Blog Post
+                VAPI->>VAPI_RT: Generate API Response
+                VAPI_RT->>VAPI_RT: Check In-Memory Cache
+                alt API Cache Hit
+                    VAPI_RT-->>VAPI: Return Cached Data
+                else API Cache Miss
+                    VAPI_RT->>VAPI_RT: Load from JSON File
+                    VAPI_RT->>VAPI_RT: Store in API Cache
+                end
+                VAPI_RT-->>VAPI: Return Data
+                VAPI-->>VCA_RT: Return Data
+                VCA_RT->>VCA_ISR: Store in ISR Cache
+            end
+            VCA-->>VCL_RT: Return Page
+            VCL_RT->>VCL_ISR: Store in ISR Cache
+        end
+        VCL-->>U: Return Response
+    end
 ```
+
+## System Boundaries
+
+Each subsystem indicated here is an independent Next.js project.
+
+### Cache Layer (Port 3000)
+
+- **Vercel CDN**: 1-hour cache for all responses
+- **ISR Cache**: 60-second revalidation for dynamic pages
+- **Runtime**: Proxy to Core App
+
+### Core (Port 3001)
+
+- **Vercel CDN**: Edge caching for static assets
+- **ISR Cache**: 60-second revalidation for dynamic pages
+- **Runtime**: Middleware for subdomain detection and routing, page generation, Redis integration, API client
+- **External Dependencies**: Redis for subdomain data storage
+
+### API App Vercel Project (Port 3002)
+
+The API service is not strictly part of the setup; it's included as a control point to illustrate various scenarios with origin health.
+

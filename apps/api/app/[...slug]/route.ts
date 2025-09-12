@@ -7,7 +7,7 @@ import {
 import { trace } from "@opentelemetry/api";
 
 // Delay for latency, not looking to illustrate anything specific
-const DELAY = process.env.NODE_ENV === "production" ? 2000 : 0;
+const DELAY = process.env.NODE_ENV === "production" ? 1000 : 0;
 
 // Define the schema for valid resources
 const ResourceSchema = z.enum(["posts"]);
