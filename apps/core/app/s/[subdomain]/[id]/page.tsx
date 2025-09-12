@@ -37,31 +37,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}
         <header className="mb-8">
-          <Card className="mb-4 gap-2">
-            <CardHeader className="mb-0">
-              <div className="flex items-center gap-3">
-                <CardTitle className="text-xl">
-                  {subdomainData && (
-                  <span className="mr-2" title={`Subdomain: ${subdomain}`}>
-                    {subdomainData.emoji}
-                  </span>
-                )}
-                  {subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN} </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="gap-2">
-              <p className="text-sm text-muted-foreground mb-2">Deployment:
-                <Badge className="font-bold ml-1" style={{ backgroundColor: idColor }}>
-                  {deploymentId}
-                </Badge>
-              </p>
-              <p className="text-sm text-muted-foreground">Generated:
-                <Badge className="font-bold ml-1" style={{ backgroundColor: dateColor }}>
-                  {new Date().toLocaleString()}
-                </Badge>
-              </p>
-            </CardContent>
-          </Card>
+          <small>{
+            subdomainData && (
+              <span className="mr-2" title={`Subdomain: ${subdomain}`}>
+                {subdomainData.emoji}
+              </span>
+            )
+            }
+            <span>{subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN}</span>
+          </small>
           <h1 className="text-4xl font-bold mb-4">
             {blogPost.title}
           </h1>
@@ -71,8 +55,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <time dateTime={blogPost.publishedAt}>
               {new Date(blogPost.publishedAt).toLocaleDateString()}
             </time>
-            <span>•</span>
-            <span>Subdomain: {subdomain}</span>
           </div>
         </header>
 
