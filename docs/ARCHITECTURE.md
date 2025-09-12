@@ -2,6 +2,41 @@
 
 This document shows the request flow for different routes through the durable ISR multi-tenant platform, including cache layers and system boundaries.
 
+## Architecture Overview
+
+```mermaid
+graph TB
+    U[User] --> VCL[Vercel CDN]
+    VCL --> VCL_ISR[Cache Layer ISR]
+    VCL_ISR --> VCL_RT[Cache Layer Runtime]
+    VCL_RT --> VCL_MW[Cache Layer Middleware]
+    VCL_MW --> VCA[Core App]
+    VCA --> VCA_ISR[Core App ISR]
+    VCA_ISR --> VCA_RT[Core App Runtime]
+    VCA_RT --> R[Redis]
+    VCA_RT --> VAPI[API App]
+    VAPI --> VAPI_RT[API Runtime]
+    
+    subgraph "Cache Layer (Port 3000)"
+        VCL_ISR
+        VCL_RT
+        VCL_MW
+    end
+    
+    subgraph "Core App (Port 3001)"
+        VCA_ISR
+        VCA_RT
+    end
+    
+    subgraph "API App (Port 3002)"
+        VAPI_RT
+    end
+    
+    subgraph "External Services"
+        R
+    end
+```
+
 ## Root Domain (/) - Landing Page
 
 ```mermaid
@@ -24,7 +59,8 @@ sequenceDiagram
             VCL_ISR-->>VCL: Return Cached Page
         else ISR Miss
             VCL->>VCL_RT: Generate Page
-            VCL_RT->>VCA: Proxy to Core App
+            VCL_RT->>VCL_RT: Middleware: No Subdomain
+            VCL_RT->>VCA: Rewrite to Core App
             VCA->>VCA_ISR: Check ISR Cache (60s)
             alt ISR Hit
                 VCA_ISR-->>VCA: Return Cached Page
@@ -64,9 +100,8 @@ sequenceDiagram
             VCL_ISR-->>VCL: Return Cached Page
         else ISR Miss
             VCL->>VCL_RT: Generate Page
-            VCL_RT->>VCA: Proxy to Core App
-            VCA->>VCA_RT: Middleware: Extract Subdomain
-            VCA_RT->>VCA_RT: Rewrite to /s/tenant
+            VCL_RT->>VCL_RT: Middleware: Extract Subdomain
+            VCL_RT->>VCA: Rewrite to /s/tenant
             VCA->>VCA_ISR: Check ISR Cache (60s)
             alt ISR Hit
                 VCA_ISR-->>VCA: Return Cached Page
@@ -100,11 +135,11 @@ sequenceDiagram
 
     U->>VCL: GET example.com/admin
     VCL->>VCL_RT: Forward Request
-    VCL_RT->>VCA: Proxy to Core App
-    VCA->>VCA_RT: Middleware: Check Subdomain
+    VCL_RT->>VCL_RT: Middleware: Check Subdomain
     alt Is Subdomain
-        VCA_RT-->>U: Redirect to Root Domain
+        VCL_RT-->>U: Redirect to Root Domain
     else Not Subdomain
+        VCL_RT->>VCA: Rewrite to Core App
         VCA->>VCA_RT: Generate Admin Page (Runtime)
         VCA_RT->>R: Fetch All Subdomains
         R-->>VCA_RT: Return Subdomain List
@@ -139,9 +174,8 @@ sequenceDiagram
             VCL_ISR-->>VCL: Return Cached Page
         else ISR Miss
             VCL->>VCL_RT: Generate Page
-            VCL_RT->>VCA: Proxy to Core App
-            VCA->>VCA_RT: Middleware: Extract Subdomain
-            VCA_RT->>VCA_RT: Rewrite to /s/tenant/123
+            VCL_RT->>VCL_RT: Middleware: Extract Subdomain
+            VCL_RT->>VCA: Rewrite to /s/tenant/123
             VCA->>VCA_ISR: Check ISR Cache (60s)
             alt ISR Hit
                 VCA_ISR-->>VCA: Return Cached Page
@@ -151,13 +185,6 @@ sequenceDiagram
                 R-->>VCA_RT: Return Subdomain Data
                 VCA_RT->>VAPI: Fetch Blog Post
                 VAPI->>VAPI_RT: Generate API Response
-                VAPI_RT->>VAPI_RT: Check In-Memory Cache
-                alt API Cache Hit
-                    VAPI_RT-->>VAPI: Return Cached Data
-                else API Cache Miss
-                    VAPI_RT->>VAPI_RT: Load from JSON File
-                    VAPI_RT->>VAPI_RT: Store in API Cache
-                end
                 VAPI_RT-->>VAPI: Return Data
                 VAPI-->>VCA_RT: Return Data
                 VCA_RT->>VCA_ISR: Store in ISR Cache
@@ -177,16 +204,21 @@ Each subsystem indicated here is an independent Next.js project.
 
 - **Vercel CDN**: 1-hour cache for all responses
 - **ISR Cache**: 60-second revalidation for dynamic pages
-- **Runtime**: Proxy to Core App
+- **Runtime**: Middleware for subdomain detection and routing, proxy to Core App
+- **Middleware**: Subdomain extraction, URL rewriting, admin page protection
 
 ### Core (Port 3001)
 
 - **Vercel CDN**: Edge caching for static assets
 - **ISR Cache**: 60-second revalidation for dynamic pages
-- **Runtime**: Middleware for subdomain detection and routing, page generation, Redis integration, API client
+- **Runtime**: Page generation, Redis integration, API client
 - **External Dependencies**: Redis for subdomain data storage
+- **No Middleware**: Pure content generation server
 
-### API App Vercel Project (Port 3002)
+### API App (Port 3002)
 
-The API service is not strictly part of the setup; it's included as a control point to illustrate various scenarios with origin health.
+- **Runtime**: Simplified API endpoints for posts
+- **Endpoints**: `/posts` (get 5 posts) and `/posts/[id]` (get single post)
+- **Data Source**: JSON file with in-memory caching
+- **Purpose**: Content API for the multi-tenant platform
 

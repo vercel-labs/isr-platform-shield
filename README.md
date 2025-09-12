@@ -90,7 +90,9 @@ User Request → Cache Layer → Core App → API
 
 For more detailed diagrams, see the [architecture docs](docs/ARCHITECTURE.md).
 
-## Color System
+For a comparison with basic durable ISR and the changes required for multi-tenant, see the [evolution docs](docs/EVOLUTION.md).
+
+## Deployment Colors
 
 The platform uses deterministic color generation for deployment identification. Each deployment ID and timestamp generates a unique color using SHA-256 hashing and HSL color space conversion.
 
