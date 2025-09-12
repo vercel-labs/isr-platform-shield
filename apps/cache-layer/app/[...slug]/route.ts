@@ -9,8 +9,12 @@ export async function GET(
 ) {
   const { slug } = await params;
 
-  const subdomain = request.headers.get("host")?.split(".")[0]; // assume only one level matters here
-  const coreUrl = `${process.env.NEXT_PUBLIC_PROTOCOL}://${subdomain}.${process.env.CORE_HOST}/${slug.join("/")}`
+  const subdomain = request.url.split(".")[0]; // assume only one level matters here
+  const proto = process.env.NEXT_PUBLIC_PROTOCOL;
+  const coreUrl =
+    subdomain ?
+      `${proto}://${process.env.CORE_HOST}/s/${subdomain}/${slug.join("/")}` :
+      `${proto}://${process.env.CORE_HOST}/${slug.join("/")}`;
   const pageResponse = await fetch(coreUrl, {
     cache: "force-cache",
   });
