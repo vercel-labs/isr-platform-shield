@@ -84,7 +84,7 @@ This project extends basic durable ISR for multi-tenant platforms:
 - **Core** (Port 3001) - Multi-tenant pages with subdomain routing and middleware, fetches from API
 - **Cache Layer** (Port 3000) - Durable proxy with CDN caching, survives Core deployments
 
-```mermaid
+```txt
 User Request → Cache Layer → Core App → API
 ```
 
