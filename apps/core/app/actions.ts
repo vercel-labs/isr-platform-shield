@@ -4,7 +4,10 @@ import { redis } from "@/lib/redis";
 import { isValidIcon } from "@/lib/subdomains";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-// Using environment variables directly
+
+const RESERVED_SUBDOMAINS = [
+  "www", "admin", "api", "cache", "core"
+];
 
 export async function createSubdomainAction(
   prevState: any,
@@ -15,6 +18,15 @@ export async function createSubdomainAction(
 
   if (!subdomain || !icon) {
     return { success: false, error: "Subdomain and icon are required" };
+  }
+
+  if (RESERVED_SUBDOMAINS.includes(subdomain)) {
+    return {
+      subdomain,
+      icon,
+      success: false,
+      error: "This subdomain is reserved for operational purposes",
+    };
   }
 
   if (!isValidIcon(icon)) {

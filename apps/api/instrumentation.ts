@@ -1,10 +1,10 @@
-import { OTLPHttpProtoTraceExporter, registerOTel } from '@vercel/otel';
+import { OTLPHttpJsonTraceExporter, registerOTel } from '@vercel/otel';
 
 export function register() {
   registerOTel({
     serviceName: 'api',
-    traceExporter: new OTLPHttpProtoTraceExporter({
-      url: 'https://grpc.otel.pzona.biz',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: 'https://http.otel.pzona.biz',
       headers: {
         'Authorization': `Bearer%20${process.env.OTEL_AUTH_TOKEN}`
       }
