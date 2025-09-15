@@ -6,7 +6,7 @@ export function register() {
     traceExporter: new OTLPHttpJsonTraceExporter({
       url: 'https://http.otel.pzona.biz',
       headers: {
-        'Authorization': `Bearer%20${process.env.OTEL_AUTH_TOKEN}`
+        'Authorization': `Bearer ${process.env.OTEL_AUTH_TOKEN}`
       }
     })
   });
