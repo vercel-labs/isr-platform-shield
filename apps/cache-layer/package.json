@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "PORT=3000 next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "PORT=3000 next start",
     "deploy:cache-layer": "vercel deploy --prod"
   },
   "dependencies": {
