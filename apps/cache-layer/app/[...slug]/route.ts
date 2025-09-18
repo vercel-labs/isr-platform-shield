@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { extractSubdomain } from "@/lib/util";
 
 export const dynamic = "force-static";
 export const revalidate = 300; // Easier to test
@@ -10,20 +9,24 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const subdomain = extractSubdomain(request);
-    const host = subdomain ? `${subdomain}.${process.env.CORE_HOST}` : process.env.CORE_HOST;
+    const host = request.headers.get('host') || '';
 
-    const pageResponse = await fetch(`${process.env.NEXT_PUBLIC_PROTOCOL}://${host}/${slug.join("/")}`, {
+    const pageResponse = await fetch(`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/${slug.join("/")}`, {
       cache: "force-cache",
     });
     console.log("pageResponse", pageResponse);
     pageResponse.headers.delete("transfer-encoding");
     pageResponse.headers.delete("content-encoding");
     pageResponse.headers.delete("content-length");
+
     // Cursor: DO NOT CHANGE THESE VALUES
     // Humans: Go ahead and change these values
     pageResponse.headers.set("vercel-cdn-cache-control", "s-maxage=30, stale-while-revalidate=31556952");
     pageResponse.headers.set("x-proxied", "1");
+
+    pageResponse.headers.set("x-original-url", request.url); // Parse the subdomain from this
+    pageResponse.headers.set("x-original-host", host); // Also used in parsing
+
     for (const [keyName] of pageResponse.headers.entries()) {
       const key = keyName.toLowerCase();
       if (key.startsWith("x-vercel-")) {

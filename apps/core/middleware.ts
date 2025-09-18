@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-function extractSubdomain(request: NextRequest): string | null {
-  const url = request.url;
-  const host = request.headers.get('host') || '';
+function extractSubdomain(url: string, host: string): string | null {
   const hostname = host.split(':')[0];
 
   // Local development environment
@@ -41,10 +39,19 @@ function extractSubdomain(request: NextRequest): string | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  console.log(request.headers);
-  const subdomain = extractSubdomain(request);
 
-  if (subdomain) {
+  // Read the original url from the header, fallback to actual request for separation of testing
+  const url = request.headers.get('x-original-url') || request.url;
+  const host = request.headers.get('x-original-host') || request.headers.get('host') || '';
+  const subdomain = extractSubdomain(url, host);
+
+  if (subdomain && subdomain !== 'www') {
+    // Skip non-nav
+    const sefFetchMode = request.headers.get('Sec-Fetch-Mode');
+    if (sefFetchMode !== 'navigate') {
+      return NextResponse.next();
+    }
+
     // Block access to admin page from subdomains
     if (pathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/', request.url));
