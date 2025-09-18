@@ -40,6 +40,8 @@ function extractSubdomain(url: string, host: string): string | null {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  console.log("headers", request.headers);
+
   // Read the original url from the header, fallback to actual request for separation of testing
   const url = request.headers.get('x-original-url') || request.url;
   const host = request.headers.get('x-original-host') || request.headers.get('host') || '';
