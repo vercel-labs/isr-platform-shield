@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { SubdomainForm } from './subdomain-form';
-// Using environment variables directly
 
 export default async function HomePage() {
   return (
@@ -25,7 +24,7 @@ export default async function HomePage() {
         </div>
 
         <div className="mt-8 shadow-md rounded-lg p-6">
-          <SubdomainForm host={process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"} />
+          <SubdomainForm host={process.env.NEXT_PUBLIC_ROOT_DOMAIN} />
         </div>
       </div>
     </div>
