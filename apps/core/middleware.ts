@@ -40,30 +40,40 @@ function extractSubdomain(url: string, host: string): string | null {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  console.log("headers", request.headers);
+
 
   // Read the original url from the header, fallback to actual request for separation of testing
   const url = request.headers.get('x-original-url') || request.url;
   const host = request.headers.get('x-original-host') || request.headers.get('host') || '';
   const subdomain = extractSubdomain(url, host);
+  console.log("subdomain", subdomain);
 
   if (subdomain && subdomain !== 'www') {
+    console.log("sec-fetch-mode", request.headers.get('Sec-Fetch-Mode'));
     // Skip non-nav
     const sefFetchMode = request.headers.get('Sec-Fetch-Mode');
     if (sefFetchMode !== 'navigate') {
       return NextResponse.next();
     }
 
+    console.log("pathname", pathname);
+    console.log("is admin?");
     // Block access to admin page from subdomains
     if (pathname.startsWith('/admin')) {
+      console.log("yes");
       return NextResponse.redirect(new URL('/', request.url));
     }
+    console.log("no");
+    console.log("is root path?");
 
     // For the root path on a subdomain, rewrite to the subdomain page
     if (pathname === '/') {
+      console.log("yes");
       return NextResponse.rewrite(new URL(`/s/${subdomain}`, request.url));
     }
+    console.log("no");
 
+    console.log("rewriting to", `/s/${subdomain}${pathname}`);
     // For all other paths on a subdomain, rewrite to that path
     return NextResponse.rewrite(new URL(`/s/${subdomain}${pathname}`, request.url));
   }
