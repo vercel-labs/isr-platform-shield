@@ -29,13 +29,6 @@ const nextConfig: NextConfig = {
         {
           source: "/:path*",
           destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
-          missing: [
-            {
-              type: "header",
-              key: "Sec-Fetch-Mode",
-              value: "navigate",
-            },
-          ],
         },
       ],
 
