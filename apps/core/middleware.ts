@@ -21,6 +21,7 @@ function extractSubdomain(url: string, host: string): string | null {
 
   // Production environment
   const rootDomainFormatted = process.env.NEXT_PUBLIC_ROOT_DOMAIN?.split(':')[0];
+  console.log("rootDomainFormatted", rootDomainFormatted);
 
   // Handle preview deployment URLs (tenant---branch-name.vercel.app)
   if (hostname.includes('---') && hostname.endsWith('.vercel.app')) {
@@ -33,6 +34,12 @@ function extractSubdomain(url: string, host: string): string | null {
     hostname !== rootDomainFormatted &&
     hostname !== `www.${rootDomainFormatted}` &&
     hostname.endsWith(`.${rootDomainFormatted}`);
+
+  console.log("hostname", hostname);
+  console.log("hostname !== rootDomainFormatted", hostname !== rootDomainFormatted);
+  console.log("hostname !== www.rootDomainFormatted", hostname !== `www.${rootDomainFormatted}`);
+  console.log("hostname ends with rootDomainFormatted", hostname.endsWith(`.${rootDomainFormatted}`));
+  console.log("isSubdomain?", isSubdomain);
 
   return isSubdomain ? hostname.replace(`.${rootDomainFormatted}`, '') : null;
 }
