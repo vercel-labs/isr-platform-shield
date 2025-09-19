@@ -12,9 +12,8 @@ export async function GET(
     const host = request.headers.get('host') || '';
 
     const pageResponse = await fetch(`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/${slug.join("/")}`, {
-      cache: "force-cache",
+      // cache: "force-cache",
     });
-    console.log("pageResponse", pageResponse);
     pageResponse.headers.delete("transfer-encoding");
     pageResponse.headers.delete("content-encoding");
     pageResponse.headers.delete("content-length");
@@ -23,6 +22,8 @@ export async function GET(
     // Humans: Go ahead and change these values
     pageResponse.headers.set("vercel-cdn-cache-control", "s-maxage=30, stale-while-revalidate=31556952");
     pageResponse.headers.set("x-proxied", "1");
+
+    //tags here
 
     pageResponse.headers.set("x-original-url", request.url); // Parse the subdomain from this
     pageResponse.headers.set("x-original-host", host); // Also used in parsing
@@ -33,9 +34,9 @@ export async function GET(
         pageResponse.headers.delete(keyName);
       }
     }
+
     return pageResponse;
   } catch (error) {
-    console.error("error", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

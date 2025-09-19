@@ -16,10 +16,6 @@ export function isValidIcon(str: string) {
   } catch (error) {
     // If the regex fails (e.g., in environments that don't support Unicode property escapes),
     // fall back to a simpler validation
-    console.warn(
-      'Emoji regex validation failed, using fallback validation',
-      error
-    );
   }
 
   // Fallback validation: Check if the string is within a reasonable length
