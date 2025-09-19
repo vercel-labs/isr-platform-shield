@@ -6,6 +6,8 @@ export async function middleware(request: NextRequest) {
 
   const subdomain = extractSubdomain(request);
 
+  console.log("headers", request.headers)
+
   if (subdomain && subdomain !== 'www') {
 
     // Block access to admin page from subdomains
