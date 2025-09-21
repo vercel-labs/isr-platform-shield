@@ -14,6 +14,12 @@
           "value": "s-maxage=30, stale-while-revalidate=31556952"
         }
       ],
+      "rewrite": [
+        {
+          "source": "/:path*",
+          "destination": "https://core.pzvtest314.vercel.app//:path*"
+        }
+      ],
       "transforms": [
         {
           "type": "request.headers",
@@ -24,12 +30,6 @@
           "args": "BYPASS_TOKEN"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "destination": "https://pzona.fun/:path*"
     }
   ]
 }
