@@ -1,4 +1,4 @@
-// force build: 3
+// force build: 4
 import type { NextConfig } from "next";
 import createWithVercelToolbar from '@vercel/toolbar/plugins/next';
 
