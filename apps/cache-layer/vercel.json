@@ -13,6 +13,16 @@
           "key": "vercel-cdn-cache-control",
           "value": "s-maxage=30, stale-while-revalidate=31556952"
         }
+      ],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "append",
+          "target": {
+            "key": "x-vercel-protection-bypass"
+          },
+          "args": "BYPASS_TOKEN"
+        }
       ]
     }
   ],
