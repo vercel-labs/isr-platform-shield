@@ -13,6 +13,22 @@
           "key": "vercel-cdn-cache-control",
           "value": "s-maxage=30, stale-while-revalidate=31556952"
         }
+      ],
+      "rewrite": [
+        {
+          "source": "/:path*",
+          "destination": "https://core.pzvtest314.vercel.app//:path*"
+        }
+      ],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "append",
+          "target": {
+            "key": "x-vercel-protection-bypass"
+          },
+          "args": "BYPASS_TOKEN"
+        }
       ]
     }
   ]
