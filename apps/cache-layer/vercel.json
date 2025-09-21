@@ -15,5 +15,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "https://pzona.fun/:path*"
+    }
   ]
 }
