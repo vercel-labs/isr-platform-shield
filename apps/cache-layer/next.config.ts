@@ -25,22 +25,6 @@ const nextConfig: NextConfig = {
           "value": "s-maxage=30, stale-while-revalidate=31556952"
         },
       ]
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "sec-fetch-mode",
-          "value": "navigate"
-        }
-      ],
-      "headers": [
-        {
-          "key": "vary",
-          "value": "host"
-        }
-      ]
     }
   ]
 };
