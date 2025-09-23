@@ -9,7 +9,8 @@
     "deploy:cache-layer": "vercel deploy --prod"
   },
   "dependencies": {
-    "next": "15.5.2"
+    "next": "15.5.2",
+    "@vercel/otel": "^1.13.0"
   },
   "devDependencies": {
     "@types/node": "^20",
