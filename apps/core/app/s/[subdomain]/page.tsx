@@ -14,13 +14,13 @@ export async function generateMetadata({
 
   if (!subdomainData) {
     return {
-      title: process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000",
+      title: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
     };
   }
 
   return {
-    title: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`,
-    description: `Subdomain page for ${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`,
+    title: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    description: `Subdomain page for ${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
   };
 }
 
