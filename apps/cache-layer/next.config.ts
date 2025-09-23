@@ -1,20 +1,32 @@
 // force build: 2
 import type { NextConfig } from "next";
-import createWithVercelToolbar from '@vercel/toolbar/plugins/next';
-
-const withToolbar = createWithVercelToolbar();
 
 const nextConfig: NextConfig = {
   rewrites: async () => {
     return {
-      // beforeFiles: [
-      //   {
-      //     source: "/:path*",
-      //     destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
-      //   },
-      // ],
+      beforeFiles: [
+        {
+          source: "/:path*",
+          destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+        },
+      ],
     };
   },
+  headers: async () => [
+    {
+      "source": "/:path*",
+      "headers": [
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "1"
+        },
+        {
+          "key": "vercel-cdn-cache-control",
+          "value": "s-maxage=30, stale-while-revalidate=31556952"
+        }
+      ]
+    }
+  ]
 };
 
-export default withToolbar(nextConfig);
+export default nextConfig;

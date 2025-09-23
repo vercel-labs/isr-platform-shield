@@ -3,10 +3,7 @@ import { extractSubdomain } from './lib/subdomains';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   const subdomain = extractSubdomain(request);
-
-  console.log("headers", request.headers)
 
   if (subdomain && subdomain !== 'www') {
 

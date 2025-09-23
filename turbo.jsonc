@@ -58,21 +58,9 @@
         ".env*"
       ]
     },
-    "deploy:api": {
-      "dependsOn": [
-        "build"
-      ],
-      "cache": false,
-      "env": [
-        "VERCEL_TOKEN",
-        "VERCEL_ORG_ID",
-        "VERCEL_PROJECT_ID"
-      ]
-    },
     "deploy:core": {
       "dependsOn": [
-        "build",
-        "deploy:api"
+        "build"
       ],
       "cache": false,
       "env": [
