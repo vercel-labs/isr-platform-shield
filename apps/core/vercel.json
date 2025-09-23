@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": false,
-  "preserveVercelCacheTags": true,
   "headers": [
     {
       "source": "/:path*",
