@@ -4,14 +4,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   rewrites: async () => {
     return {
-      beforeFiles: [
-        {
-          source: "/:path*",
-          destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
-        },
-      ],
+      // beforeFiles: [
+      //   {
+      //     source: "/:path*",
+      //     destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+      //   },
+      // ],
     };
   },
+  // Leaving this as a comment so I can use it locally
   // headers: async () => [
   //   {
   //     "source": "/:path*",
