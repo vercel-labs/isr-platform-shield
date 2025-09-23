@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { getSubdomainData } from "@/lib/subdomains";
 import { blogPostService } from "@/lib/blog-posts";
 
+export const dynamic = "force-static";
+export const revalidate = 3600;
+
 export async function generateMetadata({
   params,
 }: {

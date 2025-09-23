@@ -3,7 +3,6 @@ import { blogPostService, BlogPost } from "@/lib/blog-posts";
 import { stringToColor } from "@/lib/deployment-id";
 import { getSubdomainData } from "@/lib/subdomains";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -12,6 +11,8 @@ interface BlogPostPageProps {
   }>;
 }
 
+export const dynamic = "force-static";
+export const revalidate = 3600;
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { subdomain, id } = await params;
