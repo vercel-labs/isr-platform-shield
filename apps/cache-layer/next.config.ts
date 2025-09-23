@@ -26,23 +26,23 @@ const nextConfig: NextConfig = {
   //       },
   //     ]
   //   },
-    // {
-    //   "source": "/:path*",
-    //   "has": [
-    //     {
-    //       "type": "header",
-    //       "key": "sec-fetch-mode",
-    //       "value": "navigate"
-    //     }
-    //   ],
-    //   "headers": [
-    //     {
-    //       "key": "vary",
-    //       "value": "host"
-    //     }
-    //   ]
-    // }
-  ]
+  // {
+  //   "source": "/:path*",
+  //   "has": [
+  //     {
+  //       "type": "header",
+  //       "key": "sec-fetch-mode",
+  //       "value": "navigate"
+  //     }
+  //   ],
+  //   "headers": [
+  //     {
+  //       "key": "vary",
+  //       "value": "host"
+  //     }
+  //   ]
+  // }
+  // ]
 };
 
 export default nextConfig;
