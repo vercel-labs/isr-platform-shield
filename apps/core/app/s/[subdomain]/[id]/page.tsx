@@ -12,8 +12,6 @@ interface BlogPostPageProps {
   }>;
 }
 
-export const dynamic = 'force-dynamic';
-
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { subdomain, id } = await params;
