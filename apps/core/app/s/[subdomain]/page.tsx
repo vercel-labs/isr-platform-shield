@@ -46,16 +46,16 @@ export default async function SubdomainPage({
         <div className="mb-12 text-center">
           <div className="text-9xl mb-6">{subdomainData.emoji}</div>
           <h1 className="text-4xl font-bold tracking-tight mb-4">
-            Welcome to {subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}
+            Welcome to {subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN}
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Your custom subdomain with the latest blog posts
           </p>
           <Link
-            href={`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`}
+            href={`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Back to {process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}
+            ← Back to {process.env.NEXT_PUBLIC_ROOT_DOMAIN}
           </Link>
         </div>
 
