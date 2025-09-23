@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         {
           "key": "vercel-cdn-cache-control",
           "value": "s-maxage=30, stale-while-revalidate=31556952"
+        },
+        {
+          "key": "vary",
+          "value": "host"
         }
       ]
     }
