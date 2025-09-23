@@ -2,64 +2,33 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  headers: async () => {
+  rewrites: async () => {
     return [
       {
         source: "/:path*",
-        headers: [
-          {
-            key: "x-vercel-bypass-protection",
-            value: process.env.VERCEL_AUTOMATION_BYPASS_SECRET!
-          }
-        ]
-      }
+        destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+      },
     ]
   },
-  rewrites: async () => {
-    return {
-      afterFiles: [
+  headers: async () => [
+    {
+      source: "/:path*",
+      headers: [
         {
-          source: "/:path*",
-          destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+          key: "x-vercel-enable-rewrite-caching",
+          value: "1"
         },
         {
-          source: "/(.*)",
-          destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+          key: "vercel-cdn-cache-control",
+          value: "s-maxage=30, stale-while-revalidate=31556952"
         },
-      ],
-    };
-  },
-  // headers: async () => [
-  //   {
-  //     "source": "/:path*",
-  //     "headers": [
-  //       {
-  //         "key": "x-vercel-enable-rewrite-caching",
-  //         "value": "1"
-  //       },
-  //       {
-  //         "key": "vercel-cdn-cache-control",
-  //         "value": "s-maxage=30, stale-while-revalidate=31556952"
-  //       },
-  //     ]
-  //   },
-  // {
-  //   "source": "/:path*",
-  //   "has": [
-  //     {
-  //       "type": "header",
-  //       "key": "sec-fetch-mode",
-  //       "value": "navigate"
-  //     }
-  //   ],
-  //   "headers": [
-  //     {
-  //       "key": "vary",
-  //       "value": "host"
-  //     }
-  //   ]
-  // }
-  // ]
+        {
+          key: "x-vercel-bypass-protection",
+          value: process.env.VERCEL_AUTOMATION_BYPASS_SECRET!
+        }
+      ]
+    },
+  ]
 };
 
 export default nextConfig;
