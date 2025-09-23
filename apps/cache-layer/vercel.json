@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": false,
   "framework": null,
-  "outputDirectory": ".",
+  "outputDirectory": null,
   "headers": [
     {
       "source": "/:path*",
