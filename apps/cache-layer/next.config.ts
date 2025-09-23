@@ -2,11 +2,28 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  headers: async () => {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "x-vercel-bypass-protection",
+            value: process.env.VERCEL_AUTOMATION_BYPASS_SECRET!
+          }
+        ]
+      }
+    ]
+  },
   rewrites: async () => {
     return {
       afterFiles: [
         {
           source: "/:path*",
+          destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+        },
+        {
+          source: "/(.*)",
           destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
         },
       ],
