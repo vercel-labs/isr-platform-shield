@@ -2,14 +2,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  rewrites: async () => {
-    return [
-      {
-        source: "/:path*",
-        destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
-      },
-    ]
-  },
   headers: async () => [
     {
       source: "/:path*",
@@ -24,11 +16,19 @@ const nextConfig: NextConfig = {
         },
         {
           key: "x-vercel-bypass-protection",
-          value: process.env.VERCEL_AUTOMATION_BYPASS_SECRET!
+          value: `${process.env.VERCEL_AUTOMATION_BYPASS_SECRET}`
         }
       ]
     },
-  ]
+  ],
+  rewrites: async () => {
+    return [
+      {
+        source: "/:path*",
+        destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+      },
+    ]
+  },
 };
 
 export default nextConfig;
