@@ -1,27 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "trailingSlash": false,
-  "framework": null,
-  "outputDirectory": null,
-  "headers": [
-    {
-      "source": "/:path*",
-      "headers": [
-        {
-          "key": "x-vercel-enable-rewrite-caching",
-          "value": "1"
-        },
-        {
-          "key": "vercel-cdn-cache-control",
-          "value": "s-maxage=30, stale-while-revalidate=31556952"
-        }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "destination": "https://pzona.fun/:path*"
-    }
-  ]
+  "trailingSlash": false
 }
