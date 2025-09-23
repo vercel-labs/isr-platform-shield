@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { SubdomainForm } from './subdomain-form';
 
+export const dynamic = "force-static";
+export const revalidate = 3600;
+
 export default async function HomePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 relative">
