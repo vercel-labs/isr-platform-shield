@@ -4,15 +4,19 @@
   "ui": "tui",
   "envMode": "loose",
   "globalEnv": [
+    "TURBO_PLATFORM_ENV_DISABLED",
+    "VERCEL",
+    "VERCEL_DEPLOYMENT_ID",
     "REDIS_URL",
     "KV_REST_API_URL",
     "KV_REST_API_TOKEN",
-    "KV_REST_API_READ_ONLY_TOKEN",
-    "KV_URL",
     "CORE_HOST",
     "CACHE_LAYER_HOST",
+    "API_HOST",
     "NEXT_PUBLIC_PROTOCOL",
     "NEXT_PUBLIC_ROOT_DOMAIN",
+    "KV_REST_API_READ_ONLY_TOKEN",
+    "KV_URL",
     "NEXT_OTEL_VERBOSE",
     "OTEL_EXPORTER_OTLP_ENDPOINT",
     "OTEL_EXPORTER_OTLP_HEADERS",
@@ -63,7 +67,14 @@
         "VERCEL_TOKEN",
         "VERCEL_ORG_ID",
         "VERCEL_PROJECT_ID",
+        "API_HOST"
       ]
+    },
+    "deploy:core-system": {
+      "dependsOn": [
+        "deploy:core"
+      ],
+      "cache": false
     },
     "deploy:cache-layer": {
       "dependsOn": [
@@ -75,6 +86,31 @@
         "VERCEL_ORG_ID",
         "VERCEL_PROJECT_ID",
         "CORE_HOST"
+      ]
+    },
+    "deploy:all": {
+      "dependsOn": [
+        "deploy:core-system",
+        "deploy:cache-layer"
+      ],
+      "cache": false
+    },
+    "deploy:check": {
+      "cache": false,
+      "env": [
+        "API_HOST",
+        "CORE_HOST",
+        "CACHE_LAYER_HOST",
+        "NEXT_PUBLIC_PROTOCOL",
+        "NEXT_PUBLIC_ROOT_DOMAIN",
+        "VERCEL_TOKEN",
+        "VERCEL_ORG_ID",
+        "VERCEL_PROJECT_ID",
+        "REDIS_URL",
+        "KV_REST_API_URL",
+        "KV_REST_API_TOKEN",
+        "KV_REST_API_READ_ONLY_TOKEN",
+        "KV_URL"
       ]
     }
   }

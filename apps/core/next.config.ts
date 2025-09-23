@@ -5,24 +5,7 @@ import createWithVercelToolbar from '@vercel/toolbar/plugins/next';
 const withToolbar = createWithVercelToolbar();
 
 const nextConfig: NextConfig = {
-  "headers": async () => [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "sec-fetch-mode",
-          "value": "navigate"
-        }
-      ],
-      "headers": [
-        {
-          "key": "vary",
-          "value": "x-forwarded-host"
-        }
-      ]
-    }
-  ]
+  /* config options here */
 };
 
 export default withToolbar(nextConfig);
