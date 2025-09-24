@@ -11,15 +11,15 @@ export async function DeploymentBar() {
 
   return (
     <div className="px-3 py-1 text-background flex justify-between">
-      <div>
-      <Badge className="text-sm font-bold" style={{ backgroundColor: dateColor }}>
-        {deploymentDate}
-      </Badge>
-      <Badge className="text-sm font-bold" style={{ backgroundColor: idColor }}>
-      {deploymentId}
-      </Badge>
+      <div className="flex gap-2">
+        <Badge className="text-sm font-bold" style={{ backgroundColor: dateColor }}>
+          {deploymentDate}
+        </Badge>
+        <Badge className="text-sm font-bold" style={{ backgroundColor: idColor }}>
+        {deploymentId}
+        </Badge>
       </div>
-      <div>
+      <div className="flex gap-2">
         <Button>
           <Link href={`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}>
             Platform Home
