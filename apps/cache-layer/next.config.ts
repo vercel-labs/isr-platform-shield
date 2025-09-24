@@ -12,23 +12,6 @@ const nextConfig: NextConfig = {
       ]
     }
   },
-  headers: async () => {
-    return [
-      {
-        "source": "/:path*",
-        "headers": [
-          {
-            "key": "x-vercel-enable-rewrite-caching",
-            "value": "1"
-          },
-          {
-            "key": "vercel-cdn-cache-control",
-            "value": "s-maxage=30, stale-while-revalidate=31556952"
-          }
-        ]
-      }
-    ]
-  }
 };
 
 export default nextConfig;
