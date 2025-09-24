@@ -1,5 +1,7 @@
 import { stringToColor } from "@/lib/deployment-id";
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 export async function DeploymentBar() {
   const deploymentId = process.env.VERCEL_DEPLOYMENT_ID ?? 'local';
@@ -9,12 +11,28 @@ export async function DeploymentBar() {
 
   return (
     <div className="px-3 py-1 text-background flex justify-between">
+      <div>
       <Badge className="text-sm font-bold" style={{ backgroundColor: dateColor }}>
         {deploymentDate}
       </Badge>
       <Badge className="text-sm font-bold" style={{ backgroundColor: idColor }}>
       {deploymentId}
       </Badge>
+      </div>
+      <div>
+        <Button>
+          <Link href={`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}>
+            Platform Home
+          </Link>
+          <Link href="/">
+            Tenant Home
+          </Link>
+          <Link href="/admin">
+            Admin
+          </Link>
+        </Button>
+      </div>
+
     </div>
   );
 }
