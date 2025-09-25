@@ -12,7 +12,7 @@
 	],
 	"headers": [
 		{
-			"source": ":path*",
+			"source": "(.*)",
 			"headers": [
 				{
 					"key": "CDN-Cache-Control",
