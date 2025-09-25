@@ -7,14 +7,7 @@ const nextConfig: NextConfig = {
 			beforeFiles: [
 				{
 					source: "/:path*",
-					destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
-					has: [
-						{
-							type: "header",
-							key: "x-rewrite-to-core",
-							value: "1",
-						},
-					]
+					destination: `https://${process.env.CORE_HOST}/:path*`,
 				},
 			],
 
