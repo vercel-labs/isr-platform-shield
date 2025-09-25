@@ -24,40 +24,75 @@
 	],
 	"tasks": {
 		"build": {
-			"dependsOn": ["^build"],
-			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**"]
+			"dependsOn": [
+				"^build"
+			],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env*"
+			],
+			"outputs": [
+				".next/**",
+				"!.next/cache/**",
+				"dist/**"
+			]
 		},
 		"dev": {
 			"cache": false,
 			"persistent": true
 		},
 		"start": {
-			"dependsOn": ["^build"]
+			"dependsOn": [
+				"^build"
+			]
 		},
 		"format": {
 			"cache": false
 		},
 		"lint": {
-			"dependsOn": ["^lint"],
-			"inputs": ["$TURBO_DEFAULT$", ".env*"]
+			"dependsOn": [
+				"^lint"
+			],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env*"
+			]
 		},
 		"deploy:core": {
-			"dependsOn": ["build"],
+			"dependsOn": [
+				"build"
+			],
 			"cache": false,
-			"env": ["VERCEL_TOKEN", "VERCEL_ORG_ID", "VERCEL_PROJECT_ID", "API_HOST"]
+			"env": [
+				"VERCEL_TOKEN",
+				"VERCEL_ORG_ID",
+				"VERCEL_PROJECT_ID",
+				"API_HOST"
+			]
 		},
 		"deploy:core-system": {
-			"dependsOn": ["deploy:core"],
+			"dependsOn": [
+				"deploy:core"
+			],
 			"cache": false
 		},
 		"deploy:cache-layer": {
-			"dependsOn": ["build"],
+			"dependsOn": [
+				"build"
+			],
 			"cache": false,
-			"env": ["VERCEL_TOKEN", "VERCEL_ORG_ID", "VERCEL_PROJECT_ID", "CORE_HOST"]
+			"env": [
+				"VERCEL_TOKEN",
+				"VERCEL_ORG_ID",
+				"VERCEL_PROJECT_ID",
+				"CORE_HOST"
+			]
 		},
 		"deploy:all": {
-			"dependsOn": ["deploy:core-system", "deploy:cache-layer"],
+			"dependsOn": [
+				"deploy:core-system",
+				"deploy:cache-layer"
+			],
 			"cache": false
 		},
 		"deploy:check": {

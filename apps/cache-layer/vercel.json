@@ -1,46 +1,20 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"routes": [
+	"rewrites": [
 		{
-			"src": "/(.*)",
-			"dest": "https://core.pzvtest314.vercel.app/$1",
-			"has": [
+			"source": "/:path*",
+			"destination": "https://core.pzvtest314.vercel.app/:path*"
+		}
+	],
+	"headers": [
+		{
+			"source": "/:path*",
+			"headers": [
 				{
-					"type": "header",
-					"key": "sec-fetch-mode",
-					"value": "navigate"
-				}
-			],
-			"transforms": [
-				{
-					"type": "response.headers",
-					"op": "set",
-					"target": {
-						"key": "x-vercel-enable-rewrite-caching"
-					},
-					"args": "1"
-				},
-				{
-					"type": "response.headers",
-					"op": "set",
-					"target": {
-						"key": "vercel-cdn-cache-control"
-					},
-					"args": "s-maxage=30, stale-while-revalidate=31556952"
-				},
-				{
-					"type": "response.headers",
-					"op": "set",
-					"target": {
-						"key": "x-anything"
-					},
-					"args": "host"
+					"key": "CDN-Cache-Control",
+					"value": "max-age=60"
 				}
 			]
-		},
-		{
-			"src": "/(.*)",
-			"dest": "https://core.pzvtest314.vercel.app/$1"
 		}
 	]
 }
