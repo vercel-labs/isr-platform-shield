@@ -1,6 +1,5 @@
 import { stringToColor } from "@/lib/deployment-id";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
 import Link from "next/link";
 
 export async function DeploymentBar() {
@@ -28,13 +27,18 @@ export async function DeploymentBar() {
 				</Badge>
 			</div>
 			<div className="flex gap-2">
-				<Button>
-					<Link href={`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}>
-						Platform Home
-					</Link>
-					<Link href="/">Tenant Home</Link>
-					<Link href="/admin">Admin</Link>
-				</Button>
+				<Link
+					className="text-sm font-bold"
+					href={`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
+				>
+					Platform Home
+				</Link>
+				<Link className="text-sm font-bold" href="/">
+					Tenant Home
+				</Link>
+				<Link className="text-sm font-bold" href="/admin">
+					Admin
+				</Link>
 			</div>
 		</div>
 	);
