@@ -16,18 +16,29 @@ const nextConfig: NextConfig = {
 						},
 					]
 				},
+				{
+					source: "/:path*",
+					destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+					has: [
+						{
+							type: "header",
+							key: "x-rewrite-to-core-before",
+							value: "1",
+						},
+					]
+				},
 			],
 			afterFiles: [
 				{
 					source: "/:path*",
 					destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CACHE_LAYER_HOST}/:path*`,
-					missing: [
+					has: [
 						{
 							type: "header",
-							key: "x-rewrite-to-core",
+							key: "x-rewrite-to-core-after",
 							value: "1",
 						},
-					],
+					]
 				},
 			],
 		};

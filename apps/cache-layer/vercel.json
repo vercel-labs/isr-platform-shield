@@ -1,17 +1,25 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"trailingSlash": false,
-	"headers": [
+	"routes": [
 		{
-			"source": "/:path*",
-			"headers": [
+			"src": "/(.*)",
+			"dest": "/$1",
+			"transforms": [
 				{
-					"key": "x-vercel-enable-rewrite-caching",
-					"value": "1"
+					"type": "request.headers",
+					"op": "set",
+					"target": {
+						"key": "x-vercel-enable-rewrite-caching"
+					},
+					"args": "1"
 				},
 				{
-					"key": "vercel-cdn-cache-control",
-					"value": "s-maxage=30, stale-while-revalidate=31556952"
+					"type": "response.headers",
+					"op": "set",
+					"target": {
+						"key": "vercel-cdn-cache-control"
+					},
+					"args": "s-maxage=30, stale-while-revalidate=31556952"
 				}
 			]
 		}
