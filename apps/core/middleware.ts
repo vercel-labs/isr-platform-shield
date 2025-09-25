@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
 	console.log("headers", headers);
 
 	if (subdomain && subdomain !== "www") {
-		headers.set('x-vercel-cache-tag', subdomain);
+		// headers.set('vercel-cache-tag', subdomain);
 
 		// Block access to admin page from subdomains
 		if (pathname.startsWith("/admin")) {
