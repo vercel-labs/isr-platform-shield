@@ -3,6 +3,13 @@
 	"routes": [
 		{
 			"src": "/(.*)",
+			"has": [
+				{
+					"type": "header",
+					"key": "x-forwarded-host",
+					"value": "(?<host>.*)"
+				}
+			],
 			"transforms": [
 				{
 					"type": "response.headers",
@@ -11,6 +18,14 @@
 						"key": "x-vercel-enable-rewrite-caching"
 					},
 					"args": "1"
+				},
+				{
+					"type": "response.headers",
+					"op": "set",
+					"target": {
+						"key": "vercel-cache-tag"
+					},
+					"args": ":host"
 				}
 			]
 		}
