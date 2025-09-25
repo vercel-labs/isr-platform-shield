@@ -3,7 +3,6 @@
 	"routes": [
 		{
 			"src": "/(.*)",
-			"dest": "https://core.pzvtest314.vercel.app/s/:host/$1",
 			"has": [
 				{
 					"type": "header",
@@ -11,15 +10,14 @@
 					"value": "navigate"
 				},
 				{
-					"type": "header",
-					"key": "X-Forwarded-Host",
+					"type": "host",
 					"value": "(?<host>.*)"
 				}
 			],
 			"headers": {
-				"CDN-Cache-Control": "s-maxage=60",
-				"Vary": "X-Forwarded-Host"
-			}
+				"CDN-Cache-Control": "s-maxage=60"
+			},
+			"dest": "https://core.pzvtest314.vercel.app/s/:host/$1"
 		},
 		{
 			"src": "(.*)",
@@ -28,6 +26,6 @@
 				"CDN-Cache-Control": "s-maxage=60",
 				"Vary": "Host"
 			}
-		},
+		}
 	]
 }
