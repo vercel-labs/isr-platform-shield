@@ -2,14 +2,6 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"routes": [
 		{
-			"src": "(.*)",
-			"dest": "https://core.pzvtest314.vercel.app$1",
-			"headers": {
-				"CDN-Cache-Control": "s-maxage=60",
-				"Vary": "Host"
-			}
-		},
-		{
 			"src": "/(.*)",
 			"dest": "https://core.pzvtest314.vercel.app/s/:host/$1",
 			"has": [
@@ -28,6 +20,14 @@
 				"CDN-Cache-Control": "s-maxage=60",
 				"Vary": "X-Forwarded-Host"
 			}
-		}
+		},
+		{
+			"src": "(.*)",
+			"dest": "https://core.pzvtest314.vercel.app$1",
+			"headers": {
+				"CDN-Cache-Control": "s-maxage=60",
+				"Vary": "Host"
+			}
+		},
 	]
 }
