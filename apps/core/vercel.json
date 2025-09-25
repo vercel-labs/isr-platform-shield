@@ -1,3 +1,11 @@
 {
-	"$schema": "https://openapi.vercel.sh/vercel.json"
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"routes": [
+		{
+			"src": "(.*)",
+			"headers": {
+				"Vary": "X-Something-HEADER"
+			}
+		}
+	]
 }
