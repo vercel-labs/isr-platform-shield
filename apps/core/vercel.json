@@ -11,14 +11,6 @@
 						"key": "x-vercel-enable-rewrite-caching"
 					},
 					"args": "1"
-				},
-				{
-					"type": "response.headers",
-					"op": "set",
-					"target": {
-						"key": "x-vercel-cache-tag"
-					},
-					"args": "$PRESERVE_CACHE_TAG"
 				}
 			]
 		}
