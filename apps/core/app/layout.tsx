@@ -6,30 +6,28 @@ import { VercelToolbar } from "@vercel/toolbar/next";
 import { DeploymentBar } from "@/components/deployment_bar";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+	variable: "--font-geist-sans",
+	subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Durable ISR Platform POC",
-  description: "Durable ISR Platform POC",
+	title: "Durable ISR Platform POC",
+	description: "Durable ISR Platform POC",
 };
 
 export default async function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-
-
-  return (
-    <html lang="en" className="dark">
-      <body className={`${geistSans.variable} antialiased`}>
-        <DeploymentBar />
-        {children}
-        <SpeedInsights />
-        <VercelToolbar />
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" className="dark">
+			<body className={`${geistSans.variable} antialiased`}>
+				<DeploymentBar />
+				{children}
+				<SpeedInsights />
+				<VercelToolbar />
+			</body>
+		</html>
+	);
 }

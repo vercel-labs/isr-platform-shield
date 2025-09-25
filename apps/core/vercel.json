@@ -1,15 +1,15 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/:path*",
-      "headers": [
-        {
-          "key": "x-vercel-enable-rewrite-caching",
-          "value": "1"
-        }
-      ]
-    }
-  ]
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"trailingSlash": false,
+	"headers": [
+		{
+			"source": "/:path*",
+			"headers": [
+				{
+					"key": "x-vercel-enable-rewrite-caching",
+					"value": "1"
+				}
+			]
+		}
+	]
 }
