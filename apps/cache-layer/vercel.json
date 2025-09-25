@@ -20,13 +20,13 @@
 				},
 				{
 					"type": "header",
-					"key": "Host",
+					"key": "X-Forwarded-Host",
 					"value": "(?<host>.*)"
 				}
 			],
 			"headers": {
 				"CDN-Cache-Control": "s-maxage=60",
-				"Vary": "Host"
+				"Vary": "X-Forwarded-Host"
 			}
 		}
 	]
