@@ -4,12 +4,9 @@
 		{
 			"src": "(.*)",
 			"dest": "https://core.pzvtest314.vercel.app$1",
-			"headers": [
-				{
-					"key": "CDN-Cache-Control",
-					"value": "max-age=60"
-				}
-			]
+			"headers": {
+				"CDN-Cache-Control": "max-age=60"
+			}
 		}
 	]
 }
