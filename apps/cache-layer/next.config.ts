@@ -21,6 +21,13 @@ const nextConfig: NextConfig = {
 				{
 					source: "/:path*",
 					destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CACHE_LAYER_HOST}/:path*`,
+					missing: [
+						{
+							type: "header",
+							key: "x-rewrite-to-core",
+							value: "1",
+						},
+					],
 				},
 			],
 		};
