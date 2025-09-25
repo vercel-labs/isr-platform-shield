@@ -2,6 +2,24 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"routes": [
 		{
+			"src": "/",
+			"has": [
+				{
+					"type": "header",
+					"key": "Sec-Fetch-Mode",
+					"value": "navigate"
+				},
+				{
+					"type": "host",
+					"value": "(?<host>.*)\\.[^\\.]+\\.[^\\.]+"
+				}
+			],
+			"headers": {
+				"CDN-Cache-Control": "s-maxage=60"
+			},
+			"dest": "https://core.pzvtest314.vercel.app/s/$host"
+		},
+		{
 			"src": "/(.*)",
 			"has": [
 				{

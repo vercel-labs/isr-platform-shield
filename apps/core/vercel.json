@@ -7,6 +7,5 @@
 				"Vary": "X-Something-HEADER"
 			}
 		}
-	],
-	"trailingSlash": false
+	]
 }
