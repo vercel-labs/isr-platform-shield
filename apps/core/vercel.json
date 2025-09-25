@@ -8,6 +8,11 @@
 					"type": "header",
 					"key": "x-forwarded-host",
 					"value": "(?<host>.*)"
+				},
+				{
+					"type": "header",
+					"key": "sec-fetch-mode",
+					"value": "navigate"
 				}
 			],
 			"transforms": [
@@ -27,6 +32,16 @@
 					},
 					"args": ":host"
 				}
+			]
+		},
+		{
+			"src": "/(.*)",
+			"has": [
+				{
+					"type": "header",
+					"key": "x-forwarded-host",
+					"value": "(?<host>.*)"
+				},
 			]
 		}
 	]
