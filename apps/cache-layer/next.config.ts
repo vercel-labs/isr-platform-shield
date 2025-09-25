@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
 					]
 				},
 			],
+			afterFiles: [
+				{
+					source: "/:path*",
+					destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CACHE_LAYER_HOST}/:path*`,
+				},
+			],
 		};
 	},
 };
