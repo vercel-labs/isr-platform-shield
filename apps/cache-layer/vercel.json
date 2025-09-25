@@ -3,6 +3,7 @@
 	"routes": [
 		{
 			"src": "/(.*)",
+			"dest": "https://core.pzvtest314.vercel.app/$1",
 			"has": [
 				{
 					"type": "header",
