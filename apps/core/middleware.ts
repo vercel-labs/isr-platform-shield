@@ -4,9 +4,13 @@ import { extractSubdomain } from "./lib/subdomains";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const subdomain = extractSubdomain(request);
-	console.log("headers", request.headers);
+
+	const headers = new Headers(request.headers);
+	console.log("headers", headers);
 
 	if (subdomain && subdomain !== "www") {
+		headers.set('x-vercel-cache-tag', subdomain);
+
 		// Block access to admin page from subdomains
 		if (pathname.startsWith("/admin")) {
 			return NextResponse.redirect(new URL("/", request.url));

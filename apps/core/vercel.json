@@ -1,6 +1,5 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"trailingSlash": false,
 	"headers": [
 		{
 			"source": "/:path*",
@@ -8,6 +7,22 @@
 				{
 					"key": "x-vercel-enable-rewrite-caching",
 					"value": "1"
+				}
+			]
+		}
+	],
+	"routes": [
+		{
+			"src": "/(.*)",
+			"dest": "/$1",
+			"transforms": [
+				{
+					"type": "response.headers",
+					"op": "set",
+					"target": {
+						"key": "x-vercel-cache-tag"
+					},
+					"args": "$PRESERVE_CACHE_TAG"
 				}
 			]
 		}
