@@ -1,5 +1,5 @@
 {
-	"name": "@platform/durable-isr-poc",
+	"name": "@platform/shielded-isr-poc",
 	"private": true,
 	"scripts": {
 		"start": "turbo run start",
@@ -7,7 +7,6 @@
 		"dev": "turbo run dev",
 		"lint": "turbo run lint",
 		"format": "biome format --write",
-		"deploy:api": "turbo run deploy:api --filter=@platform/api",
 		"deploy:core": "turbo run deploy:core --filter=@platform/core",
 		"deploy:core-system": "turbo run deploy:core-system",
 		"deploy:cache-layer": "turbo run deploy:cache-layer --filter=@platform/cache-layer",
