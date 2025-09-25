@@ -3,7 +3,13 @@
 	"routes": [
 		{
 			"src": "/(.*)",
-			"dest": "https://core.pzvtest314.vercel.app/$1",
+			"has": [
+				{
+					"type": "header",
+					"key": "sec-fetch-mode",
+					"value": "navigate"
+				}
+			],
 			"transforms": [
 				{
 					"type": "response.headers",
@@ -22,6 +28,10 @@
 					"args": "s-maxage=30, stale-while-revalidate=31556952"
 				}
 			]
+		},
+		{
+			"src": "/(.*)",
+			"dest": "https://core.pzvtest314.vercel.app/$1"
 		}
 	]
 }
