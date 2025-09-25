@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
 				{
 					source: "/:path*",
 					destination: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.CORE_HOST}/:path*`,
+					has: [
+						{
+							type: "header",
+							key: "x-rewrite-to-core",
+							value: "1",
+						},
+					]
 				},
 			],
 		};
