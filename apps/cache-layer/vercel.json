@@ -3,7 +3,7 @@
 	"routes": [
 		{
 			"src": "/(.*)",
-			"dest": "https://pzona.fun/$1",
+			"dest": "https://core.pzvtest314.vercel.app/$1",
 			"transforms": [
 				{
 					"type": "response.headers",
