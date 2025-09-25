@@ -6,7 +6,7 @@
 			"dest": "/$1",
 			"transforms": [
 				{
-					"type": "request.headers",
+					"type": "response.headers",
 					"op": "set",
 					"target": {
 						"key": "x-vercel-enable-rewrite-caching"

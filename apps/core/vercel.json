@@ -1,21 +1,18 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"headers": [
-		{
-			"source": "/:path*",
-			"headers": [
-				{
-					"key": "x-vercel-enable-rewrite-caching",
-					"value": "1"
-				}
-			]
-		}
-	],
 	"routes": [
 		{
 			"src": "/(.*)",
 			"dest": "/$1",
 			"transforms": [
+				{
+					"type": "response.headers",
+					"op": "set",
+					"target": {
+						"key": "x-vercel-enable-rewrite-caching"
+					},
+					"args": "1"
+				},
 				{
 					"type": "response.headers",
 					"op": "set",
@@ -28,4 +25,3 @@
 		}
 	]
 }
-
