@@ -1,3 +1,21 @@
 {
-	"$schema": "https://openapi.vercel.sh/vercel.json"
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"headers": [
+		{
+			"source": "(.*)",
+			"has": [
+				{
+					"type": "header",
+					"key": "sec-fetch-mode",
+					"value": "navigate"
+				}
+			],
+			"headers": [
+				{
+					"key": "vary",
+					"value": "x-forwarded-host"
+				}
+			]
+		}
+	]
 }

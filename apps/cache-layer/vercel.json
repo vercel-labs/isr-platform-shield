@@ -8,6 +8,26 @@
 				"CDN-Cache-Control": "s-maxage=60",
 				"Vary": "Host"
 			}
+		},
+		{
+			"src": "/(.*)",
+			"dest": "https://core.pzvtest314.vercel.app/s/:host/$1",
+			"has": [
+				{
+					"type": "header",
+					"key": "Sec-Fetch-Mode",
+					"value": "navigate"
+				},
+				{
+					"type": "header",
+					"key": "Host",
+					"value": "(?<host>.*)"
+				}
+			],
+			"headers": {
+				"CDN-Cache-Control": "s-maxage=60",
+				"Vary": "Host"
+			}
 		}
 	]
 }
