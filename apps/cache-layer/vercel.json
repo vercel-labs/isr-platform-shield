@@ -1,18 +1,9 @@
 {
 	"$schema": "https://openapi.vercel.sh/vercel.json",
-	"rewrites": [
+	"routes": [
 		{
-			"source": "/",
-			"destination": "https://core.pzvtest314.vercel.app/"
-		},
-		{
-			"source": "/:path*",
-			"destination": "https://core.pzvtest314.vercel.app/:path*"
-		}
-	],
-	"headers": [
-		{
-			"source": "(.*)",
+			"src": "(.*)",
+			"dest": "https://core.pzvtest314.vercel.app$1",
 			"headers": [
 				{
 					"key": "CDN-Cache-Control",
