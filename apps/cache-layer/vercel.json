@@ -5,7 +5,7 @@
 			"src": "(.*)",
 			"dest": "https://core.pzvtest314.vercel.app$1",
 			"headers": {
-				"CDN-Cache-Control": "max-age=60",
+				"CDN-Cache-Control": "s-maxage=60",
 				"Vary": "Host"
 			}
 		}
