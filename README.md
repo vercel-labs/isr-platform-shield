@@ -71,7 +71,7 @@ const nextConfig: NextConfig = {
 
 ### How it works
 
-1. **Cache Layer**: Proxies requests to your main application
+1. **Shield**: Proxies requests to your main application
 2. **CDN Caching**: 30-second revalidation with 1-year stale-while-revalidate
 3. **Deployment Independence**: Cache survives when you deploy your main app
 4. **Automatic Fallback**: Serves stale content if upstream fails
@@ -82,10 +82,10 @@ This project extends basic durable ISR for multi-tenant platforms:
 
 - **API** (Port 3002) - Content API with posts/authors endpoints
 - **Core** (Port 3001) - Multi-tenant pages with subdomain routing and middleware, fetches from API
-- **Cache Layer** (Port 3000) - Durable proxy with CDN caching, survives Core deployments
+- **Shield** (Port 3000) - Durable proxy with CDN caching, survives Core deployments
 
 ```txt
-User Request → Cache Layer → Core App → API
+User Request → Shield → Core App → API
 ```
 
 For more detailed diagrams, see the [architecture docs](docs/ARCHITECTURE.md).
@@ -108,7 +108,7 @@ The platform uses deterministic color generation for deployment identification. 
 
 Set environment variables in Vercel projects:
 
-- `API_HOST`, `CORE_HOST`, `CACHE_LAYER_HOST`
+- `API_HOST`, `CORE_HOST`, `SHIELD_HOST`
 - `NEXT_PUBLIC_PROTOCOL`, `NEXT_PUBLIC_ROOT_DOMAIN`
 - `REDIS_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`
 
@@ -118,8 +118,8 @@ Set environment variables in Vercel projects:
 # Deploy Core System (API + Core)
 pnpm run deploy:core-system
 
-# Deploy Cache Layer independently
-pnpm run deploy:cache-layer
+# Deploy Shield independently
+pnpm run deploy:shield
 
 # Deploy everything
 pnpm run deploy:all
@@ -128,7 +128,7 @@ pnpm run deploy:all
 ### Deployment Boundaries
 
 - **Core System**: Tightly coupled API + Core apps
-- **Cache Layer**: Independent durable proxy layer
+- **Shield**: Independent durable proxy layer
 
 ## Environment Variables
 
@@ -137,7 +137,7 @@ pnpm run deploy:all
 ```bash
 API_HOST=api.yourteam.vercel.app
 CORE_HOST=core.yourteam.vercel.app
-CACHE_LAYER_HOST=cache.yourteam.vercel.app
+SHIELD_HOST=shield.yourteam.vercel.app
 NEXT_PUBLIC_PROTOCOL=https
 NEXT_PUBLIC_ROOT_DOMAIN=yourcoolsite.com
 REDIS_URL=rediss://default:xxx@yyy-123.upstash.io:6379

@@ -7,12 +7,12 @@ This document outlines the evolution from a basic durable ISR setup to the curre
 ### Architecture
 
 ```
-User Request → Cache Layer → Upstream App
+User Request → Shield → Upstream App
 ```
 
 ### Key Components
 
-- **Single Cache Layer**: Simple proxy with rewrite rules
+- **Single Shield**: Simple proxy with rewrite rules
 - **Single Upstream App**: Basic Next.js application
 - **Simple Routing**: Direct path-based routing
 - **Basic Caching**: CDN + ISR with long-term stale-while-revalidate
@@ -20,7 +20,7 @@ User Request → Cache Layer → Upstream App
 ### Configuration
 
 ```typescript
-// Cache Layer - next.config.ts
+// Shield - next.config.ts
 const nextConfig: NextConfig = {
   rewrites: async () => {
     return {
@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
 ```
 
 ```typescript
-// Cache Layer - route handler
+// Shield - route handler
 export async function GET(request: NextRequest, { params }) {
   const { slug } = await params;
 
@@ -66,12 +66,12 @@ export async function GET(request: NextRequest, { params }) {
 ### Architecture
 
 ```
-User Request → Cache Layer (Middleware + Routes) → Core App → API
+User Request → Shield (Middleware + Routes) → Core App → API
 ```
 
 ### Key Components
 
-- **Three-App System**: Cache Layer, Core App, API
+- **Three-App System**: Shield, Core App, API
 - **Middleware-Based Routing**: Subdomain detection and URL rewriting
 - **Multi-Tenant Support**: Subdomain-based tenant isolation
 - **Advanced Caching**: Multiple cache layers with different TTLs
@@ -93,7 +93,7 @@ User Request → Cache Layer (Middleware + Routes) → Core App → API
 - Complex routing logic for different request types
 
 ```typescript
-// Cache Layer - middleware.ts
+// Shield - middleware.ts
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const subdomain = extractSubdomain(request);
@@ -117,7 +117,7 @@ export async function middleware(request: NextRequest) {
 
 ### 2. Caching Strategy
 
-#### **Before: Single Cache Layer**
+#### **Before: Single Shield**
 
 - One CDN cache (1 hour TTL)
 - One ISR cache (30s revalidation)
@@ -125,13 +125,13 @@ export async function middleware(request: NextRequest) {
 
 #### **After: Multi-Layer Caching**
 
-- **Cache Layer CDN**: 1 hour TTL for all responses
-- **Cache Layer ISR**: 60s revalidation for dynamic content
+- **Shield CDN**: 1 hour TTL for all responses
+- **Shield ISR**: 60s revalidation for dynamic content
 - **Core App ISR**: 60s revalidation for page generation
 - **API Caching**: In-memory caching for data requests
 
 ```typescript
-// Cache Layer - route handler with advanced caching
+// Shield - route handler with advanced caching
 export async function GET(request: NextRequest, { params }) {
   const { slug } = await params;
 
@@ -159,12 +159,12 @@ export async function GET(request: NextRequest, { params }) {
 
 #### **Before: Two Apps**
 
-- Cache Layer (proxy)
+- Shield (proxy)
 - Upstream App (content)
 
 #### **After: Three Apps**
 
-- **Cache Layer**: Middleware + routing + proxy
+- **Shield**: Middleware + routing + proxy
 - **Core App**: Multi-tenant pages + subdomain handling
 - **API App**: Content API with simplified endpoints
 
@@ -173,13 +173,13 @@ export async function GET(request: NextRequest, { params }) {
 #### **Before: Simple Data Flow**
 
 ```
-User → Cache Layer → Upstream App → Response
+User → Shield → Upstream App → Response
 ```
 
 #### **After: Complex Multi-Tenant Flow**
 
 ```
-User → Cache Layer (Middleware) → Core App (Subdomain Logic) → API → Response
+User → Shield (Middleware) → Core App (Subdomain Logic) → API → Response
 ```
 
 ### 5. Environment Configuration
@@ -196,7 +196,7 @@ UPSTREAM_URL=https://upstream-app.vercel.app
 ```bash
 # Multi-tenant platform
 NEXT_PUBLIC_PROTOCOL=https
-CACHE_LAYER_HOST=cache.yourteam.vercel.app
+SHIELD_HOST=shield.yourteam.vercel.app
 CORE_HOST=core.yourteam.vercel.app
 API_HOST=api.yourteam.vercel.app
 NEXT_PUBLIC_ROOT_DOMAIN=yourcoolsite.com
@@ -278,7 +278,7 @@ export async function GET(request: Request, { params }) {
 
 ### 1. Middleware Location
 
-- **Decision**: Middleware in Cache Layer (not Core App)
+- **Decision**: Middleware in Shield (not Core App)
 - **Rationale**: Simpler routing logic, better performance, cleaner separation
 - **Trade-off**: Cache layer becomes more complex but eliminates proxy complexity
 

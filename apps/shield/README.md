@@ -1,4 +1,4 @@
-# Cache Layer
+# Shield
 
 A Next.js caching proxy that sits in front of the core app to provide CDN-level caching.
 

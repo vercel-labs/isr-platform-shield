@@ -8,10 +8,10 @@ This document shows the request flow for different routes through the durable IS
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant VCL_MW as Cache Layer Middleware
-    participant VCL as Cache Layer CDN
-    participant VCL_ISR as Cache Layer ISR
-    participant VCL_RT as Cache Layer Runtime
+    participant VCL_MW as Shield Middleware
+    participant VCL as Shield CDN
+    participant VCL_ISR as Shield ISR
+    participant VCL_RT as Shield Runtime
     participant VCA as Core CDN
     participant VCA_ISR as Core App ISR
     participant VCA_RT as Core App Runtime
@@ -48,10 +48,10 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant VCL_MW as Cache Layer Middleware
-    participant VCL as Cache Layer CDN
-    participant VCL_ISR as Cache Layer ISR
-    participant VCL_RT as Cache Layer Runtime
+    participant VCL_MW as Shield Middleware
+    participant VCL as Shield CDN
+    participant VCL_ISR as Shield ISR
+    participant VCL_RT as Shield Runtime
     participant VCA as Core CDN
     participant VCA_ISR as Core App ISR
     participant VCA_RT as Core App Runtime
@@ -97,9 +97,9 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant VCL_MW as Cache Layer Middleware
-    participant VCL as Cache Layer CDN
-    participant VCL_RT as Cache Layer Runtime
+    participant VCL_MW as Shield Middleware
+    participant VCL as Shield CDN
+    participant VCL_RT as Shield Runtime
     participant VCA as Core CDN
     participant VCA_RT as Core App Runtime
     participant R as Redis
@@ -126,10 +126,10 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant VCL_MW as Cache Layer Middleware
-    participant VCL as Cache Layer CDN
-    participant VCL_ISR as Cache Layer ISR
-    participant VCL_RT as Cache Layer Runtime
+    participant VCL_MW as Shield Middleware
+    participant VCL as Shield CDN
+    participant VCL_ISR as Shield ISR
+    participant VCL_RT as Shield Runtime
     participant VCA as Core CDN
     participant VCA_ISR as Core App ISR
     participant VCA_RT as Core App Runtime
@@ -174,7 +174,7 @@ sequenceDiagram
 
 Each subsystem indicated here is an independent Next.js project.
 
-### Cache Layer (Port 3000)
+### Shield (Port 3000)
 
 - **Vercel CDN**: 1-hour cache for all responses
 - **ISR Cache**: 60-second revalidation for dynamic pages
