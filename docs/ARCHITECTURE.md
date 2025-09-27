@@ -1,7 +1,14 @@
 # Request Flow Diagrams
 
+This document shows the request flow for different routes through the shielded ISR multi-tenant platform, including cache layers and system boundaries.
 
-This document shows the request flow for different routes through the durable ISR multi-tenant platform, including cache layers and system boundaries.
+## Shielded ISR Concept
+
+The shielded ISR architecture addresses the problem where ISR cache is purged on each new deployment, causing slow first requests for pages not generated during build. The shield layer provides:
+
+- **Cache Protection**: Serves cached content while Core app ISR cache rebuilds after deployment
+- **Cache Warming**: Allows deferring static page generation until after build, then prewarming by requesting each page
+- **Performance**: Prevents slow first requests during the critical post-deployment period
 
 ## Root Domain (/) - Landing Page
 
@@ -176,18 +183,20 @@ Each subsystem indicated here is an independent Next.js project.
 
 ### Shield (Port 3000)
 
-- **Vercel CDN**: 1-hour cache for all responses
+- **Vercel CDN**: 1-hour cache for all responses (protective layer)
 - **ISR Cache**: 60-second revalidation for dynamic pages
 - **Runtime**: Middleware for subdomain detection and routing, proxy to Core App
 - **Middleware**: Subdomain extraction, URL rewriting, admin page protection
+- **Purpose**: Provides cache protection during Core app deployments, enabling cache warming
 
 ### Core (Port 3001)
 
 - **Vercel CDN**: Edge caching for static assets
-- **ISR Cache**: 60-second revalidation for dynamic pages
+- **ISR Cache**: 60-second revalidation for dynamic pages (rebuilds after deployment)
 - **Runtime**: Page generation, Redis integration, API client
 - **External Dependencies**: Redis for subdomain data storage
 - **No Middleware**: Pure content generation server
+- **Purpose**: Generates pages on-demand, can be warmed after deployment
 
 ### API App (Port 3002)
 
@@ -195,4 +204,3 @@ Each subsystem indicated here is an independent Next.js project.
 - **Endpoints**: `/posts` (get 5 posts) and `/posts/[id]` (get single post)
 - **Data Source**: JSON file with in-memory caching
 - **Purpose**: Content API for the multi-tenant platform
-

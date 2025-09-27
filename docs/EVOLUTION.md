@@ -1,21 +1,21 @@
-# Durable ISR: Basic to Multi-Tenant
+# Shielded ISR: Basic to Multi-Tenant
 
-This document outlines the evolution from a basic durable ISR setup to the current multi-tenant platform, highlighting the key changes required for routing, caching, and architecture.
+This document outlines the evolution from a basic shielded ISR setup to the current multi-tenant platform, highlighting the key changes required for routing, caching, and architecture.
 
-## Basic Durable ISR (Initial Setup)
+## Basic Shielded ISR (Initial Setup)
 
 ### Architecture
 
-```
+```text
 User Request → Shield → Upstream App
 ```
 
 ### Key Components
 
-- **Single Shield**: Simple proxy with rewrite rules
+- **Single Shield**: Simple proxy with rewrite rules and protective caching
 - **Single Upstream App**: Basic Next.js application
 - **Simple Routing**: Direct path-based routing
-- **Basic Caching**: CDN + ISR with long-term stale-while-revalidate
+- **Basic Caching**: CDN + ISR with long-term stale-while-revalidate for cache protection
 
 ### Configuration
 
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest, { params }) {
     `https://upstream-app.vercel.app/${slug.join("/")}`
   );
 
-  // Set durable cache headers
+  // Set shielded cache headers for protection during deployments
   pageResponse.headers.set(
     "vercel-cdn-cache-control",
     "s-maxage=30, stale-while-revalidate=31556952"
@@ -63,18 +63,18 @@ export async function GET(request: NextRequest, { params }) {
 
 ## Current Multi-Tenant Platform
 
-### Architecture
+### Multi-Tenant Architecture
 
-```
+```text
 User Request → Shield (Middleware + Routes) → Core App → API
 ```
 
-### Key Components
+### Multi-Tenant Key Components
 
 - **Three-App System**: Shield, Core App, API
 - **Middleware-Based Routing**: Subdomain detection and URL rewriting
 - **Multi-Tenant Support**: Subdomain-based tenant isolation
-- **Advanced Caching**: Multiple cache layers with different TTLs
+- **Advanced Caching**: Multiple cache layers with different TTLs for cache protection
 
 ## Major Changes Required
 
@@ -121,13 +121,13 @@ export async function middleware(request: NextRequest) {
 
 - One CDN cache (1 hour TTL)
 - One ISR cache (30s revalidation)
-- Simple stale-while-revalidate
+- Simple stale-while-revalidate for basic protection
 
 #### **After: Multi-Layer Caching**
 
-- **Shield CDN**: 1 hour TTL for all responses
+- **Shield CDN**: 1 hour TTL for all responses (protective layer)
 - **Shield ISR**: 60s revalidation for dynamic content
-- **Core App ISR**: 60s revalidation for page generation
+- **Core App ISR**: 60s revalidation for page generation (rebuilds after deployment)
 - **API Caching**: In-memory caching for data requests
 
 ```typescript
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest, { params }) {
   pageResponse.headers.delete("content-encoding");
   pageResponse.headers.delete("content-length");
 
-  // Set durable cache with shorter revalidation
+  // Set shielded cache with shorter revalidation for deployment protection
   pageResponse.headers.set(
     "vercel-cdn-cache-control",
     "s-maxage=30, stale-while-revalidate=31556952"
@@ -164,21 +164,21 @@ export async function GET(request: NextRequest, { params }) {
 
 #### **After: Three Apps**
 
-- **Shield**: Middleware + routing + proxy
-- **Core App**: Multi-tenant pages + subdomain handling
+- **Shield**: Middleware + routing + proxy with protective caching
+- **Core App**: Multi-tenant pages + subdomain handling (can be warmed after deployment)
 - **API App**: Content API with simplified endpoints
 
 ### 4. Data Flow Complexity
 
 #### **Before: Simple Data Flow**
 
-```
+```text
 User → Shield → Upstream App → Response
 ```
 
 #### **After: Complex Multi-Tenant Flow**
 
-```
+```text
 User → Shield (Middleware) → Core App (Subdomain Logic) → API → Response
 ```
 
@@ -187,7 +187,7 @@ User → Shield (Middleware) → Core App (Subdomain Logic) → API → Response
 #### **Before: Simple Environment**
 
 ```bash
-# Basic durable ISR
+# Basic shielded ISR
 UPSTREAM_URL=https://upstream-app.vercel.app
 ```
 
@@ -291,8 +291,8 @@ export async function GET(request: Request, { params }) {
 ### 3. Caching Headers
 
 - **Decision**: Shorter revalidation (30s) with long stale-while-revalidate (1 year)
-- **Rationale**: Balance between freshness and performance
-- **Trade-off**: Slightly less fresh content but much better performance
+- **Rationale**: Balance between freshness and performance, provides cache protection during deployments
+- **Trade-off**: Slightly less fresh content but much better performance and deployment protection
 
 ### 4. API Simplification
 
@@ -336,12 +336,12 @@ export async function GET(request: Request, { params }) {
 
 ## Conclusion
 
-The evolution from basic durable ISR to a multi-tenant platform required significant architectural changes:
+The evolution from basic shielded ISR to a multi-tenant platform required significant architectural changes:
 
 1. **Routing**: From simple proxy to middleware-based subdomain routing
-2. **Caching**: From single-layer to multi-layer caching strategy
+2. **Caching**: From single-layer to multi-layer caching strategy with deployment protection
 3. **Architecture**: From 2-app to 3-app system with clear separation of concerns
 4. **Data Flow**: From simple proxy to complex multi-service orchestration
 5. **Configuration**: From simple environment to complex multi-service configuration
 
-The trade-offs include increased complexity but provide powerful multi-tenant capabilities with maintained cache durability and performance benefits.
+The trade-offs include increased complexity but provide powerful multi-tenant capabilities with cache protection during deployments and performance benefits.
