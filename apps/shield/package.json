@@ -1,12 +1,12 @@
 {
-	"name": "@platform/cache-layer",
+	"name": "@platform/shield",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "PORT=3000 next dev --turbopack",
 		"build": "next build --turbopack",
 		"start": "PORT=3000 next start",
-		"deploy:cache-layer": "vercel deploy --prod"
+		"deploy:shield": "vercel deploy --prod"
 	},
 	"dependencies": {
 		"@opentelemetry/api-logs": "^0.204.0",

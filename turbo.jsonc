@@ -11,7 +11,7 @@
 		"KV_REST_API_URL",
 		"KV_REST_API_TOKEN",
 		"CORE_HOST",
-		"CACHE_LAYER_HOST",
+		"SHIELD_HOST",
 		"API_HOST",
 		"NEXT_PUBLIC_PROTOCOL",
 		"NEXT_PUBLIC_ROOT_DOMAIN",
@@ -76,7 +76,7 @@
 			],
 			"cache": false
 		},
-		"deploy:cache-layer": {
+		"deploy:shield": {
 			"dependsOn": [
 				"build"
 			],
@@ -91,7 +91,7 @@
 		"deploy:all": {
 			"dependsOn": [
 				"deploy:core-system",
-				"deploy:cache-layer"
+				"deploy:shield"
 			],
 			"cache": false
 		},
@@ -100,7 +100,7 @@
 			"env": [
 				"API_HOST",
 				"CORE_HOST",
-				"CACHE_LAYER_HOST",
+				"SHIELD_HOST",
 				"NEXT_PUBLIC_PROTOCOL",
 				"NEXT_PUBLIC_ROOT_DOMAIN",
 				"VERCEL_TOKEN",

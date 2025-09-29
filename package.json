@@ -9,11 +9,11 @@
 		"format": "biome format --write",
 		"deploy:core": "turbo run deploy:core --filter=@platform/core",
 		"deploy:core-system": "turbo run deploy:core-system",
-		"deploy:cache-layer": "turbo run deploy:cache-layer --filter=@platform/cache-layer",
+		"deploy:shield": "turbo run deploy:shield --filter=@platform/shield",
 		"deploy:all": "turbo run deploy:all",
 		"deploy:api:manual": "vercel deploy --prod apps/api",
 		"deploy:core:manual": "vercel deploy --prod apps/core",
-		"deploy:cache-layer:manual": "vercel deploy --prod apps/cache-layer"
+		"deploy:shield:manual": "vercel deploy --prod apps/shield"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",

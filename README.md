@@ -1,24 +1,24 @@
-# Durable ISR Multi-Tenant Platform
+# Shielded ISR Multi-Tenant Platform
 
 > [!NOTE]
 > This project is experimental and all practices herein should be evaluated as such.
 
-A three-app Next.js system providing durable ISR caching for multi-tenant platforms on Vercel. The cache layer survives Core app deployments, enabling independent scaling and true cache durability.
+A three-app Next.js system providing shielded ISR caching for multi-tenant platforms on Vercel. The shield layer provides cache protection during Core app deployments, enabling cache warming and preventing slow first requests.
 
-## Durable ISR Architecture
+## Shielded ISR Architecture
 
-"Normal" ISR (Incremental Static Regeneration) in Next.js caches pages tied to a deployment. When you deploy a new version, the ISR cache is invalidated and must be rebuilt.
+"Normal" ISR (Incremental Static Regeneration) in Next.js caches pages tied to a deployment. When you deploy a new version, the ISR cache is invalidated and must be rebuilt, causing slow first requests for pages not generated during build.
 
-**Durable ISR** solves this by separating the cache layer from your application layer. Static pages are generated and persisted across deployments, providing:
+**Shielded ISR** solves this by providing a protective cache layer that serves content while the Core app warms its cache after deployment. This enables:
 
-- **Cache Persistence**: Pages remain cached even after new deployments
-- **Independent Scaling**: Cache and application layers can be deployed separately
-- **Cost Efficiency**: Reduced cold starts and faster response times
-- **Reliability**: Stale content serves while new content regenerates
+- **Cache Warming**: Defer static page generation until after build, then prewarm by requesting each page
+- **Deployment Protection**: Shield cache serves content while Core app ISR cache rebuilds
+- **Performance**: Fast responses during the critical post-deployment period
+- **Flexibility**: Generate pages on-demand rather than during build time
 
-### Basic Durable ISR Example
+### Basic Shielded ISR Example
 
-Here's how durable ISR works in its simplest form:
+Here's how shielded ISR works in its simplest form:
 
 ```typescript
 // ./app/[...slug]/route.ts
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest, { params }) {
   pageResponse.headers.delete("content-encoding");
   pageResponse.headers.delete("content-length");
 
-  // Key: Set long-term cache with revalidation
+  // Key: Set long-term cache with revalidation for shield protection
   pageResponse.headers.set(
     "vercel-cdn-cache-control",
     "s-maxage=30, stale-while-revalidate=31556952"
@@ -71,26 +71,26 @@ const nextConfig: NextConfig = {
 
 ### How it works
 
-1. **Cache Layer**: Proxies requests to your main application
+1. **Shield**: Proxies requests to your main application with protective caching
 2. **CDN Caching**: 30-second revalidation with 1-year stale-while-revalidate
-3. **Deployment Independence**: Cache survives when you deploy your main app
-4. **Automatic Fallback**: Serves stale content if upstream fails
+3. **Deployment Protection**: Shield cache serves content while Core app ISR rebuilds
+4. **Cache Warming**: Pages can be generated on-demand after deployment
 
 ## Multi-Tenant Architecture
 
-This project extends basic durable ISR for multi-tenant platforms:
+This project extends basic shielded ISR for multi-tenant platforms:
 
 - **API** (Port 3002) - Content API with posts/authors endpoints
 - **Core** (Port 3001) - Multi-tenant pages with subdomain routing and middleware, fetches from API
-- **Cache Layer** (Port 3000) - Durable proxy with CDN caching, survives Core deployments
+- **Shield** (Port 3000) - Protective proxy with CDN caching, shields Core app during deployments
 
 ```txt
-User Request → Cache Layer → Core App → API
+User Request → Shield → Core App → API
 ```
 
 For more detailed diagrams, see the [architecture docs](docs/ARCHITECTURE.md).
 
-For a comparison with basic durable ISR and the changes required for multi-tenant, see the [evolution docs](docs/EVOLUTION.md).
+For a comparison with basic shielded ISR and the changes required for multi-tenant, see the [evolution docs](docs/EVOLUTION.md).
 
 ## Deployment Colors
 
@@ -108,7 +108,7 @@ The platform uses deterministic color generation for deployment identification. 
 
 Set environment variables in Vercel projects:
 
-- `API_HOST`, `CORE_HOST`, `CACHE_LAYER_HOST`
+- `API_HOST`, `CORE_HOST`, `SHIELD_HOST`
 - `NEXT_PUBLIC_PROTOCOL`, `NEXT_PUBLIC_ROOT_DOMAIN`
 - `REDIS_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`
 
@@ -118,8 +118,8 @@ Set environment variables in Vercel projects:
 # Deploy Core System (API + Core)
 pnpm run deploy:core-system
 
-# Deploy Cache Layer independently
-pnpm run deploy:cache-layer
+# Deploy Shield independently
+pnpm run deploy:shield
 
 # Deploy everything
 pnpm run deploy:all
@@ -128,7 +128,7 @@ pnpm run deploy:all
 ### Deployment Boundaries
 
 - **Core System**: Tightly coupled API + Core apps
-- **Cache Layer**: Independent durable proxy layer
+- **Shield**: Independent protective proxy layer
 
 ## Environment Variables
 
@@ -137,7 +137,7 @@ pnpm run deploy:all
 ```bash
 API_HOST=api.yourteam.vercel.app
 CORE_HOST=core.yourteam.vercel.app
-CACHE_LAYER_HOST=cache.yourteam.vercel.app
+SHIELD_HOST=shield.yourteam.vercel.app
 NEXT_PUBLIC_PROTOCOL=https
 NEXT_PUBLIC_ROOT_DOMAIN=yourcoolsite.com
 REDIS_URL=rediss://default:xxx@yyy-123.upstash.io:6379

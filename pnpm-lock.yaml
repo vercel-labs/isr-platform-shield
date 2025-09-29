@@ -21,7 +21,7 @@ importers:
         specifier: ^47.0.5
         version: 47.0.5
 
-  apps/cache-layer:
+  apps/shield:
     dependencies:
       '@opentelemetry/api-logs':
         specifier: ^0.204.0
