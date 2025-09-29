@@ -45,42 +45,37 @@ The Shielded ISR architecture introduces a protective cache layer that:
 ## System Architecture
 
 ```mermaid
-graph TB
-    subgraph "User Layer"
-        U[Users]
+graph LR
+    U[Users] --> S[Shield Layer<br/>Port 3000]
+    S --> C[Core Layer<br/>Port 3001]
+    C --> D[Data Layer]
+
+    subgraph S
+        MW[Middleware]
+        CDN1[CDN Cache]
+        ISR1[ISR Cache]
+        RT1[Runtime]
     end
 
-    subgraph "Shield Layer (Port 3000)"
-        MW[Middleware<br/>Subdomain Detection]
-        CDN1[Shield CDN<br/>1h TTL]
-        ISR1[Shield ISR<br/>60s Revalidation]
-        RT1[Shield Runtime<br/>Proxy Logic]
+    subgraph C
+        CDN2[CDN Cache]
+        ISR2[ISR Cache]
+        RT2[Runtime]
     end
 
-    subgraph "Core Layer (Port 3001)"
-        CDN2[Core CDN<br/>Static Assets]
-        ISR2[Core ISR<br/>60s Revalidation]
-        RT2[Core Runtime<br/>Page Generation]
+    subgraph D
+        R[Redis]
+        FS[File System]
     end
 
-    subgraph "Data Layer"
-        R[Redis<br/>Subdomain Data]
-        FS[File System<br/>Blog Posts]
-    end
-
-    U --> MW
-    MW --> CDN1
-    CDN1 --> ISR1
-    ISR1 --> RT1
-    RT1 --> CDN2
-    CDN2 --> ISR2
-    ISR2 --> RT2
+    MW --> CDN1 --> ISR1 --> RT1
+    CDN2 --> ISR2 --> RT2
     RT2 --> R
     RT2 --> FS
 
-    classDef shield fill:#e1f5fe
-    classDef core fill:#f3e5f5
-    classDef data fill:#e8f5e8
+    classDef shield fill:#1976d2,color:#fff
+    classDef core fill:#7b1fa2,color:#fff
+    classDef data fill:#388e3c,color:#fff
 
     class MW,CDN1,ISR1,RT1 shield
     class CDN2,ISR2,RT2 core
@@ -314,8 +309,8 @@ graph TB
     ISR1 --> HIT
     ISR2 --> MISS
 
-    classDef cache fill:#e3f2fd
-    classDef behavior fill:#f1f8e9
+    classDef cache fill:#1976d2,color:#fff
+    classDef behavior fill:#ff9800,color:#fff
 
     class CDN,ISR1,ISR2 cache
     class HIT,MISS behavior
