@@ -5,7 +5,7 @@ import { isValidIcon } from "@/lib/subdomains";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const RESERVED_SUBDOMAINS = ["www", "admin", "api", "cache", "core"];
+const RESERVED_SUBDOMAINS = ["www", "admin", "shield", "core"];
 
 export async function createSubdomainAction(
 	prevState: any,
