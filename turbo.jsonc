@@ -70,12 +70,6 @@
 				"API_HOST"
 			]
 		},
-		"deploy:core-system": {
-			"dependsOn": [
-				"deploy:core"
-			],
-			"cache": false
-		},
 		"deploy:shield": {
 			"dependsOn": [
 				"build"
@@ -95,23 +89,8 @@
 			],
 			"cache": false
 		},
-		"deploy:check": {
-			"cache": false,
-			"env": [
-				"API_HOST",
-				"CORE_HOST",
-				"SHIELD_HOST",
-				"NEXT_PUBLIC_PROTOCOL",
-				"NEXT_PUBLIC_ROOT_DOMAIN",
-				"VERCEL_TOKEN",
-				"VERCEL_ORG_ID",
-				"VERCEL_PROJECT_ID",
-				"REDIS_URL",
-				"KV_REST_API_URL",
-				"KV_REST_API_TOKEN",
-				"KV_REST_API_READ_ONLY_TOKEN",
-				"KV_URL"
-			]
+		"touch": {
+			"cache": false
 		}
 	}
 }

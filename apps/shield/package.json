@@ -6,7 +6,8 @@
 		"dev": "PORT=3000 next dev --turbopack",
 		"build": "next build --turbopack",
 		"start": "PORT=3000 next start",
-		"deploy:shield": "vercel deploy --prod"
+		"deploy:shield": "vercel deploy --prod",
+		"touch": "echo $(date +%s%N | shasum | head -c 16) > .build-hash"
 	},
 	"dependencies": {
 		"@opentelemetry/api-logs": "^0.204.0",

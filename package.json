@@ -8,12 +8,10 @@
 		"lint": "turbo run lint",
 		"format": "biome format --write",
 		"deploy:core": "turbo run deploy:core --filter=@platform/core",
-		"deploy:core-system": "turbo run deploy:core-system",
 		"deploy:shield": "turbo run deploy:shield --filter=@platform/shield",
 		"deploy:all": "turbo run deploy:all",
-		"deploy:api:manual": "vercel deploy --prod apps/api",
-		"deploy:core:manual": "vercel deploy --prod apps/core",
-		"deploy:shield:manual": "vercel deploy --prod apps/shield"
+		"touch:core": "turbo run touch --filter=@platform/core",
+		"touch:shield": "turbo run touch --filter=@platform/shield"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",
