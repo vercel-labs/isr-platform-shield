@@ -53,13 +53,12 @@ graph LR
     subgraph S
         MW[Middleware]
         CDN1[CDN Cache]
-        ISR1[ISR Cache]
         RT1[Runtime]
     end
 
     subgraph C
         CDN2[CDN Cache]
-        ISR2[ISR Cache]
+        ISR[ISR Cache]
         RT2[Runtime]
     end
 
@@ -68,8 +67,8 @@ graph LR
         FS[File System]
     end
 
-    MW --> CDN1 --> ISR1 --> RT1
-    CDN2 --> ISR2 --> RT2
+    MW --> CDN1 --> RT1
+    CDN2 --> ISR --> RT2
     RT2 --> R
     RT2 --> FS
 
