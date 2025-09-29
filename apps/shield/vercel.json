@@ -28,7 +28,7 @@
 			"dest": "https://core.pzvtest314.vercel.app/s/www/admin"
 		},
 		{
-			"src": "/((?!_next|admin).*)",
+			"src": "/((?!_next).*)",
 			"has": [
 				{
 					"type": "host",
