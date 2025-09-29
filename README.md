@@ -146,9 +146,6 @@ KV_REST_API_TOKEN=xxx
 KV_REST_API_READ_ONLY_TOKEN=xxx
 ```
 
-### Vercel Authentication
+## Validation
 
-```bash
-VERCEL_TOKEN=your_vercel_token
-VERCEL_ORG_ID=your_org_id
-```
+Validating deployment behavior is done through the `validator` package. You can run `pnpm validate` from the root of the monorepo to test whether certain requests are being routed to the correct pages.
