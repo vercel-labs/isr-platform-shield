@@ -33,6 +33,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
 	return (
 		<div className="min-h-screen bg-background">
+			<span className="hidden" aria-hidden="true">
+				$validator_post_page$
+			</span>
+
 			<div className="max-w-4xl mx-auto px-6 py-12">
 				{/* Header */}
 				<header className="mb-8">

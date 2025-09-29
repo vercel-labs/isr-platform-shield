@@ -11,7 +11,8 @@
 		"deploy:shield": "turbo run deploy:shield --filter=@platform/shield",
 		"deploy:all": "turbo run deploy:all",
 		"touch:core": "turbo run touch --filter=@platform/core",
-		"touch:shield": "turbo run touch --filter=@platform/shield"
+		"touch:shield": "turbo run touch --filter=@platform/shield",
+		"validate": "turbo run validate"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",

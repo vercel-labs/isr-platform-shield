@@ -7,6 +7,10 @@ export const revalidate = 3600;
 export default async function HomePage() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center p-4 relative">
+			<span className="hidden" aria-hidden="true">
+				$validator_home_page$
+			</span>
+
 			<div className="absolute top-4 right-4">
 				<Link href="/admin" className="text-sm transition-colors">
 					Admin

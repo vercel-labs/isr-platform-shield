@@ -91,6 +91,9 @@
 		},
 		"touch": {
 			"cache": false
+		},
+		"validate": {
+			"cache": false
 		}
 	}
 }
