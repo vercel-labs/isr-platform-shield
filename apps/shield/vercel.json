@@ -2,6 +2,15 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"routes": [
 		{
+			"src": "/((?api\/(invalidate).*)",
+			"headers": {}
+		},
+		{
+			"src": "/((?api\/(delete).*)",
+			"headers": {},
+			"dest": "https://core.pzvtest314.vercel.app$1"
+		},
+		{
 			"src": "/",
 			"has": [
 				{
