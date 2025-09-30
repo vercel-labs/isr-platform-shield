@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { invalidateByTag } from "@vercel/functions"
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const { tag } = await req.json();
 
