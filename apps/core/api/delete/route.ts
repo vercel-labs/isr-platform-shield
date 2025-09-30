@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dangerouslyDeleteByTag } from "@vercel/functions"
+import { unstable_cache } from "next/cache";
 
 export async function GET(req: NextRequest) {
   try {

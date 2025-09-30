@@ -3,7 +3,7 @@ import { invalidateByTag } from "@vercel/functions"
 
 export async function GET(req: NextRequest) {
   try {
-    const { tag } = await req.json();
+    const tag = req.nextUrl.searchParams.get("tag");
 
     if (!tag) {
       return NextResponse.json(
