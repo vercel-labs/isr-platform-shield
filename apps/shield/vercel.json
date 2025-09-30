@@ -2,13 +2,8 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"routes": [
 		{
-			"src": "/((?api\/(invalidate).*)",
-			"headers": {}
-		},
-		{
-			"src": "/((?api\/(delete).*)",
-			"headers": {},
-			"dest": "https://core.pzvtest314.vercel.app$1"
+			"src": "/api/(.*)",
+			"dest": "/api/$1"
 		},
 		{
 			"src": "/",
@@ -24,7 +19,7 @@
 			"dest": "https://core.pzvtest314.vercel.app/s/$host"
 		},
 		{
-			"src": "/((?!_next).*)",
+			"src": "/((?!_next|api).*)",
 			"has": [
 				{
 					"type": "host",
