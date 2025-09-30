@@ -3,6 +3,7 @@ import { blogPostService, BlogPost } from "@/lib/blog-posts";
 import { stringToColor } from "@/lib/deployment-id";
 import { getSubdomainData } from "@/lib/subdomains";
 import { Badge } from "@/components/ui/badge";
+import { unstable_cache } from "next/cache";
 
 interface BlogPostPageProps {
 	params: Promise<{
@@ -16,6 +17,7 @@ export const revalidate = 3600;
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
 	const { subdomain, id } = await params;
+	unstable_cache(async	() =>	{}, [], {tags: ["blog-post", subdomain, id]})()
 
 	// Fetch blog post data from API
 	const blogPost: BlogPost | null = await blogPostService.getPost(id);
