@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
     }
-
     await invalidateByTag(tag);
 
     return NextResponse.json({
