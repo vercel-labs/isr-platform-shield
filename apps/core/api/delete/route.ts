@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const { tag } = await req.json();
+    const tag = req.nextUrl.searchParams.get("tag");
 
     if (!tag) {
       return NextResponse.json(
