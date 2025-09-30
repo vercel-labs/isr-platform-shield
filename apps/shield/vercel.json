@@ -15,19 +15,6 @@
 			"dest": "https://core.pzvtest314.vercel.app/s/$host"
 		},
 		{
-			"src": "/admin",
-			"has": [
-				{
-					"type": "host",
-					"value": "(?www)\\.[^\\.]+\\.[^\\.]+"
-				}
-			],
-			"headers": {
-				"CDN-Cache-Control": "s-maxage=120 stale-while-revalidate=31556952"
-			},
-			"dest": "https://core.pzvtest314.vercel.app/s/www/admin"
-		},
-		{
 			"src": "/((?!_next).*)",
 			"has": [
 				{
