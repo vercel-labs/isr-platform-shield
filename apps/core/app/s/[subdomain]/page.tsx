@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getSubdomainData } from '@/lib/subdomains';
 import { blogPostService } from '@/lib/blog-posts';
+import { unstable_cache } from "next/cache";
 
 export const dynamic = 'force-static';
 export const revalidate = 3600;
@@ -13,6 +14,7 @@ export async function generateMetadata({
   params: Promise<{ subdomain: string }>;
 }): Promise<Metadata> {
   const { subdomain } = await params;
+  unstable_cache(async	() =>	{}, [], {tags: ["blog-post", subdomain]})()
   const subdomainData = await getSubdomainData(subdomain);
 
   if (!subdomainData) {
