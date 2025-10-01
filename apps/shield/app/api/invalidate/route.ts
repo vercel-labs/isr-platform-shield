@@ -17,19 +17,21 @@ export async function GET(req: NextRequest) {
     const childResponse = await fetch(`https://core.pzvtest314.vercel.app/api/delete?tag=${tag}`);
     const childResponseData = await childResponse.json();
 
+    // If the core tag deletion fails, bail out and don't invalidate shield because it
+    // will refetch stale content unnecessarily
     if (childResponseData.error) {
       return NextResponse.json(
         { error: childResponseData.error },
         { status: 500 }
       );
+    } else { // If the core app is able to delete the tag, invalidate the tag on the shield app
+      await invalidateByTag(tag);
+
+      return NextResponse.json({
+        message: "Cache invalidated successfully",
+        tag,
+      });
     }
-
-    await invalidateByTag(tag);
-
-    return NextResponse.json({
-      message: "Cache invalidated successfully",
-      tag,
-    });
   } catch (error) {
     console.error("Invalidation error:", error);
     return NextResponse.json(
