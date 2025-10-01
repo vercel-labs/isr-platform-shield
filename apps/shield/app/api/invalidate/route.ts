@@ -13,6 +13,17 @@ export async function GET(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const childResponse = await fetch(`https://core.pzona.lol/api/delete?tag=${tag}`);
+    const childResponseData = await childResponse.json();
+
+    if (childResponseData.error) {
+      return NextResponse.json(
+        { error: childResponseData.error },
+        { status: 500 }
+      );
+    }
+
     await invalidateByTag(tag);
 
     return NextResponse.json({
