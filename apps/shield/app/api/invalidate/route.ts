@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const childResponse = await fetch(`https://core.pzona.lol/api/delete?tag=${tag}`);
+    const childResponse = await fetch(`https://core.pzvtest314.vercel.app/api/delete?tag=${tag}`);
     const childResponseData = await childResponse.json();
 
     if (childResponseData.error) {
