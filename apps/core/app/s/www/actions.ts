@@ -75,6 +75,11 @@ export async function deleteSubdomainAction(
 	formData: FormData,
 ) {
 	const subdomain = formData.get("subdomain");
+
+	if (["cool", "test"].includes(subdomain as string)) {
+		return { success: false, error: "This domain is reserved for operational purposes" };
+	}
+
 	await redis.del(`subdomain:${subdomain}`);
 	revalidatePath("/admin");
 	return { success: "Domain deleted successfully" };
