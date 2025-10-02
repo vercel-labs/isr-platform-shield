@@ -2,6 +2,7 @@
 	"name": "@platform/shielded-isr-poc",
 	"private": true,
 	"scripts": {
+		"setup": "pnpm install && export PATH=$PATH:$(pwd)/bin",
 		"start": "turbo run start",
 		"build": "turbo run build --env-mode=loose",
 		"dev": "turbo run dev",
@@ -12,7 +13,10 @@
 		"deploy:all": "turbo run deploy:all",
 		"touch:core": "turbo run touch --filter=@platform/core",
 		"touch:shield": "turbo run touch --filter=@platform/shield",
-		"validate": "turbo run validate"
+		"validate": "turbo run validate",
+		"tag:delete-core": "curl -kvN \"https://core.pzvtest314.vercel.app/api/delete?tag=$1\" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null",
+		"tag:invalidate-shield": "curl -kvN \"https://cache.pzvtest314.vercel.app/api/invalidate?tag=$1\" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null",
+		"purge-tag": "pnpm tag:delete-core $1 && pnpm tag:invalidate-shield $1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",

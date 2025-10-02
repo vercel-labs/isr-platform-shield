@@ -48,6 +48,10 @@ export default async function SubdomainPage({
 
   return (
     <div className="min-h-screen bg-background">
+      <span className="hidden" aria-hidden="true">
+				$validator_subdomain_page$
+			</span>
+
       <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-12 text-center">

@@ -1,0 +1,50 @@
+#!/usr/bin/env sh
+
+echo "=== Requesting $1.pzona.lol ==="
+echo ""
+
+# Make the request and capture both headers and body
+curl -kvN "https://$1.pzona.lol" -H 'x-vercel-debug-proxy-timing:1' 2>&1 | \
+awk '
+BEGIN {
+    in_headers = 0
+    in_body = 0
+    print "--- REQUEST HEADERS ---"
+}
+/^> / {
+    if (in_headers == 0) print "--- RESPONSE HEADERS ---"
+    in_headers = 1
+    in_body = 0
+    # Clean up the curl output format
+    gsub(/^> /, "")
+    print "  " $0
+    next
+}
+/^< / {
+    if (in_headers == 0) print "--- RESPONSE HEADERS ---"
+    in_headers = 1
+    in_body = 0
+    # Clean up the curl output format and highlight important headers
+    gsub(/^< /, "")
+    if ($0 ~ /^HTTP\//) {
+        print "📡 " $0
+    } else if ($0 ~ /^cache-control/i) {
+        print "🗄️  " $0
+    } else if ($0 ~ /^x-vercel-cache/i) {
+        print "⚡ " $0
+    } else if ($0 ~ /^x-cache/i) {
+        print "💾 " $0
+    } else if ($0 ~ /^content-type/i) {
+        print "📄 " $0
+    } else if ($0 ~ /^content-length/i) {
+        print "📏 " $0
+    } else if ($0 ~ /^server/i) {
+        print "🖥️  " $0
+    } else if ($0 ~ /^date/i) {
+        print "📅 " $0
+    } else {
+        print "   " $0
+    }
+    next
+}
+'

@@ -2,12 +2,15 @@
   "name": "validator",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "validate": "node --experimental-strip-types index.ts"
+    "validate": "jest",
+    "validate:routing": "jest routing.test.ts"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^22.18.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.9.2"
   }
 }
