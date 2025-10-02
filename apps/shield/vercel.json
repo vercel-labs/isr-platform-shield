@@ -2,7 +2,7 @@
 	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"routes": [
 		{
-			"src": "/api/(.*)",
+			"src": "/api/shield/(.*)",
 			"dest": "/api/$1"
 		},
 		{
