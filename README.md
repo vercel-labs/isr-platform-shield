@@ -5,6 +5,12 @@
 
 A three-app Next.js system providing shielded ISR caching for multi-tenant platforms on Vercel. The shield layer provides cache protection during Core app deployments, enabling cache warming and preventing slow first requests.
 
+## Before you start
+
+Run the setup script: `pnpm setup`
+
+This installs dependency and injects the
+
 ## Shielded ISR Architecture
 
 "Normal" ISR (Incremental Static Regeneration) in Next.js caches pages tied to a deployment. When you deploy a new version, the ISR cache is invalidated and must be rebuilt, causing slow first requests for pages not generated during build.
