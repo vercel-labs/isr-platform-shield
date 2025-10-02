@@ -11,9 +11,13 @@ The `validator` package includes several unit tests to ensure the correct conten
 - `<subdomain>.<base_url>/` - Subdomain homepage
 - `<subdomain>.<base_url>/<n>` - Blog post
 
-To run the tests, go to the validator package dir and run `pnpm run validate:routing`.
+Run the tests with `pnpm run validate:routing`
 
-## Cache behavior
+## Cache behavior (wip)
+
+The `validator` package includes unit tests specific to caching as well.
+
+Run the tests with `pnpm run validate:cache`
 
 ## Tag invalidation
 
@@ -26,3 +30,4 @@ The repo includes helpers to perform tag invalidation at both layers. The follow
 
 ## Skew protection
 
+wip
