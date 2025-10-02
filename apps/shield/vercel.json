@@ -14,7 +14,7 @@
 				}
 			],
 			"headers": {
-				"CDN-Cache-Control": "s-maxage=120 stale-while-revalidate=31556952"
+				"CDN-Cache-Control": "s-maxage=120, stale-while-revalidate=31556952"
 			},
 			"dest": "https://core.pzvtest314.vercel.app/s/$host"
 		},
@@ -27,7 +27,7 @@
 				}
 			],
 			"headers": {
-				"CDN-Cache-Control": "s-maxage=120 stale-while-revalidate=31556952"
+				"CDN-Cache-Control": "s-maxage=120, stale-while-revalidate=31556952"
 			},
 			"dest": "https://core.pzvtest314.vercel.app/s/$host/$1"
 		},
@@ -35,7 +35,7 @@
 			"src": "(.*)",
 			"dest": "https://core.pzvtest314.vercel.app$1",
 			"headers": {
-				"CDN-Cache-Control": "s-maxage=120 stale-while-revalidate=31556952"
+				"CDN-Cache-Control": "s-maxage=120, stale-while-revalidate=31556952"
 			}
 		}
 	]

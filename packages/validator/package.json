@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "validate": "jest",
-    "validate:routing": "jest routing.test.ts"
+    "validate:routing": "jest routing.test.ts",
+    "validate:cache": "jest cache.test.ts"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
