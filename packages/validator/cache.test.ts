@@ -10,7 +10,6 @@ describe('Cache', () => {
 
     if (h.get('Age') && parseInt(h.get('Age')!) < 120) {
       expect(h.get('x-vercel-cache')).toBe('HIT');
-      expect(h.get('Age')).toBe('120');
     } else {
       expect(h.get('x-vercel-cache')).not.toBe('HIT');
 
@@ -54,6 +53,7 @@ describe('Cache', () => {
     expect(html).toContain('😎');
     expect(html).toContain('cool');
 
+    // Serving a different subdomain was a failure mode we fixed previously
     const response2 = await fetch('https://test.pzona.lol');
     expect(response.status).toBe(200);
 
