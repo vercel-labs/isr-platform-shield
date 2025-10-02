@@ -66,7 +66,7 @@ export async function createSubdomainAction(
 	});
 
 	redirect(
-		`${process.env.NEXT_PUBLIC_PROTOCOL}://${sanitizedSubdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+		`https://${sanitizedSubdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
 	);
 }
 

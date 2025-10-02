@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const childResponse = await fetch(`https://core.pzvtest314.vercel.app/api/delete?tag=${tag}`);
+    const childResponse = await fetch(`https://core.labs.vercel.dev/api/delete?tag=${tag}`);
     const childResponseData = await childResponse.json();
 
     // If the core tag deletion fails, bail out and don't invalidate shield because it

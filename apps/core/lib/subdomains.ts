@@ -9,22 +9,6 @@ export function extractSubdomain(request: NextRequest): string | null {
 		"";
 	const hostname = host.split(":")[0];
 
-	// Local development environment
-	if (host.includes("localhost") || host.includes("127.0.0.1")) {
-		// Try to extract subdomain from the full URL
-		const fullUrlMatch = host.match(/([^.]+)\.localhost/);
-		if (fullUrlMatch && fullUrlMatch[1]) {
-			return fullUrlMatch[1];
-		}
-
-		// Fallback to host header approach
-		if (hostname.includes(".localhost")) {
-			return hostname.split(".")[0];
-		}
-
-		return null;
-	}
-
 	// Production environment
 	const rootDomainFormatted =
 		process.env.NEXT_PUBLIC_ROOT_DOMAIN?.split(":")[0];

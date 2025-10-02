@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { AdminDashboard } from "./dashboard";
 
 export const metadata: Metadata = {
-	title: `Admin Dashboard | ${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`,
-	description: `Manage subdomains for ${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"}`,
+	title: `Admin Dashboard | ${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "high-performance-platform.com"}`,
+	description: `Manage subdomains for ${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "high-performance-platform.com"}`,
 };
 
 export default async function AdminPage() {

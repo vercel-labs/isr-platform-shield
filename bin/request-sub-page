@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 
-echo "=== Requesting $1.pzona.lol ==="
+echo "=== Requesting $1.high-performance-platform.com ==="
 echo ""
 
 # Make the request and capture both headers and body
-curl -kvN "https://$1.pzona.lol" -H 'x-vercel-debug-proxy-timing:1' 2>&1 | \
+curl -kvN "https://$1.high-performance-platform.com" -H 'x-vercel-debug-proxy-timing:1' 2>&1 | \
 awk '
 BEGIN {
     in_headers = 0
