@@ -14,6 +14,8 @@
 		"touch:core": "turbo run touch --filter=@platform/core",
 		"touch:shield": "turbo run touch --filter=@platform/shield",
 		"validate": "turbo run validate",
+		"validate:routing": "turbo run validate:routing",
+		"validate:cache": "turbo run validate:cache",
 		"tag:delete-core": "curl -kvN \"https://core.pzvtest314.vercel.app/api/delete?tag=$1\" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null",
 		"tag:invalidate-shield": "curl -kvN \"https://cache.pzvtest314.vercel.app/api/invalidate?tag=$1\" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null",
 		"purge-tag": "pnpm tag:delete-core $1 && pnpm tag:invalidate-shield $1"
