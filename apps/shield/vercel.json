@@ -16,7 +16,7 @@
 			"headers": {
 				"CDN-Cache-Control": "s-maxage=120, stale-while-revalidate=31556952"
 			},
-			"dest": "https://core.labs.vercel.dev/s/$host"
+			"dest": "https://core.vercel-labs.vercel.app/s/$host"
 		},
 		{
 			"src": "/((?!_next|api).*)",
@@ -29,11 +29,11 @@
 			"headers": {
 				"CDN-Cache-Control": "s-maxage=120, stale-while-revalidate=31556952"
 			},
-			"dest": "https://core.labs.vercel.dev/s/$host/$1"
+			"dest": "https://core.vercel-labs.vercel.app/s/$host/$1"
 		},
 		{
 			"src": "(.*)",
-			"dest": "https://core.labs.vercel.dev$1",
+			"dest": "https://core.vercel-labs.vercel.app$1",
 			"headers": {
 				"CDN-Cache-Control": "s-maxage=120, stale-while-revalidate=31556952"
 			}
