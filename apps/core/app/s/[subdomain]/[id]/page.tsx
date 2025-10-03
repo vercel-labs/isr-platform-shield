@@ -4,6 +4,7 @@ import { stringToColor } from "@/lib/deployment-id";
 import { getSubdomainData } from "@/lib/subdomains";
 import { Badge } from "@/components/ui/badge";
 import { unstable_cache } from "next/cache";
+import Link from "next/link";
 
 interface BlogPostPageProps {
 	params: Promise<{
@@ -89,13 +90,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 							<p className="font-medium mb-2">Other posts:</p>
 							<div className="flex flex-wrap gap-2">
 								{Array.from({ length: 10 }, (_, i) => i + 1).map((postId) => (
-									<a
+									<Link
 										key={postId}
 										href={`/${postId}`}
 										className="px-2 py-1 text-sm bg-muted hover:bg-muted/80 rounded transition-colors"
 									>
 										{postId}
-									</a>
+									</Link>
 								))}
 							</div>
 						</div>
