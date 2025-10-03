@@ -80,9 +80,25 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
 				{/* Footer */}
 				<footer className="mt-12 pt-8 border-t border-border">
-					<div className="text-muted-foreground">
+					<div className="text-muted-foreground space-y-4">
 						<p>Post ID: {id}</p>
 						<p>Subdomain: {subdomain}</p>
+
+						{/* Links to other posts */}
+						<div>
+							<p className="font-medium mb-2">Other posts:</p>
+							<div className="flex flex-wrap gap-2">
+								{Array.from({ length: 10 }, (_, i) => i + 1).map((postId) => (
+									<a
+										key={postId}
+										href={`/${postId}`}
+										className="px-2 py-1 text-sm bg-muted hover:bg-muted/80 rounded transition-colors"
+									>
+										{postId}
+									</a>
+								))}
+							</div>
+						</div>
 					</div>
 				</footer>
 			</div>
