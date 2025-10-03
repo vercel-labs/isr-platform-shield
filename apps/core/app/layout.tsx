@@ -11,8 +11,8 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-	title: "Durable ISR Platform POC",
-	description: "Durable ISR Platform POC",
+	title: "Shielded ISR Platform",
+	description: "A High Performance Platform with Shielded ISR",
 };
 
 export default async function RootLayout({
