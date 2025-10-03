@@ -4,6 +4,14 @@ import createWithVercelToolbar from '@vercel/toolbar/plugins/next';
 
 const withToolbar = createWithVercelToolbar();
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'www.high-performance-platform.com'
+      ],
+    },
+  },
+};
 
 export default withToolbar(nextConfig);
