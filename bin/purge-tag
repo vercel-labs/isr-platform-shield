@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+./delete-tag-core $1 && \
+  ./invalidate-tag-shield $1

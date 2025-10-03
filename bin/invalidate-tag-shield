@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+curl -kvN "https://shield.labs.vercel.dev/api/invalidate?tag=$1" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null

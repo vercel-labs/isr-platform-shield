@@ -1,0 +1,33 @@
+{
+	"name": "@platform/shielded-isr-poc",
+	"private": true,
+	"scripts": {
+		"setup": "pnpm install && export PATH=$PATH:$(pwd)/bin",
+		"start": "turbo run start",
+		"build": "turbo run build --env-mode=loose",
+		"dev": "turbo run dev",
+		"lint": "turbo run lint",
+		"format": "biome format --write",
+		"deploy:core": "turbo run deploy:core --filter=@platform/core",
+		"deploy:shield": "turbo run deploy:shield --filter=@platform/shield",
+		"deploy:all": "turbo run deploy:all",
+		"touch:core": "turbo run touch --filter=@platform/core",
+		"touch:shield": "turbo run touch --filter=@platform/shield",
+		"validate": "turbo run validate",
+		"validate:routing": "turbo run validate:routing",
+		"validate:cache": "turbo run validate:cache",
+		"tag:delete-core": "curl -kvN \"https://core.labs.vercel.dev/api/delete?tag=$1\" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null",
+		"tag:invalidate-shield": "curl -kvN \"https://shield.labs.vercel.dev/api/invalidate?tag=$1\" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null",
+		"purge-tag": "pnpm tag:delete-core $1 && pnpm tag:invalidate-shield $1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.0",
+		"turbo": "^2.5.6",
+		"typescript": "5.9.2",
+		"vercel": "^47.0.5"
+	},
+	"packageManager": "pnpm@10.12.4",
+	"engines": {
+		"node": ">=22"
+	}
+}

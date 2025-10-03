@@ -1,0 +1,98 @@
+// force build: 0
+{
+	"$schema": "https://turborepo.com/schema.json",
+	"ui": "tui",
+	"envMode": "loose",
+	"globalEnv": [
+		"TURBO_PLATFORM_ENV_DISABLED",
+		"VERCEL",
+		"VERCEL_DEPLOYMENT_ID",
+		"REDIS_URL",
+		"KV_REST_API_URL",
+		"KV_REST_API_TOKEN",
+		"CORE_HOST",
+		"SHIELD_HOST",
+		"API_HOST",
+		"NEXT_PUBLIC_ROOT_DOMAIN",
+		"KV_REST_API_READ_ONLY_TOKEN",
+		"KV_URL",
+		"NEXT_OTEL_VERBOSE",
+		"OTEL_EXPORTER_OTLP_ENDPOINT",
+		"OTEL_EXPORTER_OTLP_HEADERS",
+		"OTEL_EXPORTER_OTLP_PROTOCOL"
+	],
+	"tasks": {
+		"build": {
+			"dependsOn": [
+				"^build"
+			],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env*"
+			],
+			"outputs": [
+				".next/**",
+				"!.next/cache/**",
+				"dist/**"
+			]
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"start": {
+			"dependsOn": [
+				"^build"
+			]
+		},
+		"format": {
+			"cache": false
+		},
+		"lint": {
+			"dependsOn": [
+				"^lint"
+			],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env*"
+			]
+		},
+		"deploy:core": {
+			"dependsOn": [
+				"build"
+			],
+			"cache": false,
+			"env": [
+				"VERCEL_TOKEN",
+				"VERCEL_ORG_ID",
+				"VERCEL_PROJECT_ID",
+				"API_HOST"
+			]
+		},
+		"deploy:shield": {
+			"dependsOn": [
+				"build"
+			],
+			"cache": false,
+			"env": [
+				"VERCEL_TOKEN",
+				"VERCEL_ORG_ID",
+				"VERCEL_PROJECT_ID",
+				"CORE_HOST"
+			]
+		},
+		"deploy:all": {
+			"dependsOn": [
+				"deploy:core-system",
+				"deploy:shield"
+			],
+			"cache": false
+		},
+		"touch": {
+			"cache": false
+		},
+		"validate": {
+			"cache": false
+		}
+	}
+}
