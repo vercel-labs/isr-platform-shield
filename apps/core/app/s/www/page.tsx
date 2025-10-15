@@ -20,13 +20,11 @@ export default async function HomePage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight">
-            Multi-Tenant Platform with Durable ISR Cache
+            Multi-Tenant Platform with Shielded ISR Cache
           </h1>
           <p className="mt-3 text-md text-muted-foreground">
-            Reference by{" "}
-            <span className="font-bold text-foreground">
-              Vercel Developer Success
-            </span>
+            Reference architecture by{" "}
+            <span className="font-bold text-foreground">Vercel</span>
           </p>
         </div>
 
