@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-./delete-tag-core $1 && \
-  ./invalidate-tag-shield $1
+$(dirname "$0")/delete-tag-core $1 && \
+  $(dirname "$0")/invalidate-tag-shield $1
