@@ -9,7 +9,7 @@ A two-app Next.js system providing shielded ISR caching for multi-tenant platfor
 
 Run the setup script: `pnpm setup`
 
-This installs dependency and injects the project `bin` dir into your PATH, which allows you to use valdation helpers.
+This installs dependency and injects the project `bin` dir into your PATH, which allows you to use validation helpers.
 
 ## Shielded ISR Architecture
 
