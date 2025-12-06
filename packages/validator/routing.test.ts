@@ -34,4 +34,22 @@ describe('Routing', () => {
     const html = await response.text();
     expect(html).toContain('$validator_admin_page$');
   });
+
+  test('should show 404 page for non-existent subdomain', async () => {
+    const response = await requestPage('https://nonexistent-xyz-12345.pzona.lol');
+    const html = await response.text();
+    expect(html.toLowerCase()).toContain('not found');
+  });
+
+  test('should show 404 page for non-existent blog post ID', async () => {
+    const response = await requestPage('https://cool.pzona.lol/99999');
+    const html = await response.text();
+    expect(html.toLowerCase()).toContain('not found');
+  });
+
+  test('should show 404 page for invalid blog post ID format', async () => {
+    const response = await requestPage('https://cool.pzona.lol/abc');
+    const html = await response.text();
+    expect(html.toLowerCase()).toContain('not found');
+  });
 });
