@@ -15,7 +15,7 @@
 		"@opentelemetry/sdk-logs": "^0.204.0",
 		"@vercel/functions": "^3.1.0",
 		"@vercel/otel": "^1.13.0",
-		"next": "canary"
+		"next": "^16.0.7"
 	},
 	"devDependencies": {
 		"@types/node": "^20",
