@@ -46,9 +46,9 @@ function EmojiPickerSearch({
 	);
 }
 
-function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
+function EmojiPickerRow({ children }: EmojiPickerListRowProps) {
 	return (
-		<div {...props} className="scroll-my-1 px-1" data-slot="emoji-picker-row">
+		<div className="scroll-my-1 px-1" data-slot="emoji-picker-row">
 			{children}
 		</div>
 	);
@@ -57,11 +57,10 @@ function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
 function EmojiPickerEmoji({
 	emoji,
 	className,
-	...props
 }: EmojiPickerListEmojiProps) {
 	return (
 		<button
-			{...props}
+			type="button"
 			className={cn(
 				"data-[active]:bg-accent flex size-7 items-center justify-center rounded-sm text-base",
 				className,
@@ -75,11 +74,9 @@ function EmojiPickerEmoji({
 
 function EmojiPickerCategoryHeader({
 	category,
-	...props
 }: EmojiPickerListCategoryHeaderProps) {
 	return (
 		<div
-			{...props}
 			className="bg-popover text-muted-foreground px-3 pb-2 pt-3.5 text-xs leading-none"
 			data-slot="emoji-picker-category-header"
 		>
