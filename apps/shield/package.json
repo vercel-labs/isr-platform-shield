@@ -1,26 +1,26 @@
 {
-	"name": "@platform/shield",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"dev": "PORT=3000 next dev --turbopack",
-		"build": "next build --turbopack",
-		"start": "PORT=3000 next start",
-		"deploy:shield": "vercel deploy --prod",
-		"touch": "echo $(date +%s%N | shasum | head -c 16) > .build-hash"
-	},
-	"dependencies": {
-		"@opentelemetry/api-logs": "^0.204.0",
-		"@opentelemetry/instrumentation": "^0.204.0",
-		"@opentelemetry/sdk-logs": "^0.204.0",
-		"@vercel/functions": "^3.1.0",
-		"@vercel/otel": "^1.13.0",
-		"next": "^16.0.7"
-	},
-	"devDependencies": {
-		"@types/node": "^20",
-		"@types/react": "^19",
-		"typescript": "^5",
-		"vercel": "^47.0.5"
-	}
+  "name": "@platform/shield",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "PORT=3000 next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "PORT=3000 next start",
+    "deploy:shield": "vercel deploy --prod",
+    "touch": "echo $(date +%s%N | shasum | head -c 16) > .build-hash"
+  },
+  "dependencies": {
+    "@opentelemetry/api-logs": "^0.204.0",
+    "@opentelemetry/instrumentation": "^0.204.0",
+    "@opentelemetry/sdk-logs": "^0.204.0",
+    "@vercel/functions": "^3.1.0",
+    "@vercel/otel": "^1.13.0",
+    "next": "16.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "typescript": "^5",
+    "vercel": "^47.0.5"
+  }
 }
