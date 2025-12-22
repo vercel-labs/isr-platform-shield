@@ -24,7 +24,7 @@ export const config: VercelConfig = {
 			dest,
 			// Don't add headers to the internal API routes
 			idx === 0
-				? { responseHeaders: {} }
+				? { responseHeaders: { "x-noop": "0" } }
 				: {
 						has: [
 							{
