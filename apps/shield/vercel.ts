@@ -12,8 +12,8 @@ const swr = 31556952;
 const shieldRewrites = [
 	["/api/shield/(.*)", "/api/$1"], // Shield internal API routes
 	["/", `https://${core}/s/$host`], // Root for tenants
-	["/((?!_next|api).*)", `https://${core}/s/$host/$1`], // Subdomain path for subdomains
-	["(.*)", `https://${core}/$1`], // Fallback route for subdomains
+	["/((?!_next|api).*)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
+	["(.*)", `https://${core}/$1`], // Fallback route for tenants
 ].map(([src, dest], idx) =>
 	routes.rewrite(
 		src,
@@ -35,5 +35,5 @@ const shieldRewrites = [
 
 export const config: VercelConfig = {
 	framework: "nextjs",
-	rewrites: [routes.rewrite("/api/shield/(.*)", "/api/$1"), ...shieldRewrites],
+	routes: [routes.rewrite("/api/shield/(.*)", "/api/$1"), ...shieldRewrites],
 };
