@@ -10,6 +10,7 @@ const swr = 31556952;
 
 // Shield rewrite rules
 const shieldRewrites = [
+	["/api/shield/(.*)", "/api/$1"], // Shield internal API routes
 	["/", `https://${core}/s/$host`], // Root for tenants
 	["/((?!_next|api).*)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
 	["(.*)", `https://${core}/$1`], // Fallback route for tenants
@@ -17,18 +18,24 @@ const shieldRewrites = [
 
 export const config: VercelConfig = {
 	framework: "nextjs",
-	rewrites: [routes.rewrite("/api/shield/(.*)", "/api/$1")],
-	routes: shieldRewrites.map(([src, dest]) =>
-		routes.rewrite(src, dest, {
-			has: [
-				{
-					type: "host",
-					value: "(?<host>.*)\\.[^\\.]+\\.[^\\.]+", // This capture group should be used in the destination URL
-				},
-			],
-			responseHeaders: {
-				"CDN-Cache-Control": `s-maxage=${sMaxAge}, stale-while-revalidate=${swr}`,
-			},
-		}),
+	routes: shieldRewrites.map(([src, dest], idx) =>
+		routes.rewrite(
+			src,
+			dest,
+			// Don't add headers to the internal API routes
+			idx === 0
+				? { responseHeaders: {} }
+				: {
+						has: [
+							{
+								type: "host",
+								value: "(?<host>.*)\\.[^\\.]+\\.[^\\.]+", // This capture group should be used in the destination URL
+							},
+						],
+						responseHeaders: {
+							"CDN-Cache-Control": `s-maxage=${sMaxAge}, stale-while-revalidate=${swr}`,
+						},
+					},
+		),
 	),
 };
