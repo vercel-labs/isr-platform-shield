@@ -11,6 +11,7 @@ const swr = 31556952;
 // Shield rewrite rules
 const shieldRewrites = [
   ["/api/shield/(.*)", "/api/$1"], // Shield internal API routes
+  ["/_next/(.*)", `https://${core}/_next/$1`], // Next.js assets - no host condition needed
   ["/", `https://${core}/s/$host`], // Root for tenants
   ["/((?!_next/|api/|s/).+)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
   ["(.*)", `https://${core}/$1`], // Fallback route for tenants
@@ -22,8 +23,8 @@ export const config: VercelConfig = {
     routes.rewrite(
       src,
       dest,
-      // Don't add headers to the internal API routes
-      idx === 0
+      // Rules 0 and 1 (api/shield and _next) don't need host condition
+      idx <= 1
         ? { responseHeaders: { "x-noop": "0" } }
         : {
             has: [
