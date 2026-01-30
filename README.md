@@ -13,7 +13,7 @@ This installs dependency and injects the project `bin` dir into your PATH, which
 
 ## Shielded ISR Architecture
 
-"Normal" ISR (Incremental Static Regeneration) in Next.js caches pages tied to a deployment. When you deploy a new version, the ISR cache is invalidated and must be rebuilt, causing slow first requests for pages not generated during build.
+"Normal" ISR (Incremental Static Regeneration) in Next.js caches pages tied to a deployment. When you deploy a new version, the ISR cache is replaced and must be rebuilt, causing slow first requests for pages not generated during build.
 
 **Shielded ISR** solves this by providing a protective cache layer that serves content while the Core app warms its cache (via active reading) after deployment. This enables:
 
