@@ -267,21 +267,20 @@ Shield cache persists across Core deployments. Users get instant stale responses
 ### Tag-Based Invalidation Flow
 
 ```mermaid
-flowchart TD
+graph TD
     A[Content mutation or publish event] --> B[Invalidation worker]
 
-    B -->|Step 1 (must be first)| C["Shield purge route"]
-    C --> D[Client cache purged]
+    B --> C[Step 1 call Shield purge route first]
+    C --> D[Client cache purged by tag]
+    D --> E[Step 2 call Shield invalidate route immediately]
+    E --> F[Step 3 delete Core cache first]
+    F -->|dangerouslyDeleteByTag| G{Core cache deleted}
 
-    B -->|Step 2 (immediately after)| E["Shield invalidate route"]
-    E -->|Step 3: DELETE Core cache first| F["Core delete route"]
-    F -->|dangerouslyDeleteByTag| G{Core cache deleted?}
-
-    G -->|Success| H[Step 4: Invalidate Shield CDN tag]
+    G -->|Yes| H[Step 4 invalidate Shield CDN tag]
     H --> I[Shield CDN invalidated]
     I --> J[Next request fetches fresh content]
 
-    G -->|Failure| K[Abort Shield invalidation; stale Shield cache remains safety net]
+    G -->|No| K[Abort Shield invalidation keep stale Shield cache as safety net]
 
     style C stroke:#66f,stroke-width:3px
     style E stroke:#66f,stroke-width:3px
