@@ -27,15 +27,15 @@ flowchart LR
         direction TB
         SC[Shield CDN Cache]
         SN[Shield Compute]
-        SP[Shield /api/purge]
-        SI[Shield /api/invalidate]
+        SP["Shield purge route"]
+        SI["Shield invalidate route"]
     end
 
     subgraph CO[Core App]
         direction TB
         CC[Core CDN or ISR Cache]
         CN[Core Compute Renderer]
-        CI[Core Cache Delete API]
+        CI["Core cache delete route"]
     end
 
     subgraph DA[Data Layer]
@@ -270,11 +270,11 @@ Shield cache persists across Core deployments. Users get instant stale responses
 flowchart TD
     A[Content mutation or publish event] --> B[Invalidation worker]
 
-    B -->|Step 1 (must be first)| C[Shield /api/purge?tag=...]
+    B -->|Step 1 (must be first)| C["Shield purge route"]
     C --> D[Client cache purged]
 
-    B -->|Step 2 (immediately after)| E[Shield /api/invalidate?tag=...]
-    E -->|Step 3: DELETE Core cache first| F[Core /api/delete]
+    B -->|Step 2 (immediately after)| E["Shield invalidate route"]
+    E -->|Step 3: DELETE Core cache first| F["Core delete route"]
     F -->|dangerouslyDeleteByTag| G{Core cache deleted?}
 
     G -->|Success| H[Step 4: Invalidate Shield CDN tag]
@@ -289,6 +289,12 @@ flowchart TD
     style G stroke:#f96,stroke-width:3px
     style K stroke:#f66,stroke-width:2px
 ```
+
+Route mapping:
+
+- Shield purge route = `/api/purge?tag=...`
+- Shield invalidate route = `/api/invalidate?tag=...`
+- Core delete route = `/api/delete`
 
 Ordering is strict and near-atomic: call Shield `/api/purge` first, then `/api/invalidate` back-to-back. This minimizes the stale-read window where clients could repopulate stale data between calls. Inside `/api/invalidate`, Core cache deletion still happens first, and Shield CDN invalidation only occurs on success.
 
