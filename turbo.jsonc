@@ -9,8 +9,7 @@
 		"VERCEL_DEPLOYMENT_ID",
 		"KV_REST_API_URL",
 		"KV_REST_API_TOKEN",
-		"CORE_HOST",
-		"NEXT_PUBLIC_ROOT_DOMAIN"
+		"CORE_HOST"
 	],
 	"tasks": {
 		"build": {

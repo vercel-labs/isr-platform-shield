@@ -2,7 +2,7 @@
 
 Integration tests for routing and cache behavior against deployed URLs.
 
-Configuration lives in `@platform/config` — see `packages/config/README.md`.
+Configuration lives in `config/validation.json` — see [config/README.md](/config/README.md).
 
 ## Usage
 

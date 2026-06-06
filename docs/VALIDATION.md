@@ -4,9 +4,7 @@ This doc contains testing and validation steps for different components of the s
 
 ## Configuration
 
-The `@platform/config` package holds deployment URLs. Copy `packages/config/validation.example.json` to `packages/config/validation.json` and edit your values. The validator package and `bin/` helpers both read from it.
-
-See `packages/config/README.md` for environment variable overrides.
+The `@platform/config` package loads `config/validation.json`. Copy `config/validation.example.json` to `config/validation.json` and edit your values. The validator package and `bin/` helpers read the same file.
 
 > Note: the header of each page includes a timestamp and a deployment ID (for the deployment that *generated* the page) for debugging.
 

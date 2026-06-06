@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { config } from '@platform/config';
 import { getSubdomainData } from '@/lib/subdomains';
 import { blogPostService } from '@/lib/blog-posts';
 import { unstable_cache } from "next/cache";
 
 export const dynamic = 'force-static';
 export const revalidate = 3600;
+
+const { rootDomain } = config;
 
 export async function generateMetadata({
   params,
@@ -19,13 +22,13 @@ export async function generateMetadata({
 
   if (!subdomainData) {
     return {
-      title: process.env.NEXT_PUBLIC_ROOT_DOMAIN,
+      title: rootDomain,
     };
   }
 
   return {
-    title: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-    description: `Subdomain page for ${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+    title: `${subdomain}.${rootDomain}`,
+    description: `Subdomain page for ${subdomain}.${rootDomain}`,
   };
 }
 
@@ -57,16 +60,16 @@ export default async function SubdomainPage({
         <div className="mb-12 text-center">
           <div className="text-9xl mb-6">{subdomainData.emoji}</div>
           <h1 className="text-4xl font-bold tracking-tight mb-4">
-            Welcome to {subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN}
+            Welcome to {subdomain}.{rootDomain}
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Your custom subdomain with the latest blog posts
           </p>
           <Link
-            href={`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
+            href={`https://${rootDomain}`}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Back to {process.env.NEXT_PUBLIC_ROOT_DOMAIN}
+            ← Back to {rootDomain}
           </Link>
         </div>
 

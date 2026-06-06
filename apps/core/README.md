@@ -20,9 +20,10 @@ The main Next.js application that serves blog posts with subdomain support.
 
 Copy `env.example` to `.env.local`:
 
-- `NEXT_PUBLIC_ROOT_DOMAIN` — root domain for subdomain detection and links
 - `KV_REST_API_URL` — Upstash Redis REST URL (subdomain storage)
 - `KV_REST_API_TOKEN` — Upstash Redis REST token
+
+Root domain, deployment URLs, and validation subdomains come from `config/validation.json`. See [config/README.md](/config/README.md).
 
 `VERCEL_DEPLOYMENT_ID` is injected automatically on Vercel and is only used for debug UI.
 
@@ -51,7 +52,7 @@ From the monorepo root:
 pnpm seed
 ```
 
-This creates the validation tenants (`cool`, `test` by default — names come from `packages/config/validation.json`) plus example tenants `demo` and `acme`.
+This creates the validation tenants (`cool`, `test` by default — names come from `config/validation.json`) plus example tenants `demo` and `acme`.
 
 Requires `apps/core/.env.local` with `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Pass `--force` to overwrite existing entries:
 
