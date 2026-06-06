@@ -4,9 +4,9 @@ This doc contains testing and validation steps for different components of the s
 
 ## Configuration
 
-Tests and `bin/` helpers read `config/validation.json`. Copy `config/validation.example.json` to `config/validation.json` and edit your values. TypeScript code loads the same file via `@platform/config`.
+Tests and `bin/` helpers read `packages/config/validation.json`. Copy `packages/config/validation.example.json` to `packages/config/validation.json` and edit your values. TypeScript code loads via `@platform/config` (bundles the example when no override exists).
 
-See [config/README.md](/config/README.md) for field descriptions.
+See [packages/config/README.md](/packages/config/README.md) for field descriptions.
 
 > Note: the header of each page includes a timestamp and a deployment ID (for the deployment that *generated* the page) for debugging.
 

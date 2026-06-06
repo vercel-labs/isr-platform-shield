@@ -1,7 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import defaultConfig from "../validation.example.json";
 
-const CONFIG_PATH = join(__dirname, "../../../config/validation.json");
+const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const OVERRIDE_PATH = join(PACKAGE_ROOT, "validation.json");
 
 export interface PlatformConfig {
 	rootDomain: string;
@@ -15,13 +18,11 @@ export interface PlatformConfig {
 }
 
 export function getConfig(): PlatformConfig {
-	if (!existsSync(CONFIG_PATH)) {
-		throw new Error(
-			`Missing config at ${CONFIG_PATH}. Copy config/validation.example.json to config/validation.json.`,
-		);
+	if (existsSync(OVERRIDE_PATH)) {
+		return JSON.parse(readFileSync(OVERRIDE_PATH, "utf8"));
 	}
 
-	return JSON.parse(readFileSync(CONFIG_PATH, "utf8"));
+	return defaultConfig as PlatformConfig;
 }
 
 export function tryGetConfig(): PlatformConfig | undefined {

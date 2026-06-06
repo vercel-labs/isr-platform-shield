@@ -6,8 +6,8 @@ This project stores **blog post content** in a static JSON file and **tenant sub
 
 | Subdomain | Emoji | Source |
 |-----------|-------|--------|
-| Primary validation tenant | 🧊 | `subdomains.primary` in `config/validation.json` (default: `cool`) |
-| Secondary validation tenant | 🧪 | `subdomains.secondary` in `config/validation.json` (default: `test`) |
+| Primary validation tenant | 🧊 | `subdomains.primary` in `packages/config/validation.json` (default: `cool`) |
+| Secondary validation tenant | 🧪 | `subdomains.secondary` in `packages/config/validation.json` (default: `test`) |
 | `demo` | 🚀 | Fixed example tenant |
 | `acme` | 🏢 | Fixed example tenant |
 
@@ -91,7 +91,7 @@ Visit subdomain pages through your deployed Shield URL:
 - `https://<subdomains.primary>.<rootDomain>/`
 - `https://<subdomains.secondary>.<rootDomain>/`
 
-(values from `config/validation.json`)
+(values from `packages/config/validation.json`)
 
 Or open the admin dashboard at `https://www.<rootDomain>/admin`.
 
@@ -124,8 +124,8 @@ Copy `apps/core/env.example` to `apps/core/.env.local` and fill in your Upstash 
 
 **Validation tests fail on subdomain pages**
 
-Confirm the primary/secondary subdomains in `config/validation.json` match what exists in Redis. Re-run `pnpm seed` or create the missing tenants in the admin UI.
+Confirm the primary/secondary subdomains in `packages/config/validation.json` match what exists in Redis. Re-run `pnpm seed` or create the missing tenants in the admin UI.
 
 **Wrong subdomain names after changing validation config**
 
-The seed script reads `subdomains.primary` and `subdomains.secondary` from `config/validation.json`. If you rename them in config, run `pnpm seed` to create the new entries. Old Redis keys are not removed automatically.
+The seed script reads `subdomains.primary` and `subdomains.secondary` from `packages/config/validation.json`. If you rename them in config, run `pnpm seed` to create the new entries. Old Redis keys are not removed automatically.

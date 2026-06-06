@@ -8,7 +8,9 @@ import { Redis } from "@upstash/redis";
 const CORE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = join(CORE_ROOT, "../..");
 const ENV_FILE = join(CORE_ROOT, ".env.local");
-const CONFIG_PATH = join(REPO_ROOT, "config/validation.json");
+const CONFIG_DIR = join(REPO_ROOT, "packages/config");
+const CONFIG_PATH = join(CONFIG_DIR, "validation.json");
+const EXAMPLE_CONFIG_PATH = join(CONFIG_DIR, "validation.example.json");
 
 const EXAMPLES = [
 	{ subdomain: "demo", emoji: "🚀" },
@@ -46,14 +48,20 @@ function loadEnvFile(path) {
 }
 
 function loadValidationSubdomains() {
-	if (!existsSync(CONFIG_PATH)) {
+	const path = existsSync(CONFIG_PATH)
+		? CONFIG_PATH
+		: existsSync(EXAMPLE_CONFIG_PATH)
+			? EXAMPLE_CONFIG_PATH
+			: null;
+
+	if (!path) {
 		return [
 			{ subdomain: "cool", emoji: "🧊" },
 			{ subdomain: "test", emoji: "🧪" },
 		];
 	}
 
-	const config = JSON.parse(readFileSync(CONFIG_PATH, "utf8"));
+	const config = JSON.parse(readFileSync(path, "utf8"));
 	return [
 		{ subdomain: config.subdomains.primary, emoji: "🧊" },
 		{ subdomain: config.subdomains.secondary, emoji: "🧪" },

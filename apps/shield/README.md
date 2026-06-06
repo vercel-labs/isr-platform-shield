@@ -25,7 +25,7 @@ Copy `env.example` to `.env.local`:
 - `CORE_HOST` — hostname of the Core deployment (used by `vercel.ts` rewrites)
 - `VERCEL_TOKEN` — only needed for `pnpm deploy:shield`
 
-`CORE_HOST` should match your Core deployment hostname (for example the host in `coreUrl` from `config/validation.json`).
+`CORE_HOST` should match your Core deployment hostname (for example the host in `coreUrl` from `packages/config/validation.json`).
 
 ## Development
 

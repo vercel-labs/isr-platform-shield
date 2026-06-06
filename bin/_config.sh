@@ -1,7 +1,13 @@
 #!/usr/bin/env sh
 
 ROOT="$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)"
-CONFIG="$ROOT/config/validation.json"
+CONFIG_DIR="$ROOT/packages/config"
+CONFIG="$CONFIG_DIR/validation.json"
+EXAMPLE="$CONFIG_DIR/validation.example.json"
+
+if [ ! -f "$CONFIG" ] && [ -f "$EXAMPLE" ]; then
+	CONFIG="$EXAMPLE"
+fi
 
 cfg() {
 	node -e "

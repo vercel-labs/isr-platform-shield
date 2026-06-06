@@ -16,7 +16,7 @@ Copy `env.example` to `.env.local` in each app you run:
 - **Core** (`apps/core`): `KV_REST_API_URL`, `KV_REST_API_TOKEN`
 - **Shield** (`apps/shield`): `CORE_HOST`
 
-Configure the platform — copy `config/validation.example.json` to `config/validation.json`. See [config/README.md](/config/README.md). The `rootDomain` and deployment URLs there are used across Core, validation tests, and `bin/` helpers.
+Configure the platform — copy `packages/config/validation.example.json` to `packages/config/validation.json`. See [packages/config/README.md](/packages/config/README.md). The `rootDomain` and deployment URLs there are used across Core, validation tests, and `bin/` helpers.
 
 Seed example tenant subdomains in Upstash Redis (required before cache validation and subdomain routes work):
 
