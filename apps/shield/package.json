@@ -10,18 +10,22 @@
 		"touch": "echo $(date +%s%N | shasum | head -c 16) > .build-hash"
 	},
 	"dependencies": {
-		"@opentelemetry/api-logs": "^0.204.0",
-		"@opentelemetry/instrumentation": "^0.204.0",
-		"@opentelemetry/sdk-logs": "^0.204.0",
-		"@vercel/config": "^0.0.24",
-		"@vercel/functions": "^3.1.0",
-		"@vercel/otel": "^1.13.0",
-		"next": "^16.1.1"
+		"@opentelemetry/api": "^1.9.0",
+		"@opentelemetry/api-logs": "^0.218.0",
+		"@opentelemetry/instrumentation": "^0.218.0",
+		"@opentelemetry/resources": "^2.7.1",
+		"@opentelemetry/sdk-logs": "^0.218.0",
+		"@opentelemetry/sdk-metrics": "^2.7.1",
+		"@opentelemetry/sdk-trace-base": "^2.7.1",
+		"@vercel/config": "^0.5.1",
+		"@vercel/functions": "^3.6.2",
+		"@vercel/otel": "^2.1.2",
+		"next": "^16.2.7"
 	},
 	"devDependencies": {
-		"@types/node": "^20",
+		"@types/node": "^22",
 		"@types/react": "^19",
-		"typescript": "^5",
-		"vercel": "^47.0.5"
+		"typescript": "^5.9.2",
+		"vercel": "^54.9.1"
 	}
 }
