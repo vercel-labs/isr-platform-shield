@@ -12,7 +12,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const childResponse = await fetch(`https://core.labs.vercel.dev/api/delete?tag=${tag}`);
+    const coreHost = process.env.CORE_HOST;
+    if (!coreHost) {
+      return NextResponse.json(
+        { error: "CORE_HOST is not configured" },
+        { status: 500 }
+      );
+    }
+
+    const childResponse = await fetch(`https://${coreHost}/api/delete?tag=${tag}`);
     const childResponseData = await childResponse.json();
 
     // If the core tag deletion fails, bail out and don't invalidate shield because it

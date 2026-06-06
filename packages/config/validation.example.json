@@ -1,0 +1,10 @@
+{
+	"rootDomain": "high-performance-platform.com",
+	"altDomain": "pzona.lol",
+	"subdomains": {
+		"primary": "cool",
+		"secondary": "test"
+	},
+	"coreUrl": "https://core.labs.vercel.dev",
+	"shieldUrl": "https://shield.labs.vercel.dev"
+}

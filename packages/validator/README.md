@@ -1,21 +1,19 @@
 # Validator
 
-Simple test suite for validating endpoints.
+Integration tests for routing and cache behavior against deployed URLs.
+
+Configuration lives in `@platform/config` — see `packages/config/README.md`.
 
 ## Usage
 
 ```bash
-# Install dependencies
-pnpm install
+# From monorepo root
+pnpm validate
+pnpm validate:routing
+pnpm validate:cache
 
-# Run all tests
+# From this package
 pnpm test
-
-# Run tests in watch mode
-pnpm test:watch
-
-# Run specific test file
-pnpm test homepage
-pnpm test subdomain
-pnpm test post
+pnpm test routing.test.ts
+pnpm test cache.test.ts
 ```

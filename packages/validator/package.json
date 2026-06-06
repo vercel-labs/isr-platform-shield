@@ -2,6 +2,9 @@
   "name": "validator",
   "version": "0.0.0",
   "private": true,
+  "dependencies": {
+    "@platform/config": "workspace:*"
+  },
   "scripts": {
     "validate": "jest",
     "validate:routing": "jest routing.test.ts",
