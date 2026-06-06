@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { deleteSubdomainAction } from "@/app/s/www/actions";
-// Using environment variables directly
 
 type Tenant = {
   subdomain: string;

@@ -86,12 +86,14 @@ skip acme (already exists)
 
 ## Verify
 
-Visit subdomain pages through your deployed Shield URL or local dev setup:
+Visit subdomain pages through your deployed Shield URL:
 
-- `https://cool.<root-domain>/`
-- `https://test.<root-domain>/`
+- `https://<subdomains.primary>.<rootDomain>/`
+- `https://<subdomains.secondary>.<rootDomain>/`
 
-Or open the admin dashboard at `/s/www/admin` (via Shield: `https://www.<root-domain>/admin`) to see all tenants listed.
+(values from `config/validation.json`)
+
+Or open the admin dashboard at `https://www.<rootDomain>/admin`.
 
 Run validation once subdomains exist:
 

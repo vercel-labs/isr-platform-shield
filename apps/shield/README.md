@@ -1,24 +1,22 @@
 # Shield
 
-A Next.js caching proxy that provides shielded ISR protection for the core app during deployments.
+A caching proxy that provides shielded ISR protection for the Core app during deployments.
 
 ## What it does
 
-- Proxies requests to the core app with protective caching
-- Adds CDN cache headers (1 hour TTL) for deployment protection
-- Removes Vercel-specific headers
-- Provides cache warming capabilities for post-deployment performance
-- Shields the core app from slow first requests after deployment
+- Rewrites tenant subdomain requests to Core's `/s/[subdomain]/...` routes via `vercel.ts`
+- Sets Shield CDN cache headers on tenant routes (`s-maxage=120`, long `stale-while-revalidate`)
+- Exposes `/api/invalidate` to delete Core cache tags and invalidate Shield CDN tags
 
 ## How it works
 
-The shield layer addresses the problem where ISR cache is purged on each new deployment, causing slow first requests for pages not generated during build. The shield:
+When Core deploys, its ISR cache is cleared. Shield's CDN cache is independent and keeps serving responses while Core rebuilds.
 
-1. **Cache Protection**: Serves cached content while Core app ISR cache rebuilds after deployment
-2. **Cache Warming**: Allows deferring static page generation until after build, then prewarming by requesting each page
-3. **Performance**: Prevents slow first requests during the critical post-deployment period
+1. **Cache protection**: Shield CDN serves cached tenant pages after Core deploys
+2. **Rewrites**: Platform routing in `vercel.ts` extracts the subdomain from the host and forwards to Core
+3. **Invalidation**: `/api/invalidate` deletes the tag on Core first, then purges Shield CDN entries for that tag
 
-All requests are forwarded to the core app with `force-cache` enabled, then the response is modified to add proper CDN caching headers before being returned to the client.
+See [architecture](/docs/ARCHITECTURE.md) for request flows and invalidation ordering.
 
 ## Environment variables
 
@@ -27,10 +25,12 @@ Copy `env.example` to `.env.local`:
 - `CORE_HOST` — hostname of the Core deployment (used by `vercel.ts` rewrites)
 - `VERCEL_TOKEN` — only needed for `pnpm deploy:shield`
 
+`CORE_HOST` should match your Core deployment hostname (for example the host in `coreUrl` from `config/validation.json`).
+
 ## Development
 
 ```bash
 pnpm dev
 ```
 
-The cache layer runs on port 3000 by default.
+The Shield app runs on port 3000 by default. Local dev does not fully replicate platform rewrites; use deployed URLs for cache and routing validation.
