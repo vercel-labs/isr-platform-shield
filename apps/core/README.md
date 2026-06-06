@@ -4,21 +4,32 @@ The main Next.js application that serves blog posts with subdomain support.
 
 ## What it does
 
-- Displays blog posts from the API service
-- Supports custom subdomains for different tenants with middleware-based routing
+- Displays blog posts from `lib/data.json`
+- Supports custom subdomains for different tenants (routed via `/s/[subdomain]`)
 - Shows individual blog post pages
 - Provides subdomain-specific landing pages with random posts
 
 ## Pages
 
-- `/` - Main landing page
+- `/s/www` - Main landing page
 - `/s/[subdomain]` - Subdomain-specific page with random posts
 - `/s/[subdomain]/[id]` - Individual blog post page
+- `/s/www/admin` - Admin dashboard for managing subdomains
+
+## Environment variables
+
+Copy `env.example` to `.env.local`:
+
+- `NEXT_PUBLIC_ROOT_DOMAIN` — root domain for subdomain detection and links
+- `KV_REST_API_URL` — Upstash Redis REST URL (subdomain storage)
+- `KV_REST_API_TOKEN` — Upstash Redis REST token
+
+`VERCEL_DEPLOYMENT_ID` is injected automatically on Vercel and is only used for debug UI.
 
 ## Development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-The core app runs on port 3000 by default.
+The core app runs on port 3001 by default.

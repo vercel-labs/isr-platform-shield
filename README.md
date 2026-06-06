@@ -9,7 +9,12 @@ A two-app Next.js system providing shielded ISR caching for multi-tenant platfor
 
 Run the setup script: `pnpm setup`
 
-This installs dependency and injects the project `bin` dir into your PATH, which allows you to use validation helpers.
+This installs dependencies and injects the project `bin` dir into your PATH, which allows you to use validation helpers.
+
+Copy `env.example` to `.env.local` in each app you run:
+
+- **Core** (`apps/core`): `NEXT_PUBLIC_ROOT_DOMAIN`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`
+- **Shield** (`apps/shield`): `CORE_HOST`
 
 ## Shielded ISR Architecture
 

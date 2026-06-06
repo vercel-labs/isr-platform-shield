@@ -20,7 +20,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 	const { subdomain, id } = await params;
 	unstable_cache(async	() =>	{}, [], {tags: ["blog-post", subdomain, id]})()
 
-	// Fetch blog post data from API
+	// Fetch blog post data from local JSON
 	const blogPost: BlogPost | null = await blogPostService.getPost(id);
 
 	if (!blogPost) {

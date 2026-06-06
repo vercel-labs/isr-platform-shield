@@ -20,10 +20,17 @@ The shield layer addresses the problem where ISR cache is purged on each new dep
 
 All requests are forwarded to the core app with `force-cache` enabled, then the response is modified to add proper CDN caching headers before being returned to the client.
 
+## Environment variables
+
+Copy `env.example` to `.env.local`:
+
+- `CORE_HOST` — hostname of the Core deployment (used by `vercel.ts` rewrites)
+- `VERCEL_TOKEN` — only needed for `pnpm deploy:shield`
+
 ## Development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 The cache layer runs on port 3000 by default.
