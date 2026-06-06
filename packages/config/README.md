@@ -16,7 +16,7 @@ Edit `packages/config/validation.json`:
 
 - `rootDomain` — public domain served through Shield
 - `altDomain` — alternate domain used in some cache/404 tests
-- `subdomains.primary` / `subdomains.secondary` — tenant subdomains that must exist in Redis
+- `subdomains.primary` / `subdomains.secondary` — tenant subdomains that must exist in Redis (seed with `pnpm seed`; see [seeding](/docs/SEEDING.md))
 - `coreUrl` — Core app base URL
 - `shieldUrl` — Shield app base URL
 

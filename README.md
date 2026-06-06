@@ -18,6 +18,14 @@ Copy `env.example` to `.env.local` in each app you run:
 
 For validation helpers and `bin/` scripts, configure `@platform/config` — copy `packages/config/validation.example.json` to `packages/config/validation.json`.
 
+Seed example tenant subdomains in Upstash Redis (required before cache validation and subdomain routes work):
+
+```bash
+pnpm seed
+```
+
+See [seeding](/docs/SEEDING.md) for prerequisites, what gets created, and troubleshooting.
+
 ## Shielded ISR Architecture
 
 "Normal" ISR (Incremental Static Regeneration) in Next.js caches pages tied to a deployment. When you deploy a new version, the ISR cache is replaced and must be rebuilt, causing slow first requests for pages not generated during build.

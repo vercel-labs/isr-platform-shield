@@ -27,7 +27,7 @@ Run the tests with `pnpm run validate:routing`.
 
 The `validator` package includes unit tests specific to caching as well.
 
-Run the tests with `pnpm run validate:cache`. Note that these tests rely on the `cool` and `test` subdomains to exist in the database, and may fail if one of them is deleted.
+Run the tests with `pnpm run validate:cache`. These tests require the primary and secondary validation subdomains (defaults: `cool` and `test`) to exist in Redis. If they are missing, run `pnpm seed` — see [seeding](/docs/SEEDING.md).
 
 ### Manual
 

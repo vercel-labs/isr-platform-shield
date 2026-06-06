@@ -3,6 +3,7 @@
 	"private": true,
 	"scripts": {
 		"setup": "pnpm install && [ -f packages/config/validation.json ] || cp packages/config/validation.example.json packages/config/validation.json && export PATH=$PATH:$(pwd)/bin",
+		"seed": "pnpm --filter @platform/core seed",
 		"start": "turbo run start",
 		"build": "turbo run build --env-mode=loose",
 		"dev": "turbo run dev",

@@ -2,6 +2,7 @@
 	"name": "@platform/core",
 	"private": true,
 	"scripts": {
+		"seed": "node scripts/seed-subdomains.mjs",
 		"dev": "PORT=3001 next dev --turbopack",
 		"build": "next build",
 		"start": "PORT=3001 next start",

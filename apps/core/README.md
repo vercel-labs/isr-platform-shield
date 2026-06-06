@@ -33,3 +33,30 @@ pnpm dev
 ```
 
 The core app runs on port 3001 by default.
+
+## Data storage
+
+| Data | Location |
+|------|----------|
+| Blog posts and authors | `lib/data.json` (static file, no seed step) |
+| Tenant subdomains | Upstash Redis (`subdomain:<name>` keys) |
+
+Subdomains can be created through the admin UI at `/s/www/admin` or seeded in bulk for dev and validation.
+
+## Seed subdomains
+
+From the monorepo root:
+
+```bash
+pnpm seed
+```
+
+This creates the validation tenants (`cool`, `test` by default — names come from `packages/config/validation.json`) plus example tenants `demo` and `acme`.
+
+Requires `apps/core/.env.local` with `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Pass `--force` to overwrite existing entries:
+
+```bash
+pnpm seed -- --force
+```
+
+Full details: [docs/SEEDING.md](/docs/SEEDING.md).
