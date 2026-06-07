@@ -4,6 +4,9 @@ import type { VercelConfig } from "@vercel/config/v1";
 // Could read these remotely, using env vars for simplicity
 const core = deploymentEnv("CORE_HOST");
 
+// Request header needed to bypass deployment protection
+const bypassHeader = { "x-vercel-protection-bypass": deploymentEnv("VERCEL_BYPASS_TOKEN") }
+
 // Cache settings
 const sMaxAge = 120;
 const swr = 31556952;
@@ -25,7 +28,7 @@ export const config: VercelConfig = {
       dest,
       // Rules 0 and 1 (api/shield and _next) don't need host condition
       idx <= 1
-        ? { responseHeaders: { "x-noop": "0" } }
+        ? { requestHeaders: { ...bypassHeader }}
         : {
             has: [
               {
@@ -33,6 +36,7 @@ export const config: VercelConfig = {
                 value: "(?<host>.*)\\.[^\\.]+\\.[^\\.]+", // This capture group should be used in the destination URL
               },
             ],
+            requestHeaders: { ...bypassHeader },
             responseHeaders: {
               "CDN-Cache-Control": `s-maxage=${sMaxAge}, stale-while-revalidate=${swr}`,
             },
