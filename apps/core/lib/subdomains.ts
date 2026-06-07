@@ -1,3 +1,4 @@
+import { tryGetConfig } from "@platform/config";
 import { redis } from "@/lib/redis";
 import { trace } from "@opentelemetry/api";
 import { NextRequest } from "next/server";
@@ -10,8 +11,7 @@ export function extractSubdomain(request: NextRequest): string | null {
 	const hostname = host.split(":")[0];
 
 	// Production environment
-	const rootDomainFormatted =
-		process.env.NEXT_PUBLIC_ROOT_DOMAIN?.split(":")[0];
+	const rootDomainFormatted = tryGetConfig()?.rootDomain;
 
 	// Handle preview deployment URLs (tenant---branch-name.vercel.app)
 	if (hostname.includes("---") && hostname.endsWith(".vercel.app")) {

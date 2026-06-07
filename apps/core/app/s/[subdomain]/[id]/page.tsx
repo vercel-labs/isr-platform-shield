@@ -1,5 +1,6 @@
+import { config } from "@platform/config";
 import { notFound } from "next/navigation";
-import { blogPostService, BlogPost } from "@/lib/blog-posts";
+import { blogPostService, type BlogPost } from "@/lib/blog-posts";
 import { stringToColor } from "@/lib/deployment-id";
 import { getSubdomainData } from "@/lib/subdomains";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 	const { subdomain, id } = await params;
 	unstable_cache(async	() =>	{}, [], {tags: ["blog-post", subdomain, id]})()
 
-	// Fetch blog post data from API
+	// Fetch blog post data from local JSON
 	const blogPost: BlogPost | null = await blogPostService.getPost(id);
 
 	if (!blogPost) {
@@ -33,6 +34,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 	const deploymentId = process.env.VERCEL_DEPLOYMENT_ID ?? "local";
 	const idColor = await stringToColor(deploymentId);
 	const dateColor = await stringToColor(new Date().toLocaleString());
+
+	const rootDomain = config.rootDomain;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -50,7 +53,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 							</span>
 						)}
 						<span>
-							{subdomain}.{process.env.NEXT_PUBLIC_ROOT_DOMAIN}
+							{subdomain}.{rootDomain}
 						</span>
 					</small>
 					<h1 className="text-4xl font-bold mb-4">{blogPost.title}</h1>

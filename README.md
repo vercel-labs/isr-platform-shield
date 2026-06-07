@@ -9,7 +9,22 @@ A two-app Next.js system providing shielded ISR caching for multi-tenant platfor
 
 Run the setup script: `pnpm setup`
 
-This installs dependency and injects the project `bin` dir into your PATH, which allows you to use validation helpers.
+This installs dependencies and injects the project `bin` dir into your PATH, which allows you to use validation helpers.
+
+Copy `env.example` to `.env.local` in each app you run:
+
+- **Core** (`apps/core`): `KV_REST_API_URL`, `KV_REST_API_TOKEN`
+- **Shield** (`apps/shield`): `CORE_HOST`
+
+Configure the platform — copy `packages/config/validation.example.json` to `packages/config/validation.json`. See [packages/config/README.md](/packages/config/README.md). The `rootDomain` and deployment URLs there are used across Core, validation tests, and `bin/` helpers.
+
+Seed example tenant subdomains in Upstash Redis (required before cache validation and subdomain routes work):
+
+```bash
+pnpm seed
+```
+
+See [seeding](/docs/SEEDING.md) for prerequisites, what gets created, and troubleshooting.
 
 ## Shielded ISR Architecture
 

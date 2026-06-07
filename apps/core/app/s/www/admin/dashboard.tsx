@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { deleteSubdomainAction } from "@/app/s/www/actions";
-// Using environment variables directly
 
 type Tenant = {
   subdomain: string;
@@ -19,7 +18,7 @@ type DeleteState = {
   success?: string;
 };
 
-function DashboardHeader({ host }: { host: string }) {
+function DashboardHeader({ rootDomain }: { rootDomain: string }) {
   // TODO: add auth
 
   return (
@@ -27,10 +26,10 @@ function DashboardHeader({ host }: { host: string }) {
       <h1 className="text-3xl font-bold">Subdomain Management</h1>
       <div className="flex items-center gap-4">
         <Link
-          href={`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
+          href={`https://${rootDomain}`}
           className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
         >
-          {process.env.NEXT_PUBLIC_ROOT_DOMAIN}
+          {rootDomain}
         </Link>
       </div>
     </div>
@@ -39,10 +38,12 @@ function DashboardHeader({ host }: { host: string }) {
 
 function TenantGrid({
   tenants,
+  rootDomain,
   action,
   isPending,
 }: {
   tenants: Tenant[];
+  rootDomain: string;
   action: (formData: FormData) => void;
   isPending: boolean;
 }) {
@@ -94,7 +95,7 @@ function TenantGrid({
             </div>
             <div className="mt-4">
               <a
-                href={`https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
+                href={`https://${tenant.subdomain}.${rootDomain}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline text-sm"
@@ -109,7 +110,13 @@ function TenantGrid({
   );
 }
 
-export function AdminDashboard({ tenants }: { tenants: Tenant[] }) {
+export function AdminDashboard({
+  tenants,
+  rootDomain,
+}: {
+  tenants: Tenant[];
+  rootDomain: string;
+}) {
   const [state, action, isPending] = useActionState<DeleteState, FormData>(
     deleteSubdomainAction,
     {},
@@ -117,10 +124,13 @@ export function AdminDashboard({ tenants }: { tenants: Tenant[] }) {
 
   return (
     <div className="space-y-6 relative p-4 md:p-8">
-      <DashboardHeader
-        host={process.env.NEXT_PUBLIC_ROOT_DOMAIN || "high-performance-platform.com"}
+      <DashboardHeader rootDomain={rootDomain} />
+      <TenantGrid
+        tenants={tenants}
+        rootDomain={rootDomain}
+        action={action}
+        isPending={isPending}
       />
-      <TenantGrid tenants={tenants} action={action} isPending={isPending} />
 
       {state.error && (
         <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-md">

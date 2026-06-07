@@ -1,3 +1,6 @@
 #!/usr/bin/env sh
 
-curl -kvN "https://core.labs.vercel.dev/api/delete?tag=$1" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null
+. "$(dirname "$0")/_config.sh"
+
+CORE_URL="$(cfg coreUrl)"
+curl -kvN "${CORE_URL}/api/delete?tag=$1" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null

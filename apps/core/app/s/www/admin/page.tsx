@@ -1,10 +1,11 @@
+import { config } from "@platform/config";
 import { getAllSubdomains } from "@/lib/subdomains";
 import type { Metadata } from "next";
 import { AdminDashboard } from "./dashboard";
 
 export const metadata: Metadata = {
-	title: `Admin Dashboard | ${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "high-performance-platform.com"}`,
-	description: `Manage subdomains for ${process.env.NEXT_PUBLIC_ROOT_DOMAIN || "high-performance-platform.com"}`,
+	title: `Admin Dashboard | ${config.rootDomain}`,
+	description: `Manage subdomains for ${config.rootDomain}`,
 };
 
 export default async function AdminPage() {
@@ -16,7 +17,7 @@ export default async function AdminPage() {
 			<span className="hidden" aria-hidden="true">
 				$validator_admin_page$
 			</span>
-			<AdminDashboard tenants={tenants} />
+			<AdminDashboard tenants={tenants} rootDomain={config.rootDomain} />
 		</div>
 	);
 }

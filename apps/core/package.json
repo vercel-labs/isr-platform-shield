@@ -2,6 +2,7 @@
 	"name": "@platform/core",
 	"private": true,
 	"scripts": {
+		"seed": "node scripts/seed-subdomains.mjs",
 		"dev": "PORT=3001 next dev --turbopack",
 		"build": "next build",
 		"start": "PORT=3001 next start",
@@ -9,6 +10,7 @@
 		"touch": "echo $(date +%s%N | shasum | head -c 16) > .build-hash"
 	},
 	"dependencies": {
+		"@platform/config": "workspace:*",
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/api-logs": "^0.218.0",
 		"@opentelemetry/instrumentation": "^0.218.0",

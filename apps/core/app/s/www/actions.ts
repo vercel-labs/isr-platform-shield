@@ -1,5 +1,6 @@
 "use server";
 
+import { config } from "@platform/config";
 import { redis } from "@/lib/redis";
 import { isValidIcon } from "@/lib/subdomains";
 import { revalidatePath } from "next/cache";
@@ -65,9 +66,7 @@ export async function createSubdomainAction(
 		createdAt: Date.now(),
 	});
 
-	redirect(
-		`https://${sanitizedSubdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-	);
+	redirect(`https://${sanitizedSubdomain}.${config.rootDomain}`);
 }
 
 export async function deleteSubdomainAction(
