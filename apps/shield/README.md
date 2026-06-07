@@ -22,10 +22,10 @@ See [architecture](/docs/ARCHITECTURE.md) for request flows and invalidation ord
 
 Copy `env.example` to `.env.local`:
 
-- `CORE_HOST` — hostname of the Core deployment (used by `vercel.ts` rewrites)
+- `CORE_HOST` — hostname of the Core deployment (used by `vercel.ts` rewrites and `@platform/config`)
+- `SHIELD_HOST` — hostname of the Shield deployment (used by `@platform/config`)
+- `NEXT_PUBLIC_ROOT_DOMAIN` — public root domain (used by `@platform/config`)
 - `VERCEL_TOKEN` — only needed for `pnpm deploy:shield`
-
-`CORE_HOST` should match your Core deployment hostname (for example the host in `coreUrl` from `packages/config/validation.json`).
 
 ## Development
 

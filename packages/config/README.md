@@ -2,17 +2,25 @@
 
 Platform settings for Core, Shield, validator tests, and `bin/` helpers.
 
-Copy `validation.example.json` to `validation.json` and edit your values. Or run `pnpm setup` from the repo root.
+## Resolution order
 
-When `validation.json` is missing (for example on Vercel), the bundled `validation.example.json` is used. Local overrides go in gitignored `validation.json`.
+1. **App env vars** (used on Vercel and in `.env.local`)
+2. **`validation.json`** local override (gitignored, optional)
+3. **`validation.example.json`** bundled fallback
 
-| Field | Used for |
-|-------|----------|
-| `rootDomain` | Public domain, subdomain suffix in Core, validation tests |
-| `altDomain` | Alternate domain in cache/404 tests |
-| `subdomains.primary` / `subdomains.secondary` | Tenants that must exist in Redis (`pnpm seed`) |
-| `coreUrl` / `shieldUrl` | Deployment URLs for `bin/` helpers and validator tests |
+| Env var | Config field |
+|---------|--------------|
+| `NEXT_PUBLIC_ROOT_DOMAIN` | `rootDomain` |
+| `CORE_HOST` | `coreUrl` |
+| `SHIELD_HOST` | `shieldUrl` |
+| `ALT_DOMAIN` | `altDomain` |
+
+Subdomain names for validation (`subdomains.primary`, `subdomains.secondary`) come from JSON only.
+
+Copy `validation.example.json` to `validation.json` to override subdomain names locally. Or run `pnpm setup` from the repo root.
 
 ```typescript
 import { config, urls, getConfig } from "@platform/config";
 ```
+
+See `apps/core/env.example` and `apps/shield/env.example` for the env vars each app expects.

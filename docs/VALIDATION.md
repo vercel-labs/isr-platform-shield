@@ -4,9 +4,7 @@ This doc contains testing and validation steps for different components of the s
 
 ## Configuration
 
-Tests and `bin/` helpers read `packages/config/validation.json`. Copy `packages/config/validation.example.json` to `packages/config/validation.json` and edit your values. TypeScript code loads via `@platform/config` (bundles the example when no override exists).
-
-See [packages/config/README.md](/packages/config/README.md) for field descriptions.
+Tests and `bin/` helpers use `@platform/config`, which reads app env vars (`NEXT_PUBLIC_ROOT_DOMAIN`, `CORE_HOST`, `SHIELD_HOST`) with JSON fallbacks for subdomain names. See [packages/config/README.md](/packages/config/README.md).
 
 > Note: the header of each page includes a timestamp and a deployment ID (for the deployment that *generated* the page) for debugging.
 

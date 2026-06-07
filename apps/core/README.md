@@ -20,10 +20,11 @@ The main Next.js application that serves blog posts with subdomain support.
 
 Copy `env.example` to `.env.local`:
 
+- `NEXT_PUBLIC_ROOT_DOMAIN` — public root domain (also read by `@platform/config`)
 - `KV_REST_API_URL` — Upstash Redis REST URL (subdomain storage)
 - `KV_REST_API_TOKEN` — Upstash Redis REST token
 
-Root domain, deployment URLs, and validation subdomains come from `@platform/config`. See [packages/config/README.md](/packages/config/README.md).
+Validation subdomain names come from `packages/config/validation.json`. Domain and deployment URLs are resolved from env vars via `@platform/config`. See [packages/config/README.md](/packages/config/README.md).
 
 `VERCEL_DEPLOYMENT_ID` is injected automatically on Vercel and is only used for debug UI.
 

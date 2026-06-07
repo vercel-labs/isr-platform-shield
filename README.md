@@ -13,10 +13,10 @@ This installs dependencies and injects the project `bin` dir into your PATH, whi
 
 Copy `env.example` to `.env.local` in each app you run:
 
-- **Core** (`apps/core`): `KV_REST_API_URL`, `KV_REST_API_TOKEN`
-- **Shield** (`apps/shield`): `CORE_HOST`
+- **Core** (`apps/core`): `NEXT_PUBLIC_ROOT_DOMAIN`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`
+- **Shield** (`apps/shield`): `CORE_HOST`, `SHIELD_HOST`, `NEXT_PUBLIC_ROOT_DOMAIN`
 
-Configure the platform — copy `packages/config/validation.example.json` to `packages/config/validation.json`. See [packages/config/README.md](/packages/config/README.md). The `rootDomain` and deployment URLs there are used across Core, validation tests, and `bin/` helpers.
+`@platform/config` reads those env vars for domain and deployment URLs. Subdomain names for validation live in `packages/config/validation.json` — copy from `validation.example.json` or run `pnpm setup`. See [packages/config/README.md](/packages/config/README.md).
 
 Seed example tenant subdomains in Upstash Redis (required before cache validation and subdomain routes work):
 

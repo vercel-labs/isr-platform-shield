@@ -1,10 +1,9 @@
 {
-	"rootDomain": "high-performance-platform.com",
-	"altDomain": "pzona.lol",
+	"rootDomain": "shield-platform.xyz",
 	"subdomains": {
 		"primary": "cool",
 		"secondary": "test"
 	},
-	"coreUrl": "https://core.labs.vercel.dev",
-	"shieldUrl": "https://shield.labs.vercel.dev"
+	"coreUrl": "https://isr-platform-shield-core.playground-vercel.tools",
+	"shieldUrl": "https://isr-platform-shield-shield.playground-vercel.tools"
 }

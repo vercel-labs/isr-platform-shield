@@ -17,12 +17,41 @@ export interface PlatformConfig {
 	shieldUrl: string;
 }
 
-export function getConfig(): PlatformConfig {
+function loadFileConfig(): PlatformConfig {
 	if (existsSync(OVERRIDE_PATH)) {
 		return JSON.parse(readFileSync(OVERRIDE_PATH, "utf8"));
 	}
 
 	return defaultConfig as PlatformConfig;
+}
+
+function hostToUrl(host: string): string {
+	const trimmed = host.trim().replace(/\/$/, "");
+
+	if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+		return trimmed;
+	}
+
+	return `https://${trimmed}`;
+}
+
+function applyEnvOverrides(fileConfig: PlatformConfig): PlatformConfig {
+	return {
+		rootDomain:
+			process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? fileConfig.rootDomain,
+		altDomain: process.env.ALT_DOMAIN ?? fileConfig.altDomain,
+		subdomains: fileConfig.subdomains,
+		coreUrl: process.env.CORE_HOST
+			? hostToUrl(process.env.CORE_HOST)
+			: fileConfig.coreUrl,
+		shieldUrl: process.env.SHIELD_HOST
+			? hostToUrl(process.env.SHIELD_HOST)
+			: fileConfig.shieldUrl,
+	};
+}
+
+export function getConfig(): PlatformConfig {
+	return applyEnvOverrides(loadFileConfig());
 }
 
 export function tryGetConfig(): PlatformConfig | undefined {
