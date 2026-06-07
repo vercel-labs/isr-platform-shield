@@ -4,7 +4,7 @@ const traceExporter = new OTLPHttpProtoTraceExporter({
   url: `https://${process.env.AXIOM_DOMAIN}/v1/traces`,
   headers: {
     'Authorization': `Bearer ${process.env.AXIOM_TOKEN}`,
-    'X-Axiom-Dataset': 'shield-isr'
+    'X-Axiom-Dataset': 'shielded-isr'
   },
 });
 
