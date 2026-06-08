@@ -1,5 +1,9 @@
-import type { Rewrite, VercelConfig } from "@vercel/config/v1";
+import type { Redirect, Rewrite, VercelConfig } from "@vercel/config/v1";
 import { deploymentEnv, routes } from "@vercel/config/v1";
+
+// Root domain for checking if redirect needed - all apex traffic should go through www.
+// Redirects are processed before rewrites
+const rootDomain = deploymentEnv("NEXT_PUBLIC_ROOT_DOMAIN");
 
 // Request header needed to bypass deployment protection
 const bypassHeader = {
@@ -36,28 +40,42 @@ const rewrites = {
 // Exported project config
 export const config: VercelConfig = {
   framework: "nextjs",
+  redirects: [
+    routes.redirect("/:path*", `https://www.${rootDomain}/:path*`, {
+      has: [
+        {
+          type: "host",
+          value: { eq: rootDomain }, // Exact match for the apex domain
+        },
+      ],
+      permanent: true,
+    }) as Redirect,
+  ],
   rewrites: [
-    ...rewrites.withoutCapturedHost.map(([src, dest]) =>
-      routes.rewrite(src, dest, {
-        requestHeaders: { ...bypassHeader },
-      }) as Rewrite,
+    ...rewrites.withoutCapturedHost.map(
+      ([src, dest]) =>
+        routes.rewrite(src, dest, {
+          requestHeaders: { ...bypassHeader },
+        }) as Rewrite,
     ),
-    ...rewrites.withCapturedHost.map(([src, dest]) =>
-      routes.rewrite(src, dest, {
-        has: [
-          {
-            type: "host",
-            value: "(?<host>.*)\\.[^\\.]+\\.[^\\.]+", // This captured value is used in the destination URL
-          },
-        ],
-        requestHeaders: { ...bypassHeader },
-        responseHeaders: { ...cacheHeader },
-      }) as Rewrite,
+    ...rewrites.withCapturedHost.map(
+      ([src, dest]) =>
+        routes.rewrite(src, dest, {
+          has: [
+            {
+              type: "host",
+              value: "(?<host>.*)\\.[^\\.]+\\.[^\\.]+", // This captured value is used in the destination URL
+            },
+          ],
+          requestHeaders: { ...bypassHeader },
+          responseHeaders: { ...cacheHeader },
+        }) as Rewrite,
     ),
-    ...rewrites.fallback.map(([src, dest]) =>
-      routes.rewrite(src, dest, {
-        requestHeaders: { ...bypassHeader },
-      }) as Rewrite,
+    ...rewrites.fallback.map(
+      ([src, dest]) =>
+        routes.rewrite(src, dest, {
+          requestHeaders: { ...bypassHeader },
+        }) as Rewrite,
     ),
   ],
 };
