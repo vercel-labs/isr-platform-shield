@@ -21,8 +21,8 @@ const rewrites = {
     ["/_next/(.*)", `https://${core}/_next/$1`], // Next.js assets - no host condition needed
   ],
   withCapturedHost: [
-    ["/", `https://${core}/s/$host`], // Root for tenants
-    ["/((?!_next/|api/|s/).+)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
+    ["/", `https://${core}/s/:host`], // Root for tenants
+    ["/((?!_next/|api/|s/).+)", `https://${core}/s/:host/$1`], // Subdomain path for tenants
   ],
   fallback: [
     ["(.*)", `https://${core}/$1`], // Fallback route for tenants
