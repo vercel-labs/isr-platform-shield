@@ -1,4 +1,4 @@
-import type { VercelConfig } from "@vercel/config/v1";
+import type { Rewrite, VercelConfig } from "@vercel/config/v1";
 import { deploymentEnv, routes } from "@vercel/config/v1";
 
 // Request header needed to bypass deployment protection
@@ -36,11 +36,11 @@ const rewrites = {
 // Exported project config
 export const config: VercelConfig = {
   framework: "nextjs",
-  routes: [
+  rewrites: [
     ...rewrites.withoutCapturedHost.map(([src, dest]) =>
       routes.rewrite(src, dest, {
         requestHeaders: { ...bypassHeader },
-      }),
+      }) as Rewrite,
     ),
     ...rewrites.withCapturedHost.map(([src, dest]) =>
       routes.rewrite(src, dest, {
@@ -52,12 +52,12 @@ export const config: VercelConfig = {
         ],
         requestHeaders: { ...bypassHeader },
         responseHeaders: { ...cacheHeader },
-      }),
+      }) as Rewrite,
     ),
     ...rewrites.fallback.map(([src, dest]) =>
       routes.rewrite(src, dest, {
         requestHeaders: { ...bypassHeader },
-      }),
+      }) as Rewrite,
     ),
   ],
 };
