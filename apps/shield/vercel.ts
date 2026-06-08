@@ -2,7 +2,6 @@ import type { Redirect, Rewrite, VercelConfig } from "@vercel/config/v1";
 import { deploymentEnv, routes } from "@vercel/config/v1";
 
 // Root domain for checking if redirect needed - all apex traffic should go through www.
-// Redirects are processed before rewrites
 const rootDomain = deploymentEnv("NEXT_PUBLIC_ROOT_DOMAIN");
 
 // Request header needed to bypass deployment protection
@@ -40,7 +39,7 @@ const rewrites = {
 // Exported project config
 export const config: VercelConfig = {
   framework: "nextjs",
-  redirects: [
+  routes: [
     routes.redirect("/:path*", `https://www.${rootDomain}/:path*`, {
       has: [
         {
@@ -50,8 +49,6 @@ export const config: VercelConfig = {
       ],
       permanent: true,
     }) as Redirect,
-  ],
-  rewrites: [
     ...rewrites.withoutCapturedHost.map(
       ([src, dest]) =>
         routes.rewrite(src, dest, {
