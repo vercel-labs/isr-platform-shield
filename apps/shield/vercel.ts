@@ -1,4 +1,4 @@
-import type { Rewrite, VercelConfig } from "@vercel/config/v1";
+import type { VercelConfig } from "@vercel/config/v1";
 import { deploymentEnv, routes } from "@vercel/config/v1";
 
 // Request header needed to bypass deployment protection
@@ -25,8 +25,8 @@ const rewrites = {
     ["/_next/(.*)", `https://${core}/_next/$1`], // Next.js assets - no host condition needed
   ],
   withCapturedHost: [
-    ["/", `https://${core}/s/:host`], // Root for tenants
-    ["/((?!_next/|api/|s/).+)", `https://${core}/s/:host/$1`], // Subdomain path for tenants
+    ["/", `https://${core}/s/$host`], // Root for tenants
+    ["/((?!_next/|api/|s/).+)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
   ],
   fallback: [
     ["(.*)", `https://${core}/$1`], // Fallback route for tenants
@@ -36,11 +36,11 @@ const rewrites = {
 // Exported project config
 export const config: VercelConfig = {
   framework: "nextjs",
-  rewrites: [
+  routes: [
     ...rewrites.withoutCapturedHost.map(([src, dest]) =>
       routes.rewrite(src, dest, {
         requestHeaders: { ...bypassHeader },
-      }) as Rewrite,
+      }),
     ),
     ...rewrites.withCapturedHost.map(([src, dest]) =>
       routes.rewrite(src, dest, {
@@ -52,12 +52,12 @@ export const config: VercelConfig = {
         ],
         requestHeaders: { ...bypassHeader },
         responseHeaders: { ...cacheHeader },
-      }) as Rewrite,
+      }),
     ),
     ...rewrites.fallback.map(([src, dest]) =>
       routes.rewrite(src, dest, {
         requestHeaders: { ...bypassHeader },
-      }) as Rewrite,
+      }),
     ),
   ],
 };
