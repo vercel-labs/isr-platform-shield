@@ -23,6 +23,8 @@ const rewrites = {
   withCapturedHost: [
     ["/", `https://${core}/s/$host`], // Root for tenants
     ["/((?!_next/|api/|s/).+)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
+  ],
+  fallback: [
     ["(.*)", `https://${core}/$1`], // Fallback route for tenants
   ]
 }
@@ -47,6 +49,11 @@ export const config: VercelConfig = {
         requestHeaders: { ...bypassHeader },
         responseHeaders: { ...cacheHeader },
       })
-    ))
+    )),
+    ...rewrites.fallback.map(([src, dest]) => (
+      routes.rewrite(src, dest, {
+        requestHeaders: { ...bypassHeader }
+      })
+    )),
   ]
 };
