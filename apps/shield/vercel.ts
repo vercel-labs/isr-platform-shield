@@ -1,5 +1,5 @@
 import type { Redirect, Rewrite, VercelConfig } from "@vercel/config/v1";
-import { deploymentEnv, routes } from "@vercel/config/v1";
+import { deploymentEnv, routes, matchers } from "@vercel/config/v1";
 
 // Root domain for checking if redirect needed - all apex traffic should go through www.
 const rootDomain = deploymentEnv("NEXT_PUBLIC_ROOT_DOMAIN");
@@ -28,8 +28,8 @@ const rewrites = {
     ["/_next/(.*)", `https://${core}/_next/$1`], // Next.js assets - no host condition needed
   ],
   withCapturedHost: [
-    ["/", `https://${core}/s/$host`], // Root for tenants
-    ["/((?!_next/|api/|s/).+)", `https://${core}/s/$host/$1`], // Subdomain path for tenants
+    ["/", `https://${core}/s/$subdomain`], // Root for tenants
+    ["/((?!_next/|api/|s/).+)", `https://${core}/s/$subdomain/$1`], // Subdomain path for tenants
   ],
   fallback: [
     ["(.*)", `https://${core}/$1`], // Fallback route for tenants
@@ -42,10 +42,7 @@ export const config: VercelConfig = {
   routes: [
     routes.redirect("/:path*", `https://www.${rootDomain}/:path*`, {
       has: [
-        {
-          type: "host",
-          value: { eq: rootDomain }, // Exact match for the apex domain
-        },
+        matchers.host(rootDomain)
       ],
       permanent: true,
     }) as Redirect,
@@ -59,10 +56,7 @@ export const config: VercelConfig = {
       ([src, dest]) =>
         routes.rewrite(src, dest, {
           has: [
-            {
-              type: "host",
-              value: "(?<host>.*)\\.[^\\.]+\\.[^\\.]+", // This captured value is used in the destination URL
-            },
+            matchers.host("(?<subdomain>.*)\\.[^\\.]+\\.[^\\.]+") // This captured value is used in the destination URL
           ],
           requestHeaders: { ...bypassHeader },
           responseHeaders: { ...cacheHeader },
