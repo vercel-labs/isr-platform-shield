@@ -40,6 +40,8 @@ See the [architecture](/docs/ARCHITECTURE.md) and [data flow](/docs/DATA_FLOW.md
 
 ## Validation
 
-Validating deployment behavior is done through the `validator` package. You can run `pnpm validate` from the root of the monorepo to test whether certain requests are being routed to the correct pages.
+Run `pnpm validate:routing` for the existing routing checks and `pnpm validate:cache` for the existing cache checks.
 
-See the [validation doc](/docs/VALIDATION.md) for more details.
+The branch-only behavioral acceptance runner uses `pnpm validate -- --suite <ID> --environment preview|production`. It mutates fixture state and can purge explicitly targeted caches, so read the [behavioral acceptance guide](/docs/BEHAVIORAL_ACCEPTANCE.md) before running it.
+
+See the [validation doc](/docs/VALIDATION.md) for the original checks.

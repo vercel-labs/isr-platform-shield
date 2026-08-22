@@ -35,9 +35,11 @@ You can also observe cache behavior by making manual requests with the `request-
 
 The repo includes helpers to perform tag invalidation at both layers. After `pnpm setup`, these are available on your PATH:
 
+Set `CACHE_CONTROL_TOKEN` in the invoking shell. The Core and Shield projects must have the same value configured for their authenticated legacy control routes.
+
 - `delete-tag-core <tag>` — delete specified tag from the Core project
 - `invalidate-tag-shield <tag>` — invalidate specified tag on the Shield project
-- `purge-tag <tag>` — invalidate on Shield and delete on Core
+- `purge-tag <tag>` — run the ordered Core-delete then Shield-invalidate route
 - `request-sub-page <subdomain>` — request `https://<subdomain>.<rootDomain>/` and print response headers
 - `seed-subdomains` — populate example tenants in Redis (also available as `pnpm seed`)
 

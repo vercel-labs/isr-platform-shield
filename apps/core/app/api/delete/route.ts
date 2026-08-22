@@ -1,28 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
-import { dangerouslyDeleteByTag } from "@vercel/functions"
+import { dangerouslyDeleteByTag } from "@vercel/functions";
+import { authorizeCacheControl, PocInputError, pocJson } from "@/lib/poc";
 
-export async function GET(req: NextRequest) {
+export async function POST(request: Request) {
+  const unauthorized = authorizeCacheControl(request);
+  if (unauthorized) return unauthorized;
+
   try {
-    const tag = req.nextUrl.searchParams.get("tag");
-
-    if (!tag) {
-      return NextResponse.json(
-        { error: "Tag is required" },
-        { status: 400 }
-      );
+    const body = (await request.json()) as { tag?: unknown };
+    if (
+      typeof body.tag !== "string" ||
+      !body.tag ||
+      body.tag.length > 256 ||
+      body.tag.includes(",")
+    ) {
+      throw new PocInputError("tag must be a single cache tag");
     }
 
-    await dangerouslyDeleteByTag(tag);
+    await dangerouslyDeleteByTag(body.tag, {
+      revalidationDeadlineSeconds: 0,
+    });
 
-    return NextResponse.json({
+    return pocJson({
       message: "Cache deleted successfully",
-      tag,
+      tag: body.tag,
     });
   } catch (error) {
+    if (error instanceof PocInputError) {
+      return pocJson({ error: error.message }, 400);
+    }
     console.error("Deletion error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return pocJson({ error: "Internal server error" }, 500);
   }
 }

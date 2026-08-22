@@ -9,14 +9,15 @@
 		"dev": "turbo run dev",
 		"lint": "turbo run lint",
 		"format": "biome format --write",
-		"deploy:core": "turbo run deploy:core --filter=@platform/core",
-		"deploy:shield": "turbo run deploy:shield --filter=@platform/shield",
-		"deploy:all": "turbo run deploy:all",
+		"deploy:poc:preview": "./bin/poc-deploy preview",
+		"deploy:poc:production": "./bin/poc-deploy production",
+		"deploy:poc:core": "./bin/poc-deploy core-only",
+		"deploy:all": "./bin/poc-deploy preview",
 		"touch:core": "turbo run touch --filter=@platform/core",
 		"touch:shield": "turbo run touch --filter=@platform/shield",
 		"validate": "turbo run validate",
-		"validate:routing": "turbo run validate:routing",
-		"validate:cache": "turbo run validate:cache",
+		"validate:routing": "pnpm --filter validator validate:routing",
+		"validate:cache": "pnpm --filter validator validate:cache",
 		"tag:delete-core": "./bin/delete-tag-core",
 		"tag:invalidate-shield": "./bin/invalidate-tag-shield",
 		"purge-tag": "./bin/purge-tag"
@@ -25,7 +26,7 @@
 		"@biomejs/biome": "2.4.16",
 		"turbo": "^2.9.16",
 		"typescript": "5.9.2",
-		"vercel": "^54.9.1"
+		"vercel": "54.9.1"
 	},
 	"packageManager": "pnpm@10.12.4",
 	"engines": {

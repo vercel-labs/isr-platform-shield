@@ -1,0 +1,790 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+umask 077
+
+ROOT="$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+EXPECTED_BRANCH="poc/behavioral-acceptance"
+SCOPE_SLUG="vercel-internal-playground"
+GITHUB_ORG="vercel-labs"
+GITHUB_REPO="isr-platform-shield"
+GITHUB_REPO_ID="1055795138"
+CORE_PROJECT_ID="prj_iWGF3kYOWINlj6MnMkJvA4oRDLDt"
+CORE_PROJECT_NAME="isr-platform-shield-core"
+SHIELD_PROJECT_ID="prj_ZrAykGzACbcNBEoohQzEaXx9DgVp"
+SHIELD_PROJECT_NAME="isr-platform-shield-shield"
+DEPLOY_TIMEOUT="10m"
+ALIAS_ATTEMPTS=30
+ALIAS_INTERVAL_SECONDS=2
+
+COMMAND=""
+TARGET=""
+MODE=""
+ALLOW_DIRTY=0
+CONFIRM_PRODUCTION=0
+PAIR_MANIFEST=""
+BRANCH=""
+SHA=""
+DIRTY="false"
+SOURCE_FINGERPRINT=""
+VERCEL_BIN=""
+CORE_PRODUCTION_HOST_VALUE=""
+STARTED_AT=""
+FINISHED_AT=""
+CORE_DEPLOYMENT_ID=""
+CORE_IMMUTABLE_URL=""
+CORE_STABLE_HOST=""
+CORE_DEPLOYED="false"
+SHIELD_DEPLOYMENT_ID=""
+SHIELD_IMMUTABLE_URL=""
+SHIELD_STABLE_HOST=""
+SHIELD_DEPLOYED=""
+MANIFEST_PATH=""
+DEPLOY_OUTCOME="not-started"
+GIT_META=()
+
+usage() {
+	cat <<'USAGE'
+Usage:
+  bin/poc-deploy preview [--allow-dirty]
+  bin/poc-deploy production --confirm-production [--allow-dirty]
+  bin/poc-deploy core-only preview --pair-manifest <path> [--allow-dirty]
+  bin/poc-deploy core-only production --pair-manifest <path> --confirm-production
+  bin/poc-deploy status preview|production
+
+The script only runs on branch poc/behavioral-acceptance. It uses an existing
+Vercel CLI login or VERCEL_TOKEN from the environment. VERCEL_TOKEN is never
+passed as a command-line argument.
+USAGE
+}
+
+log() {
+	printf '%s\n' "$*" >&2
+}
+
+die() {
+	printf 'poc-deploy: %s\n' "$*" >&2
+	exit 1
+}
+
+usage_error() {
+	printf 'poc-deploy: %s\n\n' "$*" >&2
+	usage >&2
+	exit 64
+}
+
+parse_args() {
+	if [[ $# -eq 0 ]]; then
+		usage_error "a command is required"
+	fi
+
+	COMMAND="$1"
+	shift
+	case "$COMMAND" in
+	preview)
+		TARGET="preview"
+		MODE="deploy-all"
+		;;
+	production)
+		TARGET="production"
+		MODE="deploy-all"
+		;;
+	core-only)
+		if [[ $# -eq 0 ]]; then
+			usage_error "core-only requires an explicit preview or production target"
+		fi
+		TARGET="$1"
+		shift
+		case "$TARGET" in
+		preview | production) ;;
+		*) usage_error "core-only target must be preview or production" ;;
+		esac
+		MODE="core-only"
+		;;
+	status)
+		if [[ $# -eq 0 ]]; then
+			usage_error "status requires an explicit preview or production target"
+		fi
+		TARGET="$1"
+		shift
+		case "$TARGET" in
+		preview | production) ;;
+		*) usage_error "status target must be preview or production" ;;
+		esac
+		MODE="status"
+		;;
+	-h | --help | help)
+		usage
+		exit 0
+		;;
+	*) usage_error "unknown command: $COMMAND" ;;
+	esac
+
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+		--allow-dirty)
+			ALLOW_DIRTY=1
+			;;
+		--confirm-production)
+			CONFIRM_PRODUCTION=1
+			;;
+		--pair-manifest)
+			[[ $# -ge 2 ]] || usage_error "--pair-manifest requires a path"
+			PAIR_MANIFEST="$2"
+			shift
+			;;
+		--)
+			;;
+		-h | --help)
+			usage
+			exit 0
+			;;
+		*) usage_error "unknown argument: $1" ;;
+		esac
+		shift
+	done
+
+	if [[ "$MODE" == "status" && "$ALLOW_DIRTY" -eq 1 ]]; then
+		usage_error "--allow-dirty does not apply to status"
+	fi
+	if [[ "$MODE" == "status" && "$CONFIRM_PRODUCTION" -eq 1 ]]; then
+		usage_error "--confirm-production does not apply to status"
+	fi
+	if [[ "$TARGET" == "preview" && "$CONFIRM_PRODUCTION" -eq 1 ]]; then
+		usage_error "--confirm-production is only valid for a production deployment"
+	fi
+	if [[ "$TARGET" == "production" && "$MODE" != "status" && "$CONFIRM_PRODUCTION" -ne 1 ]]; then
+		usage_error "production requires --confirm-production"
+	fi
+	if [[ "$MODE" == "core-only" && -z "$PAIR_MANIFEST" ]]; then
+		usage_error "core-only requires --pair-manifest from the preceding paired deployment"
+	fi
+	if [[ "$MODE" != "core-only" && -n "$PAIR_MANIFEST" ]]; then
+		usage_error "--pair-manifest only applies to core-only"
+	fi
+}
+
+require_command() {
+	command -v "$1" >/dev/null 2>&1 || die "$1 is required"
+}
+
+normalize_host() {
+	node -e '
+const fs = require("fs");
+const host = fs.readFileSync(0, "utf8");
+const labels = host.split(".");
+const validLabel = (label) =>
+  label.length > 0 &&
+  label.length <= 63 &&
+  /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(label);
+if (
+  !host ||
+  host !== host.trim() ||
+  host.length > 253 ||
+  host.includes("://") ||
+  /[\/?#:@\s]/.test(host) ||
+  labels.length < 2 ||
+  !labels.every(validLabel)
+) {
+  process.exit(1);
+}
+process.stdout.write(host.toLowerCase());
+'
+}
+
+source_fingerprint() {
+	# Node template expressions must not be expanded by Bash.
+	# shellcheck disable=SC2016
+	ROOT_DIR="$ROOT" node -e '
+const { execFileSync } = require("node:child_process");
+const { createHash } = require("node:crypto");
+const fs = require("node:fs");
+const root = process.env.ROOT_DIR;
+const git = (...args) => execFileSync("git", ["-C", root, ...args]);
+const hash = createHash("sha256");
+hash.update(git("rev-parse", "HEAD"));
+hash.update(git("diff", "--binary", "HEAD", "--", "."));
+const untracked = git("ls-files", "--others", "--exclude-standard", "-z")
+  .toString()
+  .split("\0")
+  .filter(Boolean)
+  .sort();
+for (const file of untracked) {
+  hash.update(file);
+  hash.update(fs.readFileSync(`${root}/${file}`));
+}
+process.stdout.write(hash.digest("hex"));
+'
+}
+
+host_from_url() {
+	node -e '
+const fs = require("fs");
+const input = fs.readFileSync(0, "utf8");
+let url;
+try {
+  url = new URL(input);
+} catch {
+  process.exit(1);
+}
+if (url.protocol !== "https:" || url.port || url.pathname !== "/" || url.search || url.hash) {
+  process.exit(1);
+}
+process.stdout.write(url.hostname.toLowerCase());
+'
+}
+
+init_context() {
+	require_command git
+	require_command node
+
+	local top
+	top="$(git -C "$ROOT" rev-parse --show-toplevel 2>/dev/null)" || die "repository root could not be resolved"
+	[[ "$top" == "$ROOT" ]] || die "run this script from the isr-platform-shield checkout"
+
+	BRANCH="$(git -C "$ROOT" symbolic-ref --quiet --short HEAD 2>/dev/null)" || die "detached HEAD is not supported"
+	[[ "$BRANCH" == "$EXPECTED_BRANCH" ]] || die "expected branch $EXPECTED_BRANCH, found $BRANCH"
+
+	SHA="$(git -C "$ROOT" rev-parse --verify 'HEAD^{commit}' 2>/dev/null)" || die "git SHA could not be resolved"
+	[[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || die "git returned an invalid commit SHA"
+
+	local status
+	status="$(git -C "$ROOT" status --porcelain=v1 --untracked-files=normal)"
+	if [[ -n "$status" ]]; then
+		DIRTY="true"
+		if [[ "$MODE" != "status" && "$ALLOW_DIRTY" -ne 1 ]]; then
+			die "worktree is dirty; review it and rerun with --allow-dirty if intentional"
+		fi
+	fi
+	if [[ "$TARGET" == "production" && "$DIRTY" == "true" && "$MODE" != "status" ]]; then
+		die "Production deployments require a clean worktree"
+	fi
+	SOURCE_FINGERPRINT="$(source_fingerprint)" || die "source fingerprint could not be calculated"
+
+	local author_name author_email commit_message
+	author_name="$(git -C "$ROOT" log -1 --format=%an)"
+	author_email="$(git -C "$ROOT" log -1 --format=%ae)"
+	commit_message="$(git -C "$ROOT" log -1 --format=%B)"
+	GIT_META=(
+		"githubDeployment=1"
+		"githubCommitAuthorName=$author_name"
+		"githubCommitAuthorEmail=$author_email"
+		"githubCommitMessage=$commit_message"
+		"githubCommitOrg=$GITHUB_ORG"
+		"githubCommitRef=$BRANCH"
+		"githubCommitRepo=$GITHUB_REPO"
+		"githubCommitSha=$SHA"
+		"githubOrg=$GITHUB_ORG"
+		"githubRepo=$GITHUB_REPO"
+		"githubRepoOwnerType=Organization"
+		"githubCommitRepoId=$GITHUB_REPO_ID"
+		"githubRepoId=$GITHUB_REPO_ID"
+		"githubRepoVisibility=public"
+		"githubHost=github.com"
+	)
+	if [[ "$DIRTY" == "true" ]]; then
+		GIT_META+=("gitDirty=1")
+	fi
+
+	[[ -x "$ROOT/node_modules/.bin/vercel" ]] ||
+		die "the repository-pinned Vercel CLI is required; run pnpm install"
+	VERCEL_BIN="$ROOT/node_modules/.bin/vercel"
+	[[ "$($VERCEL_BIN --version 2>/dev/null)" == *"54.9.1"* ]] ||
+		die "bin/poc-deploy requires Vercel CLI 54.9.1"
+
+	if [[ -n "${CORE_PRODUCTION_HOST:-}" ]]; then
+		CORE_PRODUCTION_HOST_VALUE="$(printf '%s' "$CORE_PRODUCTION_HOST" | normalize_host)" ||
+			die "CORE_PRODUCTION_HOST must be a bare hostname, not a URL"
+	fi
+}
+
+run_vercel() {
+	(
+		unset VERCEL_ORG_ID VERCEL_PROJECT_ID
+		CI=1 "$VERCEL_BIN" "$@" \
+			--scope "$SCOPE_SLUG" \
+			--non-interactive \
+			--no-color </dev/null
+	)
+}
+
+require_auth() {
+	if ! run_vercel whoami --format=json >/dev/null 2>&1; then
+		die "Vercel authentication is required; use an existing CLI login or set VERCEL_TOKEN"
+	fi
+}
+
+verify_project_configuration() {
+	local label="$1" project_id="$2" project_name="$3" root_directory="$4"
+	run_vercel api "/v9/projects/$project_id" 2>/dev/null |
+		EXPECTED_ID="$project_id" \
+		EXPECTED_NAME="$project_name" \
+		EXPECTED_ROOT="$root_directory" \
+		EXPECTED_ORG="$GITHUB_ORG" \
+		EXPECTED_REPO="$GITHUB_REPO" \
+		node -e '
+const fs = require("fs");
+const project = JSON.parse(fs.readFileSync(0, "utf8"));
+if (
+  project.id !== process.env.EXPECTED_ID ||
+  project.name !== process.env.EXPECTED_NAME ||
+  project.rootDirectory !== process.env.EXPECTED_ROOT ||
+  project.link?.type !== "github" ||
+  project.link?.org !== process.env.EXPECTED_ORG ||
+  project.link?.repo !== process.env.EXPECTED_REPO
+) process.exit(1);
+' || die "$label project configuration does not match the checked-in deployment contract"
+}
+
+assert_clean_source_unchanged() {
+	[[ "$(source_fingerprint)" == "$SOURCE_FINGERPRINT" ]] ||
+		die "source changed during deployment; refusing to continue with a mixed snapshot"
+}
+
+deployment_field() {
+	local field="$1"
+	# Node template expressions must not be expanded by Bash.
+	# shellcheck disable=SC2016
+	node -e '
+const fs = require("fs");
+const field = process.argv[1];
+const payload = JSON.parse(fs.readFileSync(0, "utf8"));
+const deployment = payload.deployment || payload;
+const value = deployment[field];
+if (typeof value !== "string" || !value) {
+  console.error(`deployment output omitted ${field}`);
+  process.exit(1);
+}
+process.stdout.write(value);
+' "$field"
+}
+
+deploy_project() {
+	local label="$1"
+	local project_id="$2"
+	local core_host="${3:-}"
+	local args meta
+	args=(
+		deploy
+		--cwd "$ROOT"
+		--project "$project_id"
+		--target "$TARGET"
+		--yes
+		--force
+		--with-cache
+		--format=json
+	)
+	for meta in "${GIT_META[@]}"; do
+		args+=(--meta "$meta")
+	done
+	if [[ -n "$core_host" ]]; then
+		args+=(--env "CORE_HOST=$core_host" --build-env "CORE_HOST=$core_host")
+	fi
+
+	log "Deploying $label to $TARGET..."
+	run_vercel "${args[@]}"
+}
+
+inspect_summary() {
+	local reference="$1"
+	local wait="${2:-0}"
+	local args
+	args=(inspect "$reference" --format=json)
+	if [[ "$wait" -eq 1 ]]; then
+		args+=(--wait --timeout "$DEPLOY_TIMEOUT")
+	fi
+	run_vercel "${args[@]}" | node -e '
+const fs = require("fs");
+const value = JSON.parse(fs.readFileSync(0, "utf8"));
+if (!value.id || !value.url || !value.readyState) process.exit(1);
+process.stdout.write([
+  value.id,
+  value.url,
+  value.readyState,
+  value.target || ""
+].join("\t"));
+'
+}
+
+wait_for_ready() {
+	local label="$1"
+	local deployment_id="$2"
+	local deployment_url="$3"
+	local summary resolved_id resolved_host state resolved_target
+	summary="$(inspect_summary "$deployment_url" 1)" || die "$label deployment could not be inspected"
+	IFS=$'\t' read -r resolved_id resolved_host state resolved_target <<<"$summary"
+	[[ "$resolved_id" == "$deployment_id" ]] || die "$label inspection returned a different deployment"
+	[[ "$state" == "READY" ]] || die "$label deployment finished in state $state"
+	if [[ "$TARGET" == "production" ]]; then
+		[[ "$resolved_target" == "production" ]] || die "$label deployment did not use the production target"
+	else
+		[[ -z "$resolved_target" || "$resolved_target" == "preview" ]] || die "$label deployment unexpectedly used target $resolved_target"
+	fi
+	log "$label is READY at https://$resolved_host"
+}
+
+branch_alias_for_deployment() {
+	local project_name="$1"
+	local immutable_url="$2"
+	local immutable_host attempt alias
+	immutable_host="$(printf '%s' "$immutable_url" | host_from_url)" || die "invalid immutable deployment URL: $immutable_url"
+	attempt=1
+	while [[ "$attempt" -le "$ALIAS_ATTEMPTS" ]]; do
+		if alias="$(
+			run_vercel list "$project_name" \
+				--environment preview \
+				--status READY \
+				--meta "githubCommitRef=$BRANCH" \
+				--meta "githubCommitSha=$SHA" \
+				--format=json \
+				--yes 2>/dev/null |
+				IMMUTABLE_HOST="$immutable_host" node -e '
+const fs = require("fs");
+const expected = process.env.IMMUTABLE_HOST;
+const value = JSON.parse(fs.readFileSync(0, "utf8"));
+const deployment = (value.deployments || []).find((item) =>
+  item.state === "READY" && item.url === expected
+);
+const alias = deployment && deployment.meta && deployment.meta.branchAlias;
+if (typeof alias !== "string" || !alias) process.exit(1);
+process.stdout.write(alias);
+'
+		)"; then
+			printf '%s' "$alias" | normalize_host
+			return
+		fi
+		sleep "$ALIAS_INTERVAL_SECONDS"
+		attempt=$((attempt + 1))
+	done
+	die "Vercel did not assign a stable branch alias to $immutable_host"
+}
+
+canonical_production_alias() {
+	local project_name="$1"
+	local immutable_url="$2"
+	local attempt alias
+	attempt=1
+	while [[ "$attempt" -le "$ALIAS_ATTEMPTS" ]]; do
+		if alias="$(
+			run_vercel inspect "$immutable_url" --format=json 2>/dev/null |
+				PROJECT_NAME="$project_name" node -e '
+const fs = require("fs");
+const name = process.env.PROJECT_NAME;
+const value = JSON.parse(fs.readFileSync(0, "utf8"));
+const aliases = (value.aliases || []).filter((alias) =>
+  typeof alias === "string" && alias.split(".")[0] === name
+);
+if (aliases.length !== 1) process.exit(1);
+process.stdout.write(aliases[0]);
+'
+		)"; then
+			printf '%s' "$alias" | normalize_host
+			return
+		fi
+		sleep "$ALIAS_INTERVAL_SECONDS"
+		attempt=$((attempt + 1))
+	done
+	return 1
+}
+
+verify_alias() {
+	local label="$1"
+	local alias="$2"
+	local expected_id="$3"
+	local immutable_url="$4"
+	local expected_host attempt summary resolved_id resolved_host state resolved_target target_matches
+	expected_host="$(printf '%s' "$immutable_url" | host_from_url)" || die "invalid immutable deployment URL: $immutable_url"
+	attempt=1
+	while [[ "$attempt" -le "$ALIAS_ATTEMPTS" ]]; do
+		if summary="$(inspect_summary "$alias" 0 2>/dev/null)"; then
+			IFS=$'\t' read -r resolved_id resolved_host state resolved_target <<<"$summary"
+			target_matches=0
+			if [[ "$TARGET" == "production" && "$resolved_target" == "production" ]]; then
+				target_matches=1
+			elif [[ "$TARGET" == "preview" && ( -z "$resolved_target" || "$resolved_target" == "preview" ) ]]; then
+				target_matches=1
+			fi
+			if [[ "$resolved_id" == "$expected_id" && "$resolved_host" == "$expected_host" && "$state" == "READY" && "$target_matches" -eq 1 ]]; then
+				log "$label alias verified: $alias -> $expected_host"
+				return
+			fi
+		fi
+		sleep "$ALIAS_INTERVAL_SECONDS"
+		attempt=$((attempt + 1))
+	done
+	die "$label alias $alias does not point to deployment $expected_id"
+}
+
+stable_host_for_deployment() {
+	local label="$1"
+	local project_name="$2"
+	local deployment_id="$3"
+	local immutable_url="$4"
+	local production_override="${5:-}"
+	local stable_host
+	if [[ "$TARGET" == "preview" ]]; then
+		stable_host="$(branch_alias_for_deployment "$project_name" "$immutable_url")"
+	elif [[ -n "$production_override" ]]; then
+		stable_host="$production_override"
+	else
+		stable_host="$(canonical_production_alias "$project_name" "$immutable_url")" || {
+			if [[ "$label" == "Core" ]]; then
+				die "Core production host could not be discovered safely; set CORE_PRODUCTION_HOST to a bare hostname"
+			fi
+			die "$label production host could not be discovered safely"
+		}
+	fi
+	stable_host="$(printf '%s' "$stable_host" | normalize_host)" || die "$label stable host is not a bare hostname"
+	verify_alias "$label" "$stable_host" "$deployment_id" "$immutable_url"
+	printf '%s' "$stable_host"
+}
+
+latest_ready_deployment() {
+	local project_name="$1"
+	local args
+	args=(
+		list "$project_name"
+		--environment "$TARGET"
+		--status READY
+		--format=json
+		--yes
+	)
+	if [[ "$TARGET" == "preview" ]]; then
+		args+=(--meta "githubCommitRef=$BRANCH")
+	fi
+	run_vercel "${args[@]}" | node -e '
+const fs = require("fs");
+const value = JSON.parse(fs.readFileSync(0, "utf8"));
+const deployment = (value.deployments || []).find((item) => item.state === "READY");
+if (!deployment || !deployment.url) process.exit(1);
+const branchAlias = deployment.meta && deployment.meta.branchAlias;
+process.stdout.write([deployment.url, branchAlias || ""].join("\t"));
+'
+}
+
+current_project_record() {
+	local label="$1"
+	local project_name="$2"
+	local production_override="${3:-}"
+	local latest immutable_host branch_alias immutable_url summary deployment_id resolved_host state resolved_target stable_host
+	latest="$(latest_ready_deployment "$project_name" 2>/dev/null)" || die "no READY $TARGET deployment found for $label"
+	IFS=$'\t' read -r immutable_host branch_alias <<<"$latest"
+	immutable_url="https://$immutable_host"
+	summary="$(inspect_summary "$immutable_url" 0)" || die "$label deployment could not be inspected"
+	IFS=$'\t' read -r deployment_id resolved_host state resolved_target <<<"$summary"
+	[[ "$state" == "READY" ]] || die "$label deployment is not READY"
+	if [[ "$TARGET" == "production" ]]; then
+		[[ "$resolved_target" == "production" ]] || die "$label deployment is not a Production deployment"
+	else
+		[[ -z "$resolved_target" || "$resolved_target" == "preview" ]] || die "$label deployment is not a Preview deployment"
+	fi
+	if [[ "$TARGET" == "preview" ]]; then
+		[[ -n "$branch_alias" ]] || die "$label preview deployment has no branch alias"
+		stable_host="$(printf '%s' "$branch_alias" | normalize_host)" || die "$label branch alias is invalid"
+	else
+		stable_host="$(stable_host_for_deployment "$label" "$project_name" "$deployment_id" "$immutable_url" "$production_override")"
+		printf '%s\t%s\t%s' "$deployment_id" "$immutable_url" "$stable_host"
+		return
+	fi
+	verify_alias "$label" "$stable_host" "$deployment_id" "$immutable_url"
+	printf '%s\t%s\t%s' "$deployment_id" "$immutable_url" "$stable_host"
+}
+
+pair_manifest_record() {
+	local manifest="$1"
+	[[ -f "$manifest" ]] || die "pair manifest not found: $manifest"
+	MANIFEST_EXPECTED_BRANCH="$BRANCH" MANIFEST_EXPECTED_TARGET="$TARGET" node -e '
+const fs = require("fs");
+const value = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+if (
+  value.outcome !== "success" ||
+  value.branch !== process.env.MANIFEST_EXPECTED_BRANCH ||
+  value.target !== process.env.MANIFEST_EXPECTED_TARGET ||
+  !value.deployments?.core?.deployed ||
+  !value.deployments?.core?.deploymentId ||
+  !value.deployments?.core?.immutableUrl ||
+  !value.deployments?.core?.stableHost ||
+  !value.deployments?.shield?.deployed ||
+  !value.deployments?.shield?.deploymentId ||
+  !value.deployments?.shield?.immutableUrl ||
+  !value.deployments?.shield?.stableHost
+) process.exit(1);
+process.stdout.write([
+  value.deployments.core.deploymentId,
+  value.deployments.core.immutableUrl,
+  value.deployments.core.stableHost,
+  value.deployments.shield.deploymentId,
+  value.deployments.shield.immutableUrl,
+  value.deployments.shield.stableHost
+].join("\t"));
+' "$manifest" || die "pair manifest does not describe a successful paired $TARGET deployment on $BRANCH"
+}
+
+show_status() {
+	local core_record shield_record core_id core_url core_host shield_id shield_url shield_host
+	core_record="$(current_project_record "Core" "$CORE_PROJECT_NAME" "$CORE_PRODUCTION_HOST_VALUE")"
+	shield_record="$(current_project_record "Shield" "$SHIELD_PROJECT_NAME")"
+	IFS=$'\t' read -r core_id core_url core_host <<<"$core_record"
+	IFS=$'\t' read -r shield_id shield_url shield_host <<<"$shield_record"
+	printf 'Branch: %s\n' "$BRANCH"
+	printf 'SHA: %s\n' "$SHA"
+	printf 'Target: %s\n' "$TARGET"
+	printf 'Core: https://%s (%s, %s)\n' "$core_host" "$core_id" "$core_url"
+	printf 'Shield: https://%s (%s, %s)\n' "$shield_host" "$shield_id" "$shield_url"
+}
+
+write_manifest() {
+	local path="$1"
+	# Node template expressions must not be expanded by Bash.
+	# shellcheck disable=SC2016
+	MANIFEST_PATH="$path" \
+		MANIFEST_OPERATION="$COMMAND" \
+		MANIFEST_BRANCH="$BRANCH" \
+		MANIFEST_SHA="$SHA" \
+		MANIFEST_TARGET="$TARGET" \
+		MANIFEST_STARTED_AT="$STARTED_AT" \
+		MANIFEST_FINISHED_AT="$FINISHED_AT" \
+		MANIFEST_DIRTY="$DIRTY" \
+		MANIFEST_CORE_PROJECT_ID="$CORE_PROJECT_ID" \
+		MANIFEST_CORE_ID="$CORE_DEPLOYMENT_ID" \
+		MANIFEST_CORE_URL="$CORE_IMMUTABLE_URL" \
+		MANIFEST_CORE_HOST="$CORE_STABLE_HOST" \
+		MANIFEST_CORE_DEPLOYED="$CORE_DEPLOYED" \
+		MANIFEST_SHIELD_PROJECT_ID="$SHIELD_PROJECT_ID" \
+		MANIFEST_SHIELD_ID="$SHIELD_DEPLOYMENT_ID" \
+		MANIFEST_SHIELD_URL="$SHIELD_IMMUTABLE_URL" \
+		MANIFEST_SHIELD_HOST="$SHIELD_STABLE_HOST" \
+		MANIFEST_SHIELD_DEPLOYED="$SHIELD_DEPLOYED" \
+		MANIFEST_OUTCOME="$DEPLOY_OUTCOME" \
+		node -e '
+const fs = require("fs");
+const env = process.env;
+const manifest = {
+  schemaVersion: 1,
+  operation: env.MANIFEST_OPERATION,
+  branch: env.MANIFEST_BRANCH,
+  sha: env.MANIFEST_SHA,
+  target: env.MANIFEST_TARGET,
+  startedAt: env.MANIFEST_STARTED_AT,
+  finishedAt: env.MANIFEST_FINISHED_AT,
+  dirty: env.MANIFEST_DIRTY === "true",
+  outcome: env.MANIFEST_OUTCOME,
+  projectIds: {
+    core: env.MANIFEST_CORE_PROJECT_ID,
+    shield: env.MANIFEST_SHIELD_PROJECT_ID
+  },
+  deployments: {
+    core: {
+      projectId: env.MANIFEST_CORE_PROJECT_ID,
+      deploymentId: env.MANIFEST_CORE_ID,
+      deployed: env.MANIFEST_CORE_DEPLOYED === "true",
+      immutableUrl: env.MANIFEST_CORE_URL,
+      stableHost: env.MANIFEST_CORE_HOST
+    },
+    shield: {
+      projectId: env.MANIFEST_SHIELD_PROJECT_ID,
+      deploymentId: env.MANIFEST_SHIELD_ID,
+      deployed: env.MANIFEST_SHIELD_DEPLOYED === "true",
+      immutableUrl: env.MANIFEST_SHIELD_URL,
+      stableHost: env.MANIFEST_SHIELD_HOST
+    }
+  }
+};
+const temporaryPath = `${env.MANIFEST_PATH}.tmp-${process.pid}`;
+fs.writeFileSync(temporaryPath, `${JSON.stringify(manifest, null, 2)}\n`, {
+  mode: 0o600
+});
+fs.renameSync(temporaryPath, env.MANIFEST_PATH);
+'
+}
+
+persist_failure_manifest() {
+	local exit_code=$?
+	if [[ -n "$MANIFEST_PATH" && ( "$DEPLOY_OUTCOME" != "success" || "$exit_code" -ne 0 ) ]]; then
+		FINISHED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+		DEPLOY_OUTCOME="failed"
+		write_manifest "$MANIFEST_PATH" || true
+		printf 'Partial manifest: %s\n' "$MANIFEST_PATH" >&2
+	fi
+	return "$exit_code"
+}
+
+main() {
+	trap persist_failure_manifest EXIT
+	parse_args "$@"
+	init_context
+	require_auth
+	verify_project_configuration "Core" "$CORE_PROJECT_ID" "$CORE_PROJECT_NAME" "apps/core"
+	verify_project_configuration "Shield" "$SHIELD_PROJECT_ID" "$SHIELD_PROJECT_NAME" "apps/shield"
+
+	if [[ "$MODE" == "status" ]]; then
+		show_status
+		return
+	fi
+
+	local shield_record="" paired_core_id="" paired_core_url="" paired_core_host=""
+	if [[ "$MODE" == "core-only" ]]; then
+		log "Verifying the preceding paired Shield deployment before changing Core..."
+		local pair_record
+		pair_record="$(pair_manifest_record "$PAIR_MANIFEST")"
+		IFS=$'\t' read -r paired_core_id paired_core_url paired_core_host SHIELD_DEPLOYMENT_ID SHIELD_IMMUTABLE_URL SHIELD_STABLE_HOST <<<"$pair_record"
+		verify_alias "Core" "$paired_core_host" "$paired_core_id" "$paired_core_url"
+		verify_alias "Shield" "$SHIELD_STABLE_HOST" "$SHIELD_DEPLOYMENT_ID" "$SHIELD_IMMUTABLE_URL"
+		if [[ -n "$CORE_PRODUCTION_HOST_VALUE" && "$CORE_PRODUCTION_HOST_VALUE" != "$paired_core_host" ]]; then
+			die "CORE_PRODUCTION_HOST does not match the paired manifest Core host"
+		fi
+		shield_record="$SHIELD_DEPLOYMENT_ID"$'\t'"$SHIELD_IMMUTABLE_URL"$'\t'"$SHIELD_STABLE_HOST"
+	fi
+
+	local manifest_dir timestamp short_sha core_json shield_json
+	manifest_dir="$ROOT/.artifacts/deployments"
+	mkdir -p "$manifest_dir"
+	STARTED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+	timestamp="$(date -u '+%Y%m%dT%H%M%SZ')"
+	short_sha="${SHA:0:12}"
+	MANIFEST_PATH="$manifest_dir/${timestamp}-${COMMAND}-${TARGET}-${short_sha}-$$.json"
+	DEPLOY_OUTCOME="in-progress"
+	write_manifest "$MANIFEST_PATH"
+
+	assert_clean_source_unchanged
+	core_json="$(deploy_project "Core" "$CORE_PROJECT_ID")"
+	CORE_DEPLOYMENT_ID="$(printf '%s' "$core_json" | deployment_field id)"
+	CORE_IMMUTABLE_URL="$(printf '%s' "$core_json" | deployment_field url)"
+	CORE_DEPLOYED="true"
+	write_manifest "$MANIFEST_PATH"
+	assert_clean_source_unchanged
+	wait_for_ready "Core" "$CORE_DEPLOYMENT_ID" "$CORE_IMMUTABLE_URL"
+	CORE_STABLE_HOST="$(stable_host_for_deployment "Core" "$CORE_PROJECT_NAME" "$CORE_DEPLOYMENT_ID" "$CORE_IMMUTABLE_URL" "$CORE_PRODUCTION_HOST_VALUE")"
+	if [[ "$MODE" == "core-only" && "$CORE_STABLE_HOST" != "$paired_core_host" ]]; then
+		die "Core stable host changed from paired manifest ($paired_core_host) to $CORE_STABLE_HOST"
+	fi
+	write_manifest "$MANIFEST_PATH"
+
+	if [[ "$MODE" == "deploy-all" ]]; then
+		assert_clean_source_unchanged
+		shield_json="$(deploy_project "Shield" "$SHIELD_PROJECT_ID" "$CORE_STABLE_HOST")"
+		SHIELD_DEPLOYMENT_ID="$(printf '%s' "$shield_json" | deployment_field id)"
+		SHIELD_IMMUTABLE_URL="$(printf '%s' "$shield_json" | deployment_field url)"
+		SHIELD_DEPLOYED="true"
+		write_manifest "$MANIFEST_PATH"
+		assert_clean_source_unchanged
+		wait_for_ready "Shield" "$SHIELD_DEPLOYMENT_ID" "$SHIELD_IMMUTABLE_URL"
+		SHIELD_STABLE_HOST="$(stable_host_for_deployment "Shield" "$SHIELD_PROJECT_NAME" "$SHIELD_DEPLOYMENT_ID" "$SHIELD_IMMUTABLE_URL")"
+	else
+		IFS=$'\t' read -r SHIELD_DEPLOYMENT_ID SHIELD_IMMUTABLE_URL SHIELD_STABLE_HOST <<<"$shield_record"
+		SHIELD_DEPLOYED="false"
+	fi
+	verify_alias "Core" "$CORE_STABLE_HOST" "$CORE_DEPLOYMENT_ID" "$CORE_IMMUTABLE_URL"
+	verify_alias "Shield" "$SHIELD_STABLE_HOST" "$SHIELD_DEPLOYMENT_ID" "$SHIELD_IMMUTABLE_URL"
+	assert_clean_source_unchanged
+
+	FINISHED_AT="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+	DEPLOY_OUTCOME="success"
+	write_manifest "$MANIFEST_PATH"
+	printf 'Manifest: %s\n' "$MANIFEST_PATH"
+	printf 'Shield: https://%s\n' "$SHIELD_STABLE_HOST"
+	trap - EXIT
+}
+
+main "$@"

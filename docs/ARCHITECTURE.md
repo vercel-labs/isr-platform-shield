@@ -21,6 +21,9 @@ The Shielded ISR architecture introduces a protective cache layer that:
 
 ## System Architecture
 
+> [!NOTE]
+> The invalidation diagrams below preserve the pre-acceptance proposal for comparison. The branch PoC tests whether project-scoped REST calls replace this application-route choreography; see [Behavioral Acceptance](/docs/BEHAVIORAL_ACCEPTANCE.md).
+
 ```mermaid
 flowchart LR
     subgraph SH[Shield App]
@@ -291,11 +294,10 @@ graph TD
 
 Route mapping:
 
-- Shield purge route = `/api/purge?tag=...`
-- Shield invalidate route = `/api/invalidate?tag=...`
-- Core delete route = `/api/delete`
+- Shield invalidate route = authenticated `POST /api/shield/invalidate`
+- Core delete route = authenticated `POST /api/delete`
 
-Ordering is strict and near-atomic: call Shield `/api/purge` first, then `/api/invalidate` back-to-back. This minimizes the stale-read window where clients could repopulate stale data between calls. Inside `/api/invalidate`, Core cache deletion still happens first, and Shield CDN invalidation only occurs on success.
+The legacy Shield route deletes the Core tag first and invalidates Shield only after Core succeeds. The behavioral acceptance PoC separately tests whether a system-of-record worker can replace both application routes with project-scoped REST calls.
 
 ### Cache Tag Structure
 

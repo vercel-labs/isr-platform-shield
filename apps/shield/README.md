@@ -6,7 +6,7 @@ A caching proxy that provides shielded ISR protection for the Core app during de
 
 - Rewrites tenant subdomain requests to Core's `/s/[subdomain]/...` routes via `vercel.ts`
 - Sets Shield CDN cache headers on tenant routes (`s-maxage=120`, long `stale-while-revalidate`)
-- Exposes `/api/invalidate` to delete Core cache tags and invalidate Shield CDN tags
+- Exposes authenticated `POST /api/shield/invalidate` for the legacy route-based invalidation comparison
 
 ## How it works
 
@@ -14,7 +14,7 @@ When Core deploys, its ISR cache is cleared. Shield's CDN cache is independent a
 
 1. **Cache protection**: Shield CDN serves cached tenant pages after Core deploys
 2. **Rewrites**: Platform routing in `vercel.ts` extracts the subdomain from the host and forwards to Core
-3. **Invalidation**: `/api/invalidate` deletes the tag on Core first, then purges Shield CDN entries for that tag
+3. **Invalidation**: `/api/shield/invalidate` deletes the tag on Core first, then invalidates Shield CDN entries for that tag
 
 See [architecture](/docs/ARCHITECTURE.md) for request flows and invalidation ordering.
 
@@ -25,7 +25,9 @@ Copy `env.example` to `.env.local`:
 - `CORE_HOST` — hostname of the Core deployment (used by `vercel.ts` rewrites and `@platform/config`)
 - `SHIELD_HOST` — hostname of the Shield deployment (used by `@platform/config`)
 - `NEXT_PUBLIC_ROOT_DOMAIN` — public root domain (used by `@platform/config`)
-- `VERCEL_TOKEN` — only needed for `pnpm deploy:shield`
+- `CACHE_CONTROL_TOKEN` — bearer token for the legacy invalidation route
+
+Run PoC deployments from the repository root with the guarded `deploy:poc:*` commands.
 
 ## Development
 
