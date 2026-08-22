@@ -12,9 +12,9 @@ describe("Cache", () => {
 		);
 
 		const age = h.get("Age");
-		if (age && Number.parseInt(age) < 120) {
+		if (age && Number.parseInt(age, 10) < 120) {
 			expect(h.get("x-vercel-cache")).toBe("HIT");
-		} else if (age && Number.parseInt(age) >= 120) {
+		} else if (age && Number.parseInt(age, 10) >= 120) {
 			expect(h.get("x-vercel-cache")).toBe("STALE");
 
 			await sleep(3000);
@@ -47,9 +47,9 @@ describe("Cache", () => {
 		);
 
 		const age = h.get("Age");
-		if (age && Number.parseInt(age) < 120) {
+		if (age && Number.parseInt(age, 10) < 120) {
 			expect(["HIT", "STALE"]).toContain(h.get("x-vercel-cache"));
-		} else if (age && Number.parseInt(age) >= 120) {
+		} else if (age && Number.parseInt(age, 10) >= 120) {
 			expect(h.get("x-vercel-cache")).toBe("STALE");
 
 			await sleep(3000);
@@ -82,9 +82,9 @@ describe("Cache", () => {
 		);
 
 		const age = h.get("Age");
-		if (age && Number.parseInt(age) < 120) {
+		if (age && Number.parseInt(age, 10) < 120) {
 			expect(["HIT", "STALE"]).toContain(h.get("x-vercel-cache"));
-		} else if (age && Number.parseInt(age) >= 120) {
+		} else if (age && Number.parseInt(age, 10) >= 120) {
 			expect(h.get("x-vercel-cache")).toBe("STALE");
 
 			await sleep(3000);
@@ -115,8 +115,8 @@ describe("Cache", () => {
 		expect(html).toContain("😎");
 		expect(html).toContain(config.subdomains.primary);
 
-		const response2 = await fetch(urls.secondarySubdomain);
-		expect(response.status).toBe(200);
+		const response2 = await requestPage(urls.secondarySubdomain);
+		expect(response2.status).toBe(200);
 
 		const html2 = await response2.text();
 		expect(html2).not.toContain("😎");

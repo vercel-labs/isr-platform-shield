@@ -6,15 +6,18 @@
     "@platform/config": "workspace:*"
   },
   "scripts": {
-    "validate": "jest",
+    "validate": "tsx src/cli.ts",
+    "validate:legacy": "jest",
     "validate:routing": "jest routing.test.ts",
-    "validate:cache": "jest cache.test.ts"
+    "validate:cache": "jest cache.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.cli.json"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^22.18.1",
     "jest": "^29.7.0",
     "ts-jest": "^29.4.11",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }

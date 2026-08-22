@@ -2,5 +2,15 @@
 
 . "$(dirname "$0")/_config.sh"
 
+[ "$#" -eq 1 ] || { printf 'usage: invalidate-tag-shield <tag>\n' >&2; exit 64; }
+[ -n "${CACHE_CONTROL_TOKEN:-}" ] || { printf 'CACHE_CONTROL_TOKEN is required\n' >&2; exit 1; }
+case "$1" in *[!a-zA-Z0-9:_./-]*) printf 'tag contains unsupported characters\n' >&2; exit 64;; esac
+
 SHIELD_URL="$(cfg shieldUrl)"
-curl -kvN "${SHIELD_URL}/api/invalidate?tag=$1" -H 'x-vercel-debug-proxy-timing:1' -o /dev/null
+curl --fail-with-body --silent --show-error \
+	--request POST \
+	--header "Authorization: Bearer ${CACHE_CONTROL_TOKEN}" \
+	--header 'Content-Type: application/json' \
+	--header "x-vercel-protection-bypass: ${SHIELD_BYPASS_TOKEN:-}" \
+	--data "{\"tag\":\"$1\"}" \
+	"${SHIELD_URL}/api/shield/invalidate"

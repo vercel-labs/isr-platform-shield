@@ -23,6 +23,10 @@ Copy `env.example` to `.env.local`:
 - `NEXT_PUBLIC_ROOT_DOMAIN` — public root domain (also read by `@platform/config`)
 - `KV_REST_API_URL` — Upstash Redis REST URL (subdomain storage)
 - `KV_REST_API_TOKEN` — Upstash Redis REST token
+- `POC_CONTROL_TOKEN` — authenticates the branch-only behavioral fixture controls
+- `CACHE_CONTROL_TOKEN` — authenticates the legacy general cache-delete route
+
+The behavioral fixture also requires a private Vercel Blob store connected through OIDC in Preview and Production. Do not enable its local in-memory fallback on Vercel.
 
 Validation subdomain names come from `packages/config/validation.json`. Domain and deployment URLs are resolved from env vars via `@platform/config`. See [packages/config/README.md](/packages/config/README.md).
 
