@@ -439,19 +439,21 @@ branch_alias_for_deployment() {
 				--meta "githubCommitSha=$SHA" \
 				--format=json \
 				--yes 2>/dev/null |
-				IMMUTABLE_HOST="$immutable_host" node -e '
+				node -e '
 const fs = require("fs");
-const expected = process.env.IMMUTABLE_HOST;
 const value = JSON.parse(fs.readFileSync(0, "utf8"));
 const deployment = (value.deployments || []).find((item) =>
-  item.state === "READY" && item.url === expected
+  item.state === "READY" && item.meta && item.meta.branchAlias
 );
 const alias = deployment && deployment.meta && deployment.meta.branchAlias;
 if (typeof alias !== "string" || !alias) process.exit(1);
 process.stdout.write(alias);
 '
 		)"; then
-			printf '%s' "$alias" | normalize_host
+			alias="$(printf '%s' "$alias" | normalize_host)" || die "Vercel returned an invalid branch alias"
+			log "Assigning $project_name branch alias $alias to $immutable_host..."
+			run_vercel alias set "$immutable_url" "$alias" >/dev/null
+			printf '%s' "$alias"
 			return
 		fi
 		sleep "$ALIAS_INTERVAL_SECONDS"
