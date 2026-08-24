@@ -76,7 +76,7 @@ B3.5 records this route-derived normalization as an architectural caveat. A midd
 
 ### B1: Invalidation propagation
 
-- B1.1, **Shield-project REST invalidate propagated tag after warm+bump**. Warms v1, bumps v2, hard-deletes the Core test tag as freshness setup, then soft-invalidates Shield. It requires an immediate outer `STALE` response and eventual v2. This is the B1/B2 stop gate.
+- B1.1, **Shield-project REST invalidate propagated tag after warm+bump**. Warms v1, bumps v2, hard-deletes the Core test tag as freshness setup, then soft-invalidates Shield. It accepts an operation-caused `STALE` or `REVALIDATED` transition and requires eventual v2. `REVALIDATED` is recorded as a caveat because it is synchronous. This is the B1/B2 stop gate.
 - B1.2, **Core-project REST invalidate only while Shield is fresh**. Requires Shield to remain on v1 and records direct Core behavior separately.
 - B1.3, **Core-side Next revalidateTag and updateTag**. Automates `revalidateTag`; the row remains BLOCKED because no safe `updateTag` Server Action transport exists.
 - B1.4, **Trace refresh mechanism via outer headers + renderId/contentVersion**. Records outer cache headers and marker changes. Definitive inner HIT/MISS attribution requires out-of-band Core logs.

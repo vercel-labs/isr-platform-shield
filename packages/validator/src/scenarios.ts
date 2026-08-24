@@ -804,9 +804,10 @@ const definitions: ScenarioDefinition[] = [
 			assertOperationOk(invalidation, "Shield REST invalidation");
 			const first = await shieldFixture(context, "page", path);
 			const firstMarker = assertMarker(first, path, "default");
+			const firstCacheStatus = first.xVercelCache?.toUpperCase();
 			ensure(
-				first.xVercelCache?.toUpperCase() === "STALE",
-				`Shield tag invalidation did not produce an immediate STALE response; received ${first.xVercelCache ?? "no cache status"}`,
+				firstCacheStatus === "STALE" || firstCacheStatus === "REVALIDATED",
+				`Shield tag invalidation did not produce STALE or REVALIDATED; received ${first.xVercelCache ?? "no cache status"}`,
 			);
 			ensure(
 				firstMarker.contentVersion === v1 || firstMarker.contentVersion === v2,
@@ -825,6 +826,9 @@ const definitions: ScenarioDefinition[] = [
 			context.shared.set(`shield-soft:${context.run}`, true);
 			return pass(
 				`first=${firstMarker.contentVersion}/${first.xVercelCache ?? "unreported"}; eventual=${marker.contentVersion}/${converged.xVercelCache ?? "unreported"}`,
+				firstCacheStatus === "REVALIDATED"
+					? "documentable-with-caveat"
+					: undefined,
 			);
 		},
 	},

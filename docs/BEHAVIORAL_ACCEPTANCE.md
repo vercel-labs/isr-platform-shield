@@ -146,7 +146,7 @@ Run the stop gate first:
 pnpm validate -- --suite B1.1 --environment preview --runs 3 --output .artifacts/evidence/b1-1-preview
 ```
 
-B1.1 hard-deletes only the Core test tag as setup so the origin can return the bumped version, then tests whether Shield-project invalidation addresses the propagated tag on the outer entry. The first post-invalidation Shield response must be `STALE`; eventual convergence proves the outer entry refreshed.
+B1.1 hard-deletes only the Core test tag as setup so the origin can return the bumped version, then tests whether Shield-project invalidation addresses the propagated tag on the outer entry. The first post-invalidation response must report `STALE` or `REVALIDATED`, and eventual convergence proves the outer entry refreshed. The observed synchronous `REVALIDATED` path is retained as a caveat.
 
 Run one section or the full suite serially:
 
