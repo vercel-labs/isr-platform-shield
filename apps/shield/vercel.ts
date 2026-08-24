@@ -99,6 +99,20 @@ export const config: VercelConfig = {
           requestHeaders: { ...bypassHeader },
         }) as Rewrite,
     ),
+    // Keep the tenant and deployment in one DNS label so the Preview suffix's
+    // existing wildcard certificate covers tenant---deployment.example.com.
+    ...rewrites.withCapturedHost.map(
+      ([src, dest]) =>
+        routes.rewrite(src, dest, {
+          has: [
+            matchers.host(
+              "(?<subdomain>[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)---[^\\.]+\\.[^\\.]+\\.[^\\.]+",
+            ),
+          ],
+          requestHeaders: { ...bypassHeader },
+          responseHeaders: { ...cacheHeader },
+        }) as Rewrite,
+    ),
     ...rewrites.withCapturedHost.map(
       ([src, dest]) =>
         routes.rewrite(src, dest, {

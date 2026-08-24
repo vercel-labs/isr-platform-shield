@@ -235,6 +235,12 @@ process.stdout.write(url.hostname.toLowerCase());
 '
 }
 
+tenant_url_template() {
+	local host
+	host="$(printf '%s' "$1" | host_from_url)" || die "invalid Shield deployment URL: $1"
+	printf 'https://{tenant}---%s' "$host"
+}
+
 init_context() {
 	require_command git
 	require_command node
@@ -640,6 +646,9 @@ show_status() {
 	printf 'Target: %s\n' "$TARGET"
 	printf 'Core: https://%s (%s, %s)\n' "$core_host" "$core_id" "$core_url"
 	printf 'Shield: https://%s (%s, %s)\n' "$shield_host" "$shield_id" "$shield_url"
+	if [[ "$TARGET" == "preview" ]]; then
+		printf 'Tenant: %s\n' "$(tenant_url_template "$shield_url")"
+	fi
 }
 
 write_manifest() {
@@ -695,7 +704,11 @@ const manifest = {
       deploymentId: env.MANIFEST_SHIELD_ID,
       deployed: env.MANIFEST_SHIELD_DEPLOYED === "true",
       immutableUrl: env.MANIFEST_SHIELD_URL,
-      stableHost: env.MANIFEST_SHIELD_HOST
+      stableHost: env.MANIFEST_SHIELD_HOST,
+      tenantUrlTemplate:
+        env.MANIFEST_TARGET === "preview" && env.MANIFEST_SHIELD_URL
+          ? `https://{tenant}---${new URL(env.MANIFEST_SHIELD_URL).hostname}`
+          : null
     }
   }
 };
@@ -792,6 +805,9 @@ main() {
 	write_manifest "$MANIFEST_PATH"
 	printf 'Manifest: %s\n' "$MANIFEST_PATH"
 	printf 'Shield: https://%s\n' "$SHIELD_STABLE_HOST"
+	if [[ "$TARGET" == "preview" ]]; then
+		printf 'Tenant: %s\n' "$(tenant_url_template "$SHIELD_IMMUTABLE_URL")"
+	fi
 	trap - EXIT
 }
 

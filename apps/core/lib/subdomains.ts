@@ -13,10 +13,15 @@ export function extractSubdomain(request: NextRequest): string | null {
 	// Production environment
 	const rootDomainFormatted = tryGetConfig()?.rootDomain;
 
-	// Handle preview deployment URLs (tenant---branch-name.vercel.app)
-	if (hostname.includes("---") && hostname.endsWith(".vercel.app")) {
-		const parts = hostname.split("---");
-		return parts.length > 0 ? parts[0] : null;
+	// Preview suffixes encode tenant and deployment in one wildcard-covered label.
+	if (hostname.includes("---")) {
+		const [tenant, deploymentHost] = hostname.split("---", 2);
+		if (
+			/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(tenant) &&
+			deploymentHost.includes(".")
+		) {
+			return tenant;
+		}
 	}
 
 	// Regular subdomain detection
@@ -40,7 +45,7 @@ export function isValidIcon(str: string) {
 		if (emojiPattern.test(str)) {
 			return true;
 		}
-	} catch (error) {
+	} catch {
 		// If the regex fails (e.g., in environments that don't support Unicode property escapes),
 		// fall back to a simpler validation
 	}
