@@ -319,7 +319,7 @@ graph LR
     D[www.domain.com/admin] -->|Extract subdomain| E[Shield]
     E -->|Rewrite| F[core.vercel.dev/s/www/admin]
 
-    G[tenant---branch.vercel.app] -->|Preview URL parse| H[Shield]
+    G[tenant---shield-deployment.preview-suffix] -->|Preview URL parse| H[Shield]
     H -->|Rewrite| I[core.vercel.dev/s/tenant/...]
 
     style B stroke:#66f,stroke-width:2px
@@ -327,4 +327,4 @@ graph LR
     style H stroke:#66f,stroke-width:2px
 ```
 
-The Shield extracts the subdomain from the host header using regex and rewrites all requests to Core's `/s/[subdomain]/[...path]` route structure. Preview deployment URLs are also handled.
+The Shield extracts the subdomain from the host header using regex and rewrites all requests to Core's `/s/[subdomain]/[...path]` route structure. Preview tenant URLs use one DNS label: `<tenant>---<shield-immutable-host>`. This stays within the Preview suffix wildcard certificate and requires no tenant wildcard certificate.

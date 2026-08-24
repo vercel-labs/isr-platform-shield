@@ -10,6 +10,8 @@ Shield stays CDN-only. Its PoC behavior is implemented with platform rewrites an
 
 Preview Shield deployments point to the stable Core branch alias. They never point to an immutable Core deployment URL. A later Core-only deployment moves the Core branch alias while the fixed Shield deployment keeps using the same hostname.
 
+Tenant previews use `https://<tenant>---<shield-immutable-host>`. Vercel routes this single-label hostname to the immutable Shield deployment, and Shield extracts the tenant before `---`. The deployment manifest and command output provide the exact template. Nested hosts such as `<tenant>.<shield-host>` are not used because they require another wildcard certificate level.
+
 ## Fixture route contract
 
 The fixture is namespaced under `/__poc`:

@@ -16,6 +16,8 @@ When Core deploys, its ISR cache is cleared. Shield's CDN cache is independent a
 2. **Rewrites**: Platform routing in `vercel.ts` extracts the subdomain from the host and forwards to Core
 3. **Invalidation**: `/api/shield/invalidate` deletes the tag on Core first, then invalidates Shield CDN entries for that tag
 
+Preview tenants use `<tenant>---<shield-immutable-host>` so they remain one DNS label under the existing Preview suffix certificate.
+
 See [architecture](/docs/ARCHITECTURE.md) for request flows and invalidation ordering.
 
 ## Environment variables
