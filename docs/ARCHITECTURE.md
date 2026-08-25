@@ -299,6 +299,9 @@ Route mapping:
 
 The legacy Shield route deletes the Core tag first and invalidates Shield only after Core succeeds. The behavioral acceptance PoC separately tests whether a system-of-record worker can replace both application routes with project-scoped REST calls.
 
+> [!WARNING]
+> B1.1 rejected the stale-preserving assumption in this flow. With same-team propagated tags, hard-deleting the Core tag also caused the outer Shield request to foreground-regenerate as `REVALIDATED`; the debug timing header made no difference. Do not treat Core-delete then Shield-invalidate as the canonical sequence while follow-up tests are pending.
+
 ### Cache Tag Structure
 
 ```text

@@ -114,6 +114,7 @@ export class EvidenceWriter {
 		const safeEvent = {
 			...event,
 			url: event.url ? sanitizeUrl(event.url, this.secrets) : null,
+			requestHeaders: sanitizeResponseBody(event.requestHeaders, this.secrets),
 			sanitizedResponseBody: sanitizeResponseBody(
 				event.sanitizedResponseBody,
 				this.secrets,
@@ -137,6 +138,7 @@ export class EvidenceWriter {
 			run,
 			url: null,
 			method: null,
+			requestHeaders: {},
 			cookies: { names: [] },
 			status: null,
 			durationMs: 0,

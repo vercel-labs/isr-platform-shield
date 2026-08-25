@@ -48,7 +48,7 @@ A quick test to observe the invalidation behavior (using the primary subdomain f
 1. Run `request-sub-page <subdomains.primary>`. Look for `x-vercel-cache: HIT` and `x-vercel-cache-level: regional`. If these aren't present on the first request, repeat. Once you see these, you're receiving a cached page from the Shield CDN.
 2. Run `invalidate-tag-shield <subdomains.primary>`.
    1. Optionally, you can run `delete-tag-core <subdomains.primary>` to delete the tag *only* from Core. Shield invalidation performs Core deletion first internally, so running both is not necessary.
-3. Request the same subdomain page again. Look for `x-vercel-cache: STALE` and `x-vercel-cache-level: regional`, indicating stale content was served and revalidation was triggered.
+3. Request the same subdomain page again and record `x-vercel-cache`, latency, deployment ID, and the content marker. This helper deletes Core before invalidating Shield; the acceptance fixture observed delayed `REVALIDATED` rather than `STALE` because Core deletion also changed the propagated outer entry. Use B1.1 for the isolated evidence instead of treating `STALE` as the required result.
 
 ## Skew protection
 

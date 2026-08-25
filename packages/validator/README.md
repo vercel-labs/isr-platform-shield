@@ -57,6 +57,8 @@ Optional timing controls are:
 - `POC_B2_REQUEST_INTERVAL_MS`, default 1000
 - `POC_INVALIDATION_GAP_MS`, default 2000
 - `POC_FAULT_DELAY_MS`, default 1500
+- `POC_PURGE_PROPAGATION_TIMEOUT_MS`, default 5000
+- `POC_TAG_PROPAGATION_SETTLE_MS`, default 1500
 
 ## Numeric versions
 
@@ -76,7 +78,7 @@ B3.5 records this route-derived normalization as an architectural caveat. A midd
 
 ### B1: Invalidation propagation
 
-- B1.1, **Shield-project REST invalidate propagated tag after warm+bump**. Warms v1, bumps v2, hard-deletes the Core test tag as freshness setup, then soft-invalidates Shield. It accepts an operation-caused `STALE` or `REVALIDATED` transition and requires eventual v2. `REVALIDATED` is recorded as a caveat because it is synchronous. This is the B1/B2 stop gate.
+- B1.1, **Isolate Core deletion from Shield invalidation**. Each run uses separate paths with the debug timing header absent and present, adds a Core delay, and observes each operation for less than the 30-second TTL. The Preview fixture showed Core deletion changing Shield to delayed `REVALIDATED/v2` in all six variants; subsequent Shield soft invalidation remained `HIT` for five seconds. The result is an architecture change and the B1/B2 stop gate.
 - B1.2, **Core-project REST invalidate only while Shield is fresh**. Requires Shield to remain on v1 and records direct Core behavior separately.
 - B1.3, **Core-side Next revalidateTag and updateTag**. Automates `revalidateTag`; the row remains BLOCKED because no safe `updateTag` Server Action transport exists.
 - B1.4, **Trace refresh mechanism via outer headers + renderId/contentVersion**. Records outer cache headers and marker changes. Definitive inner HIT/MISS attribution requires out-of-band Core logs.
@@ -139,7 +141,7 @@ All cache calls use these Vercel endpoints directly:
 
 Every request body contains an explicit `target`. Every hard-delete body also contains `revalidationDeadlineSeconds: 0`.
 
-The canonical orchestrator hard-deletes Core first and calls Shield soft invalidation only after Core succeeds. B4.1 emits `canonical.abort` evidence with `shieldCalled: false` when Core fails.
+The candidate orchestrator hard-deletes Core first and calls Shield soft invalidation only after Core succeeds. B4.1 emits `canonical.abort` evidence with `shieldCalled: false` when Core fails. B1.1 shows that this candidate currently removes Shield's stale fallback and must not be treated as canonical.
 
 ## Evidence
 
@@ -148,7 +150,7 @@ Each `--output` value is a base directory. The runner creates a unique invocatio
 - `events.jsonl`, one sanitized event for every request, operation, experiment report, and row result
 - `summary.json`, aggregate status and one result per selected row
 
-Request evidence includes timestamp, scenario, run, URL, method, cookie names and profile, status, latency, `x-vercel-cache`, `x-vercel-id`, `age`, cache-control headers, `Vary`, parsed marker, operation metadata, and sanitized body. Authorization, bypass values, JWTs, and credential-shaped fields are redacted.
+Request evidence includes timestamp, scenario, run, URL, method, sanitized request headers, cookie names and profile, status, latency, `x-vercel-cache`, `x-vercel-id`, `age`, cache-control headers, `Vary`, parsed marker, operation metadata, and sanitized body. Authorization, bypass values, JWTs, and credential-shaped fields are redacted.
 
 Each summary row has:
 
