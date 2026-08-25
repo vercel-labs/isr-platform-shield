@@ -173,6 +173,7 @@ async function fixtureRequest(
 		bypassToken?: string;
 		useBypass?: boolean;
 		redirect?: RequestRedirect;
+		debugProxyTiming?: boolean;
 	},
 ): Promise<RecordedResponse> {
 	return context.http.request({
@@ -182,6 +183,7 @@ async function fixtureRequest(
 		headers: input.useBypass === false ? {} : bypassHeaders(input.bypassToken),
 		cookies: input.profile ? { [PROFILE_COOKIE]: input.profile } : undefined,
 		redirect: input.redirect,
+		debugProxyTiming: input.debugProxyTiming,
 		operation: {
 			name: `fixture.${input.kind}.${input.role}`,
 			path: input.path,
@@ -194,6 +196,7 @@ function shieldFixture(
 	kind: "page" | "profile",
 	path: string,
 	profile?: Profile,
+	debugProxyTiming?: boolean,
 ): Promise<RecordedResponse> {
 	return fixtureRequest(context, {
 		baseUrl: context.config.shieldUrl as string,
@@ -201,6 +204,7 @@ function shieldFixture(
 		kind,
 		path,
 		profile,
+		debugProxyTiming,
 		bypassToken: context.config.shieldBypassToken,
 	});
 }
@@ -666,6 +670,215 @@ function deploymentManifest(value: unknown): DeploymentManifest {
 	return candidate as DeploymentManifest;
 }
 
+interface InvalidationIsolationResult {
+	debugProxyTiming: boolean;
+	path: string;
+	afterCoreDelete: RequestObservation;
+	afterShieldInvalidate: RequestObservation;
+	eventual: RequestObservation;
+	coreDeleteProbeCount: number;
+	coreDeleteWindowMs: number;
+	shieldInvalidateProbeCount: number;
+	shieldInvalidateWindowMs: number;
+	coreDeleteEffect: string;
+	shieldInvalidateEffect: string;
+}
+
+async function observeCacheTransition(
+	context: ScenarioContext,
+	attempt: () => Promise<RecordedResponse>,
+	remainsUnchanged: (response: RecordedResponse) => boolean,
+): Promise<{
+	response: RecordedResponse;
+	probeCount: number;
+	elapsedMs: number;
+}> {
+	const startedAt = Date.now();
+	let probeCount = 1;
+	let response = await attempt();
+	while (
+		remainsUnchanged(response) &&
+		Date.now() - startedAt < context.config.purgePropagationTimeoutMs
+	) {
+		await sleep(context.config.pollIntervalMs);
+		response = await attempt();
+		probeCount += 1;
+	}
+	return {
+		response,
+		probeCount,
+		elapsedMs: Date.now() - startedAt,
+	};
+}
+
+async function runInvalidationIsolationVariant(
+	context: ScenarioContext,
+	debugProxyTiming: boolean,
+): Promise<InvalidationIsolationResult> {
+	const path = pathFor(
+		context,
+		debugProxyTiming ? "-with-debug" : "-without-debug",
+	);
+	const v1 = versionFor(context, debugProxyTiming ? 11 : 1);
+	const v2 = versionFor(context, debugProxyTiming ? 12 : 2);
+	const startedAt = Date.now();
+	await bump(context, path, v1);
+	const warmResponse = await shieldFixture(
+		context,
+		"page",
+		path,
+		undefined,
+		debugProxyTiming,
+	);
+	const warm = assertMarker(warmResponse, path, "default");
+	ensure(warm.contentVersion === v1, "Shield did not warm version v1");
+	const warmHitResponse = await shieldFixture(
+		context,
+		"page",
+		path,
+		undefined,
+		debugProxyTiming,
+	);
+	const warmHit = assertMarker(warmHitResponse, path, "default");
+	ensure(
+		warmHitResponse.xVercelCache?.toUpperCase() === "HIT" &&
+			warmHit.renderId === warm.renderId,
+		"Shield did not establish a stable v1 HIT before the experiment",
+	);
+	const tags = safePathTags(warm, path);
+	if (tags.length === 0) {
+		throw new Error("marker had no safe path-scoped tag");
+	}
+	await bump(context, path, v2);
+	await setFault(context, path, { delayMs: context.config.faultDelayMs });
+
+	try {
+		const coreDelete = await edgeCacheOperation(
+			context,
+			"delete",
+			context.config.coreProjectId as string,
+			tags,
+			target(context),
+		);
+		assertOperationOk(coreDelete, "Core hard delete");
+
+		const coreDeleteTransition = await observeCacheTransition(
+			context,
+			() => shieldFixture(context, "page", path, undefined, debugProxyTiming),
+			(response) =>
+				response.xVercelCache?.toUpperCase() === "HIT" &&
+				response.marker?.contentVersion === v1,
+		);
+		const afterCoreDeleteResponse = coreDeleteTransition.response;
+		const afterCoreDeleteMarker = assertMarker(
+			afterCoreDeleteResponse,
+			path,
+			"default",
+		);
+		ensure(
+			afterCoreDeleteMarker.contentVersion === v1 ||
+				afterCoreDeleteMarker.contentVersion === v2,
+			"Core-delete probe returned an unexpected content version",
+		);
+		const settledAfterCoreDelete = await pollResponse(
+			context,
+			() => shieldFixture(context, "page", path, undefined, debugProxyTiming),
+			(response) =>
+				response.xVercelCache?.toUpperCase() === "HIT" &&
+				response.marker?.renderId === afterCoreDeleteMarker.renderId,
+			"the outer Shield entry to settle after Core deletion",
+		);
+		await sleep(context.config.tagPropagationSettleMs);
+
+		const shieldInvalidate = await edgeCacheOperation(
+			context,
+			"invalidate",
+			context.config.shieldProjectId as string,
+			tags,
+			target(context),
+		);
+		assertOperationOk(shieldInvalidate, "Shield soft invalidation");
+
+		const shieldInvalidateTransition = await observeCacheTransition(
+			context,
+			() => shieldFixture(context, "page", path, undefined, debugProxyTiming),
+			(response) => response.xVercelCache?.toUpperCase() === "HIT",
+		);
+		const afterShieldInvalidateResponse = shieldInvalidateTransition.response;
+		const afterShieldInvalidateMarker = assertMarker(
+			afterShieldInvalidateResponse,
+			path,
+			"default",
+		);
+		const shieldCacheStatus =
+			afterShieldInvalidateResponse.xVercelCache?.toUpperCase();
+
+		const eventualResponse =
+			afterShieldInvalidateMarker.contentVersion === v2
+				? afterShieldInvalidateResponse
+				: shieldCacheStatus === "STALE" || shieldCacheStatus === "REVALIDATED"
+					? await pollResponse(
+							context,
+							() =>
+								shieldFixture(
+									context,
+									"page",
+									path,
+									undefined,
+									debugProxyTiming,
+								),
+							(response) => response.marker?.contentVersion === v2,
+							"Shield to converge to version v2",
+						)
+					: afterShieldInvalidateResponse;
+		assertMarker(eventualResponse, path, "default");
+
+		const afterCoreDelete = observation(afterCoreDeleteResponse, startedAt);
+		const afterShieldInvalidate = observation(
+			afterShieldInvalidateResponse,
+			startedAt,
+		);
+		const eventual = observation(eventualResponse, startedAt);
+		const coreDeleteEffect =
+			afterCoreDelete.cache?.toUpperCase() === "HIT" &&
+			afterCoreDelete.version === v1
+				? "outer-unchanged"
+				: `outer-changed:${afterCoreDelete.cache ?? "unreported"}/v${afterCoreDelete.version ?? "unknown"}`;
+		const shieldInvalidateEffect =
+			shieldCacheStatus === "STALE"
+				? "soft-background-revalidation"
+				: shieldCacheStatus === "REVALIDATED"
+					? "foreground-revalidation"
+					: `no-transition:${shieldCacheStatus ?? "unreported"}/v${afterShieldInvalidate.version ?? "unknown"}`;
+
+		const result = {
+			debugProxyTiming,
+			path,
+			afterCoreDelete,
+			afterShieldInvalidate,
+			eventual,
+			coreDeleteProbeCount: coreDeleteTransition.probeCount,
+			coreDeleteWindowMs: coreDeleteTransition.elapsedMs,
+			shieldInvalidateProbeCount: shieldInvalidateTransition.probeCount,
+			shieldInvalidateWindowMs: shieldInvalidateTransition.elapsedMs,
+			coreDeleteEffect,
+			shieldInvalidateEffect,
+		};
+		await recordReport(context, "invalidation-isolation.sequence", {
+			...result,
+			versions: { v1, v2 },
+			faultDelayMs: context.config.faultDelayMs,
+			tagPropagationSettleMs: context.config.tagPropagationSettleMs,
+			warm: observation(warmResponse, startedAt),
+			warmHit: observation(warmHitResponse, startedAt),
+			settledAfterCoreDelete: observation(settledAfterCoreDelete, startedAt),
+		});
+		return result;
+	} finally {
+		await clearFault(context, path);
+	}
+}
+
 async function loadB6Evidence(context: ScenarioContext): Promise<{
 	preObservations: EvidenceObservation[];
 	postObservations: EvidenceObservation[];
@@ -729,7 +942,7 @@ function invalidProjectId(context: ScenarioContext): string {
 const definitions: ScenarioDefinition[] = [
 	{
 		id: "B1.1",
-		title: "Shield-project REST invalidate propagated tag after warm+bump",
+		title: "Isolate Core deletion from Shield invalidation",
 		requires: [
 			"shieldUrl",
 			"controlToken",
@@ -763,72 +976,25 @@ const definitions: ScenarioDefinition[] = [
 				preflightBody.storage === "blob",
 				`deployed fixture storage must be blob, received ${String(preflightBody.storage)}`,
 			);
-			const path = pathFor(context);
-			const v1 = versionFor(context, 1);
-			const v2 = versionFor(context, 2);
-			await bump(context, path, v1);
-			const warm = assertMarker(
-				await shieldFixture(context, "page", path),
-				path,
-				"default",
-			);
-			ensure(warm.contentVersion === v1, "Shield did not warm version v1");
-			const stable = assertMarker(
-				await shieldFixture(context, "page", path),
-				path,
-				"default",
-			);
-			ensure(
-				stable.renderId === warm.renderId,
-				"Shield did not reuse the warm render",
-			);
-			const tags = safePathTags(warm, path);
-			if (tags.length === 0)
-				return blocked("marker had no safe path-scoped tag");
-			await bump(context, path, v2);
-			const corePreparation = await edgeCacheOperation(
+			const withoutDebug = await runInvalidationIsolationVariant(
 				context,
-				"delete",
-				context.config.coreProjectId as string,
-				tags,
-				target(context),
+				false,
 			);
-			assertOperationOk(corePreparation, "Core freshness preparation");
-			const invalidation = await edgeCacheOperation(
-				context,
-				"invalidate",
-				context.config.shieldProjectId as string,
-				tags,
-				target(context),
-			);
-			assertOperationOk(invalidation, "Shield REST invalidation");
-			const first = await shieldFixture(context, "page", path);
-			const firstMarker = assertMarker(first, path, "default");
-			const firstCacheStatus = first.xVercelCache?.toUpperCase();
-			ensure(
-				firstCacheStatus === "STALE" || firstCacheStatus === "REVALIDATED",
-				`Shield tag invalidation did not produce STALE or REVALIDATED; received ${first.xVercelCache ?? "no cache status"}`,
-			);
-			ensure(
-				firstMarker.contentVersion === v1 || firstMarker.contentVersion === v2,
-				"first response returned an unexpected content version",
-			);
-			const converged =
-				firstMarker.contentVersion === v2
-					? first
-					: await pollResponse(
-							context,
-							() => shieldFixture(context, "page", path),
-							(response) => response.marker?.contentVersion === v2,
-							"Shield propagation to version v2",
-						);
-			const marker = assertMarker(converged, path, "default");
+			const withDebug = await runInvalidationIsolationVariant(context, true);
 			context.shared.set(`shield-soft:${context.run}`, true);
+			context.shared.set(`core-hard:${context.run}`, true);
+			const proposalDisposition: ProposalDisposition =
+				withoutDebug.coreDeleteEffect !== "outer-unchanged"
+					? "architecture-change"
+					: withoutDebug.shieldInvalidateEffect === "foreground-revalidation"
+						? "escalate-to-sign-off"
+						: withDebug.shieldInvalidateEffect !==
+								withoutDebug.shieldInvalidateEffect
+							? "documentable-with-caveat"
+							: "documentable";
 			return pass(
-				`first=${firstMarker.contentVersion}/${first.xVercelCache ?? "unreported"}; eventual=${marker.contentVersion}/${converged.xVercelCache ?? "unreported"}`,
-				firstCacheStatus === "REVALIDATED"
-					? "documentable-with-caveat"
-					: undefined,
+				`without debug: Core delete ${withoutDebug.coreDeleteEffect}, Shield invalidate ${withoutDebug.shieldInvalidateEffect}; with debug: Core delete ${withDebug.coreDeleteEffect}, Shield invalidate ${withDebug.shieldInvalidateEffect}`,
+				proposalDisposition,
 			);
 		},
 	},

@@ -146,7 +146,7 @@ Run the stop gate first:
 pnpm validate -- --suite B1.1 --environment preview --runs 3 --output .artifacts/evidence/b1-1-preview
 ```
 
-B1.1 hard-deletes only the Core test tag as setup so the origin can return the bumped version, then tests whether Shield-project invalidation addresses the propagated tag on the outer entry. The first post-invalidation response must report `STALE` or `REVALIDATED`, and eventual convergence proves the outer entry refreshed. The observed synchronous `REVALIDATED` path is retained as a caveat.
+B1.1 isolates Core deletion from Shield invalidation with separate paths that omit and include `x-vercel-debug-proxy-timing`. In the observed Preview fixture, Core hard deletion changed the outer Shield entry to delayed `REVALIDATED` with fresh content in all six variants. After the refreshed Shield entry settled, Shield soft invalidation produced no transition from `HIT` during the five-second observation window. The result is classified as an architecture change because Core deletion removed the Shield stale fallback before Shield invalidation ran.
 
 Run one section or the full suite serially:
 

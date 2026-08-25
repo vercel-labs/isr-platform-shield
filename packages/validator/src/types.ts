@@ -42,6 +42,7 @@ export interface EvidenceEvent {
 	run: number;
 	url: string | null;
 	method: string | null;
+	requestHeaders: Record<string, string>;
 	cookies: CookieEvidence;
 	status: number | null;
 	durationMs: number;

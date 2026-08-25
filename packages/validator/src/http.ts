@@ -16,6 +16,7 @@ interface RequestOptions {
 	body?: unknown;
 	cookies?: Record<string, string>;
 	redirect?: RequestRedirect;
+	debugProxyTiming?: boolean;
 	operation: OperationEvidence;
 }
 
@@ -82,7 +83,9 @@ export class EvidenceHttpClient {
 	async request(options: RequestOptions): Promise<RecordedResponse> {
 		const method = options.method ?? "GET";
 		const headers = new Headers(options.headers);
-		headers.set("x-vercel-debug-proxy-timing", "1");
+		if (options.debugProxyTiming ?? true) {
+			headers.set("x-vercel-debug-proxy-timing", "1");
+		}
 		if (options.body !== undefined) {
 			headers.set("content-type", "application/json");
 		}
@@ -102,6 +105,7 @@ export class EvidenceHttpClient {
 		if (profile) {
 			cookieEvidence.profile = profile;
 		}
+		const requestHeaders = Object.fromEntries(headers.entries());
 
 		const controller = new AbortController();
 		const timeout = setTimeout(
@@ -144,6 +148,7 @@ export class EvidenceHttpClient {
 				run: options.run,
 				url: options.url,
 				method,
+				requestHeaders,
 				cookies: cookieEvidence,
 				status: response.status,
 				durationMs,
@@ -169,6 +174,7 @@ export class EvidenceHttpClient {
 				run: options.run,
 				url: options.url,
 				method,
+				requestHeaders,
 				cookies: cookieEvidence,
 				status: null,
 				durationMs,

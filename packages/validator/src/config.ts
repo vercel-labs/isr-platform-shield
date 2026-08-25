@@ -25,6 +25,8 @@ export interface RuntimeConfig {
 	b2RequestIntervalMs: number;
 	invalidationGapMs: number;
 	faultDelayMs: number;
+	purgePropagationTimeoutMs: number;
+	tagPropagationSettleMs: number;
 	b6PreEvidencePath?: string;
 	b6PostEvidencePath?: string;
 	b6PreManifestPath?: string;
@@ -130,6 +132,16 @@ export function loadConfig(
 		),
 		invalidationGapMs: positiveInteger(env, "POC_INVALIDATION_GAP_MS", 2_000),
 		faultDelayMs: positiveInteger(env, "POC_FAULT_DELAY_MS", 1_500),
+		purgePropagationTimeoutMs: positiveInteger(
+			env,
+			"POC_PURGE_PROPAGATION_TIMEOUT_MS",
+			5_000,
+		),
+		tagPropagationSettleMs: positiveInteger(
+			env,
+			"POC_TAG_PROPAGATION_SETTLE_MS",
+			1_500,
+		),
 		b6PreEvidencePath: value(env, "B6_PRE_EVIDENCE_PATH"),
 		b6PostEvidencePath: value(env, "B6_POST_EVIDENCE_PATH"),
 		b6PreManifestPath: value(env, "B6_PRE_MANIFEST_PATH"),
