@@ -4,11 +4,6 @@ import { deploymentEnv, routes, matchers } from "@vercel/config/v1";
 // Root domain for checking if redirect needed - all apex traffic should go through www.
 const rootDomain = deploymentEnv("NEXT_PUBLIC_ROOT_DOMAIN");
 
-// Request header needed to bypass deployment protection
-const bypassHeader = {
-  "x-vercel-protection-bypass": deploymentEnv("VERCEL_BYPASS_TOKEN"),
-};
-
 // Cache settings and response header to add for relevant routes
 const sMaxAge = 120;
 const swr = 31556952;
@@ -47,10 +42,7 @@ export const config: VercelConfig = {
       permanent: true,
     }) as Redirect,
     ...rewrites.withoutCapturedHost.map(
-      ([src, dest]) =>
-        routes.rewrite(src, dest, {
-          requestHeaders: { ...bypassHeader },
-        }) as Rewrite,
+      ([src, dest]) => routes.rewrite(src, dest) as Rewrite,
     ),
     ...rewrites.withCapturedHost.map(
       ([src, dest]) =>
@@ -58,15 +50,11 @@ export const config: VercelConfig = {
           has: [
             matchers.host("(?<subdomain>.*)\\.[^\\.]+\\.[^\\.]+") // This captured value is used in the destination URL
           ],
-          requestHeaders: { ...bypassHeader },
           responseHeaders: { ...cacheHeader },
         }) as Rewrite,
     ),
     ...rewrites.fallback.map(
-      ([src, dest]) =>
-        routes.rewrite(src, dest, {
-          requestHeaders: { ...bypassHeader },
-        }) as Rewrite,
+      ([src, dest]) => routes.rewrite(src, dest) as Rewrite,
     ),
   ],
 };
