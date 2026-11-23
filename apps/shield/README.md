@@ -6,7 +6,7 @@ A caching proxy that provides shielded ISR protection for the Core app during de
 
 - Rewrites tenant subdomain requests to Core's `/s/[subdomain]/...` routes via `vercel.ts`
 - Sets Shield CDN cache headers on tenant routes (`s-maxage=120`, long `stale-while-revalidate`)
-- Exposes authenticated `POST /api/shield/invalidate` for the legacy route-based invalidation comparison
+- Exposes authenticated `POST /api/shield/invalidate` for the legacy route-based invalidation comparison; Vercel rewrites it to the app route `/api/invalidate`
 
 ## How it works
 
@@ -14,7 +14,7 @@ When Core deploys, its ISR cache is cleared. Shield's CDN cache is independent a
 
 1. **Cache protection**: Shield CDN serves cached tenant pages after Core deploys
 2. **Rewrites**: Platform routing in `vercel.ts` extracts the subdomain from the host and forwards to Core
-3. **Invalidation**: `/api/shield/invalidate` deletes the tag on Core first, then invalidates Shield CDN entries for that tag
+3. **Invalidation**: the server-side `/api/shield/invalidate` endpoint deletes the tag on Core first, then invalidates Shield CDN entries for that tag. There is no browser/client cache purge step.
 
 Preview tenants use `<tenant>---<shield-immutable-host>` so they remain one DNS label under the existing Preview suffix certificate.
 

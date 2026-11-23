@@ -30,8 +30,7 @@ flowchart LR
         direction TB
         SC[Shield CDN Cache]
         SN[Shield Compute]
-        SP["Shield purge route"]
-        SI["Shield invalidate route"]
+        SI["Shield invalidation endpoint"]
     end
 
     subgraph CO[Core App]
@@ -51,7 +50,6 @@ flowchart LR
         direction TB
         RQ[1. Request tenant.domain.com/path]
         U[User Browser]
-        CQ[Client cache]
         RQ --> U
     end
 
@@ -75,12 +73,10 @@ flowchart LR
     SN -->|8. Set s-maxage=120 and swr=1 year| SC
     SC -->|9. Return response| U
 
-    MUT -.->|A. Trigger near-atomic sequence| ORC
-    ORC -.->|B. Call /api/purge first| SP
-    SP -.->|C. Purge client cache by tag| CQ
-    ORC -.->|D. Immediately call /api/invalidate| SI
-    SI -.->|E. Delete Core tag first| CI
-    CI -.->|F. Invalidate Shield tag second| SC
+    MUT -.->|A. Trigger server-side tag invalidation| ORC
+    ORC -.->|B. Call Shield invalidation endpoint| SI
+    SI -.->|C. Delete Core tag first| CI
+    CI -.->|D. Invalidate Shield tag on success| SC
 
     DEP -.->|G. Core ISR cache reset| CC
     DEP -.->|H. Shield cache remains available| SC
@@ -88,14 +84,12 @@ flowchart LR
     style SH stroke:#66f,stroke-width:3px
     style SC stroke:#66f,stroke-width:2px
     style SN stroke:#66f,stroke-width:2px
-    style SP stroke:#66f,stroke-width:2px
     style SI stroke:#66f,stroke-width:2px
     style CO stroke:#f9f,stroke-width:3px
     style CC stroke:#f9f,stroke-width:2px
     style CN stroke:#f9f,stroke-width:2px
     style CI stroke:#f9f,stroke-width:2px
     style CL stroke:#f96,stroke-width:2px
-    style CQ stroke:#f96,stroke-width:3px
     style R stroke:#6f6,stroke-width:2px
     style FS stroke:#6f6,stroke-width:2px
     style CP stroke:#f96,stroke-width:2px
@@ -103,7 +97,7 @@ flowchart LR
 
 Solid arrows are the request/data plane. Dashed arrows are deployment and invalidation control flows.
 
-Critical ordering: call `/api/purge` first, then `/api/invalidate` immediately after (near-atomically) to avoid clients re-reading stale entries between operations.
+Tag invalidation is server-side; there is no browser/client cache purge step. The invalidation worker calls Shield once. Shield deletes the Core tag first, then invalidates the Shield tag only if Core deletion succeeds.
 
 ### Shield
 
@@ -273,31 +267,27 @@ Shield cache persists across Core deployments. Users get instant stale responses
 graph TD
     A[Content mutation or publish event] --> B[Invalidation worker]
 
-    B --> C[Step 1 call Shield purge route first]
-    C --> D[Client cache purged by tag]
-    D --> E[Step 2 call Shield invalidate route immediately]
-    E --> F[Step 3 delete Core cache first]
-    F -->|dangerouslyDeleteByTag| G{Core cache deleted}
+    B --> C[Call Shield invalidation endpoint]
+    C --> D[Delete Core cache tag]
+    D -->|dangerouslyDeleteByTag| E{Core deletion succeeds?}
 
-    G -->|Yes| H[Step 4 invalidate Shield CDN tag]
-    H --> I[Shield CDN invalidated]
-    I --> J[Next request fetches fresh content]
+    E -->|Yes| F[Invalidate Shield CDN tag]
+    F --> G[Shield CDN invalidated]
+    G --> H[Next request fetches fresh content]
 
-    G -->|No| K[Abort Shield invalidation keep stale Shield cache as safety net]
+    E -->|No| I[Return error without invalidating Shield]
 
     style C stroke:#66f,stroke-width:3px
-    style E stroke:#66f,stroke-width:3px
-    style D stroke:#f96,stroke-width:2px
-    style G stroke:#f96,stroke-width:3px
-    style K stroke:#f66,stroke-width:2px
+    style E stroke:#f96,stroke-width:3px
+    style I stroke:#f66,stroke-width:2px
 ```
 
 Route mapping:
 
-- Shield invalidate route = authenticated `POST /api/shield/invalidate`
+- Shield invalidate route = authenticated `POST /api/shield/invalidate`, rewritten by `apps/shield/vercel.ts` to the Shield app route `/api/invalidate`
 - Core delete route = authenticated `POST /api/delete`
 
-The legacy Shield route deletes the Core tag first and invalidates Shield only after Core succeeds. The behavioral acceptance PoC separately tests whether a system-of-record worker can replace both application routes with project-scoped REST calls.
+This is one server-side operation, not a client-cache purge followed by a second invalidation call. The legacy Shield route deletes the Core tag first and invalidates Shield only after Core succeeds. The behavioral acceptance PoC separately tests whether a system-of-record worker can replace both application routes with project-scoped REST calls.
 
 > [!WARNING]
 > B1.1 rejected the stale-preserving assumption in this flow. With same-team propagated tags, hard-deleting the Core tag also caused the outer Shield request to foreground-regenerate as `REVALIDATED`; the debug timing header made no difference. Do not treat Core-delete then Shield-invalidate as the canonical sequence while follow-up tests are pending.
